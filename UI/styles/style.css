@@ -245,3 +245,47 @@ body, .homepage, .inbox{
 .inbox .view-message .top.away{
     background-color: #3E8C84;
 }
+.inbox .right-compose div{
+    width: 100%
+}
+.inbox .right-compose .address label{
+    width:20% ;
+    display: inline-block;
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-right: 1em;   
+}
+.inbox .right-compose .address input[type="email"]{
+    padding: .5em;
+    width:50%;
+}
+.inbox .right-compose .message{
+    width: 100%;
+    margin-top: 2em;
+    display: flex;
+    flex-flow: column nowrap;
+}
+.inbox .right-compose .message input{
+    padding: .5em;
+    font-weight: bold;
+    font-size: 1.2em;
+    border-color: lightblue;
+}
+.inbox .right-compose .message textarea{
+    padding: 1em .5em .5em .5em;
+    height: 10em;
+    border-color: lightblue;
+}
+.inbox .right-compose button{
+    float: right;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: .5em 2em;
+    border-radius: 
+}
+button.sending{
+    background-color:orange;
+}
+button.sent{
+    background-color: limegreen;
+}
