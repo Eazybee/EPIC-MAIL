@@ -111,3 +111,116 @@ body, .homepage, .inbox{
 .hidden, .homepage .hidden{
     display: none;
 }
+.inbox .top{
+    display: flex;
+    justify-content: space-between;
+    padding: 1em 1em 1em 1em;
+    border-bottom: lightblue solid 5px;
+    background-color: lightblue;
+}
+.inbox .top h1{
+    font-size:3em;
+    font-family: cursive;
+    color: #0F2D40;
+}
+.inbox .top input{
+    border: lightblue solid .5em;
+    border-radius: 1em;
+    padding: .5em;
+    height: 1.2em;
+    transition: 1s;
+}
+.inbox .top input:hover, .inbox .top input:active{
+    border-color: #194759;
+}
+.inbox .bottom {
+    display: flex;
+}
+.inbox .bottom .left{
+    border:lightblue solid 5px;
+    border-width: 0 5px 5px 0;
+    width:20%;
+}
+.inbox .bottom ul{
+    width:100%;
+    overflow: hidden;
+}
+.inbox .bottom li {
+    display:inline;
+}
+.inbox .bottom li a{
+    display:block;
+    padding: 1em;
+    font-size: 1.2em;
+    font-weight:bold;
+    color:#194759;
+}
+.inbox .bottom li a.active{
+    background-color: #194759;
+    color:white;
+}
+.inbox .bottom li a:hover{
+    background-color: #194759;
+    color:white;
+    transition: .5s;
+}
+.inbox .bottom .right{
+    width: 100%;
+    border-bottom:lightblue solid 5px;
+    padding: 1em;
+}
+.inbox .bottom .toolbar{
+    padding: .5em;
+    border-bottom: lightblue solid 5px;
+}
+.inbox .toolbar button{
+    padding: .5em 1em;
+    border-radius: .5em;
+    border: #194759 solid .2em;
+    cursor: pointer;
+}
+.inbox .toolbar button:hover{
+    opacity: .8;
+    font-weight: bold;
+    border-color: lightblue;
+    transition: 1s
+}
+.inbox .bottom .inbox-view >div{
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    padding: .2em;
+    margin: .5em 0;
+}
+.inbox .bottom .inbox-view >div >*:not(input){
+    cursor: pointer;
+}
+.inbox .bottom .inbox-view >div:hover{
+    background-color: #98E1ED;
+}
+.inbox .inbox-view div div{
+    width:50%;
+    align-items: center;
+    
+}
+.inbox .inbox-view div div *{
+    float: left
+}
+.inbox .inbox-view >div> p{
+    width:20%;
+    
+}
+.inbox .inbox-view label{
+    width:15%;
+}
+.inbox .inbox-view >div> p,.inbox .inbox-view .subject, .inbox .inbox-view label{
+    font-size: 1em;
+    font-weight: bold;
+    padding-right: .5em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.inbox .inbox-view input{
+    width:1.2em;
+    height: 1.2em
+}
