@@ -92,6 +92,39 @@ window.onload= function ready(){
                 }
             });
         }
+        
+        document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
+            radioButton.onclick = (event) => {
+                let selectedRadioValue = radioButton.value;
+                let inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+                let selectGroup = document.querySelector(".inbox .right-compose .address select");
+                if(selectedRadioValue == "Individual"){
+                    inputEmail.classList.remove("hidden");
+                    inputEmail.required=true;
+                    selectGroup.required=false;
+                    selectGroup.classList.add("hidden");
+                    
+                }else if(selectedRadioValue == "Group"){
+                    inputEmail.classList.add("hidden");
+                    inputEmail.required=false;
+                    selectGroup.required=true;
+                    selectGroup.classList.remove("hidden");
+                    
+                    (() => {
+                        selectGroup.innerHTML="<option disabled selected value='0'>Select Group</option>";
+                        document.querySelectorAll(".inbox .bottom ul.groups ul li a").forEach((element) => {
+                            
+                            let name =element.innerHTML.split("»")[1];
+                            let option = document.createElement('option'); //create an option element(tag)
+                            let groupName = document.createTextNode(name); //create a textnode 
+                            option.appendChild(groupName); 			//add text to option tag created
+                            selectGroup.appendChild(option);	//add option to Select element
+                        })
+                        
+                    })();
+                }
+            }
+        });
     }
     
 };
