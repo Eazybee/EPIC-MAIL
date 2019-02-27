@@ -2,6 +2,8 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
         <title></title>
         <style>
             @import url('../styles/style.css');
@@ -20,16 +22,20 @@
             <div class="bottom">
                 <div class="left">
                     <ul>
-                        <li><a href="#Compose">Compose</a></li>
+                        <li><a  class="active" href="#Compose">Compose</a></li>
                         <li><a href="#Inbox">Inbox</a></li>
-                        <li><a  class="active" href="#Sent">Sent</a></li>
+                        <li><a href="#Sent">Sent</a></li>
                         <li><a href="#Draft">Draft</a></li>
                     </ul>
-                    <ul>
+                    <ul class="groups">
                         <li><a href="#">Create Group</a></li>
+                        <ul>
+                            <li><a href="#">&raquo; Family</a></li>
+                            <li><a href="#">&raquo; Andela Group</a></li>
+                        </ul>
                     </ul>
                 </div>
-                <div class="right right-sent">
+                <div class="right right-sent hidden">
                     <div class="toolbar">
                         <button>Delete</button>
                         <button id="retract">Retract</button>
@@ -56,7 +62,7 @@
                     </div>
                 </div>
                 <!-- For Composing and send mail -->
-                <div class="right right-compose hidden">
+                <div class="right right-compose">
                     <form name="sendMail" action="#">
                         <div class="address">
                             <div>
@@ -64,11 +70,16 @@
                                 <span>
                                     <input type="radio" value="Individual" name="to" checked required> Individual
                                 </span>
-
+                                <span>
+                                    <input type="radio" value="Group"  name="to"  required> Group
+                                </span>
                             </div>
                             <div>
                                 <label>Address :</label>
-                                <input type="email" placeholder="Johndoe@epicmail.com" required>
+                                <input type="email" placeholder="Johndoe@epicmail.com" required >
+                                <select class="hidden">
+                                    
+                                </select>
                             </div>
                         </div>
                         <div class="message">

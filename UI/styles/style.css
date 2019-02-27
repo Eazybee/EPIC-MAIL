@@ -11,7 +11,7 @@
     color: #000;
     position: relative;
 }
-input,textarea,button{
+input,textarea,button,select{
     border: 1px solid cyan;
     border-radius: .2em;
     
@@ -189,6 +189,7 @@ body, body>div{
 .inbox .bottom ul{
     width:100%;
     overflow: hidden;
+    border-bottom: solid ;
 }
 .inbox .bottom li {
     display:inline;
@@ -208,6 +209,13 @@ body, body>div{
     background-color: #194759;
     color:white;
     transition: .5s;
+}
+.inbox .bottom ul.groups ul li a{
+    padding-left: 1.5em;
+}
+.inbox .bottom ul.groups ul li a:hover{
+    background-color:#46A394;
+    
 }
 .inbox .bottom .right{
     width: 100%;
@@ -293,6 +301,9 @@ body, body>div{
 .inbox .right-compose div{
     width: 100%
 }
+.inbox .right-compose .address >div{
+    margin:.5em 0 ;
+}
 .inbox .right-compose .address label{
     width:20% ;
     display: inline-block;
@@ -300,9 +311,16 @@ body, body>div{
     font-weight: bold;
     margin-right: 1em;   
 }
-.inbox .right-compose .address input[type="email"]{
+.inbox .right-compose .address span{
+    margin-right:5em;
+}
+.inbox .right-compose .address span *{
+    vertical-align: bottom;
+}
+.inbox .right-compose .address input[type="email"],.inbox .right-compose .address select{
     padding: .5em;
     width:50%;
+    
 }
 .inbox .right-compose .message{
     width: 100%;
