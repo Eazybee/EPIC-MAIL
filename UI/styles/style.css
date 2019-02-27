@@ -289,3 +289,9 @@ button.sending{
 button.sent{
     background-color: limegreen;
 }
+.inbox  .bottom .right-sent .toolbar{
+    border-color:#3E8C84;
+}
+.inbox .bottom .right-sent .inbox-view >div:hover{
+    background-color: #3E8C84;
+}

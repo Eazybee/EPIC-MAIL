@@ -20,15 +20,42 @@
             <div class="bottom">
                 <div class="left">
                     <ul>
-                        <li><a  class="active" href="#Compose">Compose</a></li>
+                        <li><a href="#Compose">Compose</a></li>
                         <li><a href="#Inbox">Inbox</a></li>
-                        <li><a href="#">Draft</a></li>
+                        <li><a  class="active" href="#Sent">Sent</a></li>
+                        <li><a href="#Draft">Draft</a></li>
                     </ul>
                     <ul>
                         <li><a href="#">Create Group</a></li>
                     </ul>
                 </div>
-                <div class="right right-compose">
+                <div class="right right-sent">
+                    <div class="toolbar">
+                        <button>Delete</button>
+                    </div>
+                    <div class="inbox-view">
+                        <div>
+                            <input type="checkbox" value="c">
+                            <p>Nknkfonhihifjje</p>
+                            <div>
+                                <p class="subject">SUBJECT</p>
+                                <p class="msg">some part of the body message to be seen or not seen...</p>
+                            </div>
+                            <label>date/time</label>
+                        </div>
+                        <div>
+                            <input type="checkbox" value="">
+                            <p>Name</p>
+                            <div>
+                                <p class="subject">SUBJECT</p>
+                                <p class="msg">some part of the body ...</p>
+                            </div>
+                            <label>5:21 am</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- For Composing and send mail -->
+                <div class="right right-compose hidden">
                     <form name="sendMail" action="#">
                         <div class="address">
                             <div>
@@ -50,6 +77,7 @@
                         <button type="submit" >SEND</button>
                     </form>
                 </div>
+                <!-- For viewing message in the inbox view -->
                <div class="right right-inbox hidden">
                     <div class="toolbar">
                         <button>Delete</button>
@@ -75,6 +103,7 @@
                         </div>
                     </div>
                 </div>
+                <!-- For reading messages -->
                 <div class="right view-message hidden">
                     <div>
                         <div class="top away">
