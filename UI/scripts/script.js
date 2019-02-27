@@ -10,6 +10,13 @@ window.onload= function ready(){
         }
     }
     if(document.querySelector("a[href='#Inbox']")){ //if on dashboard page -> inbox.html
+        /** ALert box Event hanler**/
+        document.querySelector(".alert .title-bar a").onclick = (event) => {
+            
+            document.querySelectorAll(".modal, .alert").forEach((element) => {
+                element.classList.add("hidden");
+            });
+        }
         /** Right-panel-Menus Event **/
         document.querySelector("a[href='#Inbox']").onclick = (event) => {
             
@@ -72,6 +79,25 @@ window.onload= function ready(){
             return false;
         }
 
+        document.querySelector("#retract").onclick = (event) => { 
+            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked){
+                    
+                   let mailID ="#s" + element.value; 
+                    alertMessage("Mail Retracted Successfully");
+                    document.querySelector(mailID).classList.add("hidden");
+                   
+                }
+            });
+        }
     }
     
 };
+
+function alertMessage(message){
+    document.querySelector(".alert p").innerHTML=message;
+    document.querySelectorAll(".modal, .alert").forEach((element) => {
+                element.classList.remove("hidden");
+            });
+}

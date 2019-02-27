@@ -32,10 +32,11 @@
                 <div class="right right-sent">
                     <div class="toolbar">
                         <button>Delete</button>
+                        <button id="retract">Retract</button>
                     </div>
                     <div class="inbox-view">
-                        <div>
-                            <input type="checkbox" value="c">
+                        <div id="s1">
+                            <input type="checkbox" value="1">
                             <p>Nknkfonhihifjje</p>
                             <div>
                                 <p class="subject">SUBJECT</p>
@@ -43,8 +44,8 @@
                             </div>
                             <label>date/time</label>
                         </div>
-                        <div>
-                            <input type="checkbox" value="">
+                        <div id="s2">
+                            <input type="checkbox" value="2">
                             <p>Name</p>
                             <div>
                                 <p class="subject">SUBJECT</p>
@@ -170,6 +171,16 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="modal hidden"></div>
+        <div class="alert hidden">
+            <div class="title-bar">
+                <label>EPIC MAIL</label>
+                <a href="#">X</a>
+            </div>
+            <div class="alert-message">
+                <p></p>
             </div>
         </div>
     </body>
