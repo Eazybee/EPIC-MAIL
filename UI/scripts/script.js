@@ -9,4 +9,21 @@ window.onload= function ready(){
             document.querySelector(".signIn").classList.remove("hidden");
         }
     }
+    if(document.querySelector("a[href='#Inbox']")){ //if on dashboard page -> inbox.html
+        /** Right-panel-Menus Event **/
+        document.querySelector("a[href='#Inbox']").onclick = (event) => {
+            document.querySelector(".right-inbox ").classList.remove("hidden");
+            document.querySelector(".view-message").classList.add("hidden");
+           
+        }
+        
+        document.querySelectorAll(".inbox .bottom .inbox-view >div >*:not(input)").forEach((element) => {
+            element.onclick = (event) => {
+                document.querySelector(".right-inbox ").classList.add("hidden");
+                document.querySelector(".view-message").classList.remove("hidden");
+            }
+        })
+        
+
+    }
 }
