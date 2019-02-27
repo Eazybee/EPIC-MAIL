@@ -39,6 +39,7 @@ window.onload= function ready(){
             document.querySelector("a[href='#Compose']").classList.add('active');
             document.querySelector("a[href='#Sent']").classList.remove('active');
         }
+        
         document.querySelector("a[href='#Sent']").onclick = (event) =>{
             document.querySelector(".right-compose").classList.add("hidden");
             document.querySelector(".right-inbox ").classList.add("hidden");
@@ -50,7 +51,7 @@ window.onload= function ready(){
             document.querySelector("a[href='#Sent']").classList.add('active');
         }
         
-        document.querySelectorAll(".inbox .inbox-view >div >*:not(input), .inbox .right-sent >div >*:not(input)").forEach((element) => {
+        document.querySelectorAll(".inbox .inbox-view >div >*:not(input)").forEach((element) => {
             element.onclick = (event) => {
                 document.querySelector(".right-inbox ").classList.add("hidden");
                 document.querySelector(".right-compose").classList.add("hidden");
