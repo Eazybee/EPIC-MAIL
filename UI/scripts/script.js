@@ -11,6 +11,7 @@ window.onload= function ready(){
     }
     if(document.querySelector("a[href='#Inbox']")){ //if on dashboard page -> inbox.html
         
+        
         //delete mail
         const deleteMail = (mailID, respondMessage="") => {
             document.querySelector(mailID).classList.add("hidden");
@@ -75,6 +76,20 @@ window.onload= function ready(){
             document.querySelector("a[href='#Draft']").classList.add('active');
             document.querySelector(".right-draft").classList.remove("hidden");
         }
+        document.querySelector("a[href='#Group']").onclick = (event) => {
+            if(document.querySelector(".inbox > input[type='hidden']").value == "Admin"){
+                document.querySelectorAll(".right:not(.right-group)").forEach((element) => {
+                    element.classList.add("hidden");
+                });
+                document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
+                    element.classList.remove('active');
+                });
+                document.querySelector("a[href='#Group']").classList.add('active');
+                document.querySelector(".right-group").classList.remove("hidden");
+            }else{
+                alertMessage("Only an Admin is allowed to create group");
+            }
+        }
         
         //veiw Message
         
@@ -125,7 +140,7 @@ window.onload= function ready(){
                     
                     (() => {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
-                        document.querySelectorAll(".inbox .bottom ul.groups ul li a").forEach((element) => {
+                        document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
                             let name =element.innerHTML.split("» ")[1];
                             let option = document.createElement('option'); //create an option element(tag)
@@ -222,7 +237,7 @@ window.onload= function ready(){
                 
                 (() => {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
-                        document.querySelectorAll(".inbox .bottom ul.groups ul li a").forEach((element) => {
+                        document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
                             let name =element.innerHTML.split("» ")[1];
                             let option = document.createElement('option'); //create an option element(tag)
@@ -264,6 +279,38 @@ window.onload= function ready(){
                     deleteMail(mailID,"Draft Mail(s) Deleted Successfully")
                 }
             });
+        }
+        /** CREATE GROUP**/
+        document.querySelector(".right-group #addMember").onsubmit = (event) => {
+            let email = document.querySelector(".right-group input[type='email']");
+            if( email.value.trim() != ""){
+                let list = document.createElement("li");
+                list.innerHTML= email.value;
+                document.querySelector(".right-group ul").appendChild(list);
+                email.value="";
+            }
+            return false;
+        }
+        document.querySelector(".right-group #createGroup").onsubmit = (event) => {
+            let groupName = document.querySelector(".right-group input[type='text']");
+            if( groupName.value.trim() != ""){
+                let groupMember = document.querySelector(".right-group ul li") != null ? true : false ;
+                if(groupMember){
+                    
+                    document.querySelector(".right-group ul ").innerHTML="";
+                    let li = document.createElement("li");
+                    li.innerHTML="<a href='#'>&raquo; "+groupName.value+"</a>"
+                    document.querySelector(".inbox .bottom li.groups ul").appendChild(li);
+                    groupName.value="";
+                    alertMessage('Group Created Successfully!')
+                }
+                else{
+                    alertMessage("Cannot create an empty group!")
+                }
+            }else{
+                alertMessage("Group Name cannot be empty")
+            }
+            return false;
         }
     }
     
