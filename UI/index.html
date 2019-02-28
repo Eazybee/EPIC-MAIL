@@ -11,12 +11,32 @@
     <body>
         <div class="homepage">
             <h1>Epic Mail</h1>
-            <div class="sign signOut hidden">
+            <div class="sign signIn">
+                <div>
+                    <label class='top'>WELCOME BACK</label>
+                    <label> </label>
+                </div>
+                <form name="signin" id="signInForm" action=""   >
+                    <div>
+                        <label>Email Address</label>
+                        <input type='text' placeholder="Johndoe@epicmail.com" id="loginEmailAddress" required>
+                    </div>
+                    <div>
+                        <label>Password</label> 
+                        <input type='password' placeholder="******" id="loginPassword" required>
+                    </div>
+                    <button type="submit">Login</button>
+
+                </form>
+                <p>Forget Your Password? <a href="#" class="resetLink">Reset</a></p>
+                <p>Dont have an account? <a href="#" class="signUpLink"> Sign Up</a></p>
+            </div>
+            <div class="sign signUp hidden">
                 <div>
                     <label class='top'>JOIN EPICMAIL TODAY</label>
                     <label> </label>
                 </div>
-                <form name="signup" id="signUpForm" action=""  method="post" >
+                <form name="signup" id="signUpForm" action="#" >
                     <div>
                         <label>First Name</label>
                         <input type='text' placeholder="John" id="fName" required>
@@ -47,27 +67,46 @@
                     <button type="submit">Sign Up</button>
 
                 </form>
-                <p>Already registered? <a href="#" id="signInLink"> Sign In</a></p>
+                <p>Already registered? <a href="#" class="signInLink"> Sign In</a></p>
+                <p>Forget Your Password? <a href="#" class="resetLink">Reset</a></p>
             </div>
-            <div class="sign signIn">
+            <div class=" sign reset hidden">
                 <div>
-                    <label class='top'>WELCOME BACK</label>
+                    <label class='top'>RESET PASSWORD</label>
                     <label> </label>
                 </div>
-                <form name="signin" id="signInForm" action=""  method="post" >
+                <form name="signin" id="resetForm" action="#"   >
                     <div>
                         <label>Email Address</label>
-                        <input type='text' placeholder="Johndoe@epicmail.com" id="loginEmailAddress" required>
+                        <input type='email' placeholder="Johndoe@epicmail.com" class="loginEmailAddress" required>
                     </div>
-                    <div>
-                        <label>Password</label> 
-                        <input type='password' placeholder="******" id="loginPassword" required>
+                    <div class="question hidden">
+                        <label>Question</label>
+                        <p>What is your first pet name?</p>
                     </div>
-                    <button type="submit">Login</button>
+                    <div class="answer hidden">
+                        <label>Answer</label>
+                        <input type="text">
+                    </div>
+                    <div class="password hidden">
+                        <label>New Password</label>
+                        <input type="password">
+                    </div>
+                    <button type="submit">Reset</button>
 
                 </form>
-                <p>Forget Your Password? <a href="#">Reset</a></p>
-                    <p>Dont have an account? <a href="#" id="signOutLink"> Sign Out</a></p>
+                <p>Already registered? <a href="#" class="signInLink"> Sign In</a></p>
+                    <p>Dont have an account ? <a href="#" class="signUpLink"> Sign Up</a></p>
+            </div>
+        </div>
+        <div class="modal hidden"></div>
+        <div class="alert hidden">
+            <div class="title-bar">
+                <label>EPIC MAIL</label>
+                <a href="#">X</a>
+            </div>
+            <div class="alert-message">
+                <p></p>
             </div>
         </div>
     </body>
