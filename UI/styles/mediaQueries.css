@@ -1,0 +1,56 @@
+@media screen and (min-width:1025px) and (max-width:1230px){
+    *{
+       font-size: 16px;
+    }
+    
+    
+}
+@media screen and (min-width:769px) and (max-width:1024px){
+    *{
+       font-size: 14px;
+    }
+    
+    
+}
+@media screen and (min-width:600px) and (max-width:768px){
+    
+    *{
+       font-size: 13px;
+    }
+    
+    
+    
+}
+
+@media screen and (min-width:400px) and (max-width:599px),screen and (max-width:399px){
+    *{
+       font-size: 12.5px;
+    }
+    
+    .right-group div >div {
+        display: flex;
+        flex-flow: column
+    }
+}
+@media screen and (max-width:399px){
+    *{
+        font-size: 11.5px;
+    }
+    .inbox .top{
+        display: flex;
+        flex-flow: column nowrap;
+    }
+    
+}
+@media screen and (max-width:350px){
+    *{
+        font-size: 10.5px;
+    }
+    
+    
+}
+
+
+
+
+
