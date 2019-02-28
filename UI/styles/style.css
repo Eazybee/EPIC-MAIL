@@ -190,7 +190,6 @@ body, body>div{
 .inbox .bottom ul{
     width:100%;
     overflow: hidden;
-    border-bottom: solid ;
 }
 .inbox .bottom li {
     display:inline;
@@ -214,10 +213,11 @@ body, body>div{
     color:white;
     transition: .5s;
 }
-.inbox .bottom ul.groups ul li a{
-    padding-left: 1.5em;
+
+.inbox .bottom li.groups  li a{
+    padding-left: 2em;
 }
-.inbox .bottom ul.groups ul li a:hover{
+.inbox .bottom li.groups  li a:hover{
     background-color:#46A394;
     
 }
@@ -248,9 +248,6 @@ body, body>div{
     justify-content: space-between;
     padding: .2em;
     margin: .5em 0;
-}
-.right-draft .inbox-view >div{
-    
 }
 .inbox .bottom .inbox-view >div >*:not(input){
     cursor: pointer;
@@ -372,6 +369,27 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-.right-draft .inbox-view >div:last-child input{
+.right-group div div {
+    padding: 1em;
     
+}
+.right-group label{
+    font-weight: bold;
+    font-size: 1.2em;
+    width: 25%;
+    display: inline-block
+}
+.right-group input, .right-group button{
+    padding: 1em;
+}
+.right-group button[form='createGroup']{
+    width: 100%;
+}
+
+.right-group ul{
+    display: flex;
+    flex-flow: column nowrap;
+}
+.right-group div ul li{
+    padding: .4em 1em
 }

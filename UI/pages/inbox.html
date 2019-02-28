@@ -12,6 +12,7 @@
     </head>
     <body>
         <div class="inbox">
+            <!-- User Type--><input type="hidden" value="Admin">
             <div class="top">
                 <div>
                     <h1> EPIC MAIL</h1>
@@ -26,14 +27,39 @@
                         <li><a href="#Inbox">Inbox</a></li>
                         <li><a href="#Sent">Sent</a></li>
                         <li><a href="#Draft">Draft</a></li>
+                        <li class="groups"><a href="#Group">Create Group</a>
+                            <ul>
+                                <li><a href="#">&raquo; Family</a></li>
+                                <li><a href="#">&raquo; Andela Group</a></li>
+                            </ul>
+                        </li>
+                            
+                        
                     </ul>
-                    <ul class="groups">
-                        <li><a href="#">Create Group</a></li>
-                        <ul>
-                            <li><a href="#">&raquo; Family</a></li>
-                            <li><a href="#">&raquo; Andela Group</a></li>
-                        </ul>
-                    </ul>
+                    
+                </div>
+                <!-- Create Group -->
+                <div class="right right-group hidden">
+                    <div>
+                        <form action="#" id="createGroup"></form>
+                        <form action="#" id="addMember"></form>
+                            <div>
+                                <label>Group Name</label>
+                                <input type="text" placeholder="Group Name" form="createGroup" required>
+                            </div>
+                            <div>
+                                
+                                    <label>Member Mail</label>
+                                    <input form="addMember" type="email" placeholder="Johndoe@epicmail.com" required>
+                                    <button form="addMember" type="submit"> Add Member </button>
+                               
+                            </div>
+                            <div><button form="createGroup" type="submit">Create Group</button></div>
+                        
+                    </div>
+                    <div>
+                        <ul></ul>
+                    </div>
                 </div>
                 <!-- For Draft Mail -->
                 <div class="right right-draft hidden">
