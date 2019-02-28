@@ -194,6 +194,9 @@ body, body>div{
 .inbox .bottom li {
     display:inline;
 }
+.inbox .bottom .left> ul >li a:not([href='#Draft']){
+    
+}
 .inbox .bottom li a{
     display:block;
     padding: 1em;
@@ -244,6 +247,9 @@ body, body>div{
     justify-content: space-between;
     padding: .2em;
     margin: .5em 0;
+}
+ .right-draft .inbox-view >div{
+    
 }
 .inbox .bottom .inbox-view >div >*:not(input){
     cursor: pointer;
@@ -338,6 +344,8 @@ body, body>div{
     padding: 1em .5em .5em .5em;
     height: 10em;
     border-color: lightblue;
+    margin-bottom: .3em;
+    resize:vertical;
 }
 .inbox .right-compose button{
     float: right;
@@ -357,7 +365,9 @@ button.sent{
 }
 .inbox .bottom .right-sent .inbox-view >div:hover{
     background-color: #3E8C84;
+}.inbox  .bottom .right-draft .toolbar{
+    border-color:#49738C;
 }
-.inbox .bottom .right-sent .inbox-view >div >input{
-    
+.inbox .bottom .right-draft .inbox-view >div:hover{
+    background-color: #49738C;
 }
