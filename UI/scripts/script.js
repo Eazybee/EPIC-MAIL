@@ -341,6 +341,18 @@ window.onload= function ready() {
                 }
             });
         }
+        
+        /** Delete inbox **/
+        document.querySelector(".right-inbox .toolbar button.deleteButton").onclick = (event) => {
+            document.querySelectorAll(".inbox .bottom .right-inbox .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked) {       
+                    let mailID =".right-inbox .inbox-view .s" + element.value; 
+                    deleteMail(mailID,"Mail(s) Deleted Successfully")
+                }
+            });
+        }
+        
         /** CREATE GROUP**/
         document.querySelector(".right-group #addMember").onsubmit = (event) => {
             let email = document.querySelector(".right-group input[type='email']");
