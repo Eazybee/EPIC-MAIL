@@ -35,6 +35,33 @@
                         </ul>
                     </ul>
                 </div>
+                <!-- For Draft Mail -->
+                <div class="right right-draft hidden">
+                    <div class="toolbar">
+                        <button>Delete</button>
+                    </div>
+                    <div class="inbox-view">
+                        <div id="s1">
+                            <input type="checkbox" value="1">
+                            <p>Nknkfonhihifjje</p>
+                            <div>
+                                <p class="subject">SUBJECT</p>
+                                <p class="msg">some part of the body message to be seen or not seen...</p>
+                            </div>
+                            <label>date/time</label>
+                        </div>
+                        <div id="s2">
+                            <input type="checkbox" value="2">
+                            <p>Name</p>
+                            <div>
+                                <p class="subject">SUBJECT</p>
+                                <p class="msg">some part of the body ...</p>
+                            </div>
+                            <label>5:21 am</label>
+                        </div>
+                    </div>
+                </div>
+                <!-- For Sent Mail -->
                 <div class="right right-sent hidden">
                     <div class="toolbar">
                         <button>Delete</button>
@@ -87,6 +114,7 @@
                             <textarea placeholder="Enter message body" required></textarea>
                         </div>
                         <button type="submit" >SEND</button>
+                        <button id="saveMail"  form="">SAVE</button>
                     </form>
                 </div>
                 <!-- For viewing message in the inbox view -->
