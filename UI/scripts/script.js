@@ -17,6 +17,7 @@ window.onload= function ready(){
                 element.classList.add("hidden");
             });
         }
+        
         /** Left-panel-Menus Event **/
         document.querySelector("a[href='#Inbox']").onclick = (event) => {
             
@@ -68,7 +69,8 @@ window.onload= function ready(){
                 document.querySelector(".view-message").classList.remove("hidden");
             }
         })
-        /**Send mail**/
+        
+        /** Send mail **/
         document.querySelector("[name='sendMail']").onsubmit = (event) => {
             let sendButton = document.querySelector("[name='sendMail'] button");
             sendButton.innerHTML = 'SENDING';
@@ -87,53 +89,6 @@ window.onload= function ready(){
             }, 3000);
             
             return false;
-        }
-        /** Save mail as draft **/
-        document.querySelector("#saveMail").onclick = (event) => {
-            let topic = document.querySelector('.inbox .right-compose .message input').value;
-            let msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
-            let mailTo ="" ;
-            if(topic.trim() == "" && msgBody.trim() == ""){
-                alertMessage("Both subject and message body cannot be empty");
-            }else{
-                document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-                   if(radioButton.checked && radioButton.value == "Individual" ){
-                       mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
-                   }
-                    else if(radioButton.checked && radioButton.value == "Group" ){
-                        let selectElement = document.querySelector(".inbox .right-compose .address select");
-                        let selectedIndex = selectElement.selectedIndex; //geting index of selected option
-                        let options = selectElement.options; //getting collections of all options as an array
-                        mailTo = options[selectedIndex].value; //returning the value of selected option
-                   }
-                });
-                
-                let divElement = document.createElement('div');
-                divElement.innerHTML ='<input type="checkbox" value="1">'+
-                                    '<p>'+mailTo+'</p>'+
-                                    '<div>'+
-                                        '<p class="subject">'+topic+'</p>'+
-                                        '<p class="msg">s'+msgBody+'</p>'+
-                                    '</div>'+
-                                    '<label>'+new Date().getDate()+'-'+new Date().getMonth()+'</label>';
-            
-                document.querySelector('.right-draft .inbox-view').appendChild(divElement);
-                alertMessage("Message saved as draf succesfully");
-            }
-            
-        }
-
-        document.querySelector("#retract").onclick = (event) => { 
-            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
-                
-                if(element.checked){
-                    
-                   let mailID ="#s" + element.value; 
-                    alertMessage("Mail Retracted Successfully");
-                    document.querySelector(mailID).classList.add("hidden");
-                   
-                }
-            });
         }
         
         document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
@@ -169,6 +124,70 @@ window.onload= function ready(){
                 }
             }
         });
+        
+        /** Save mail as draft **/
+        document.querySelector("#saveMail").onclick = (event) => {
+            let topic = document.querySelector('.inbox .right-compose .message input').value;
+            let msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
+            let mailTo ="" ;
+            if(topic.trim() == "" && msgBody.trim() == ""){
+                alertMessage("Both subject and message body cannot be empty");
+            }else{
+                document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
+                   if(radioButton.checked && radioButton.value == "Individual" ){
+                       mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
+                   }
+                    else if(radioButton.checked && radioButton.value == "Group" ){
+                        let selectElement = document.querySelector(".inbox .right-compose .address select");
+                        let selectedIndex = selectElement.selectedIndex; //geting index of selected option
+                        let options = selectElement.options; //getting collections of all options as an array
+                        mailTo = options[selectedIndex].value; //returning the value of selected option
+                   }
+                });
+                
+                let divElement = document.createElement('div');
+                divElement.innerHTML ='<input type="checkbox" value="1">'+
+                                    '<p>'+mailTo+'</p>'+
+                                    '<div>'+
+                                        '<p class="subject">'+topic+'</p>'+
+                                        '<p class="msg">s'+msgBody+'</p>'+
+                                    '</div>'+
+                                    '<label>'+new Date().getDate()+'-'+new Date().getMonth()+'</label>';
+            
+                document.querySelector('.right-draft .inbox-view').appendChild(divElement);
+                alertMessage("Message saved as draf succesfully");
+            }
+            
+        }
+
+        /** Retract a sent mail **/
+        document.querySelector("#retract").onclick = (event) => { 
+            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked){
+                    
+                   let mailID =".right-sent .inbox-view  .s" + element.value; 
+                    alertMessage("Mail Retracted Successfully");
+                    document.querySelector(mailID).classList.add("hidden");
+                    
+                   
+                }
+            });
+        }
+        
+        /** Delete draft **/
+        document.querySelector(".right-draft .toolbar button.deleteButton").onclick = (event) => {
+            document.querySelectorAll(".inbox .bottom .right-draft .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked){
+                    
+                   let mailID =".right-draft .inbox-view .s" + element.value; 
+                    alertMessage("Draft Mail Deleted Successfully");
+                    document.querySelector(mailID).classList.add("hidden");
+                   
+                }
+            });
+        }
     }
     
 };
