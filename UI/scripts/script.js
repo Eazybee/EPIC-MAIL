@@ -1,5 +1,5 @@
-window.onload= function ready(){
-    if( document.querySelector(".signUpLink")){ //If on home page -> index.html
+window.onload= function ready() {
+    if( document.querySelector(".signUpLink")) { //If on home page -> index.html
         document.querySelectorAll(".signUpLink").forEach((element) => {
             element.onclick= (event) => {
                 document.querySelector(".signIn").classList.add("hidden");
@@ -22,20 +22,21 @@ window.onload= function ready(){
             }
         });
         
+        //RESET FORM
         document.querySelector("#resetForm").onsubmit = (event) => {
             let email = document.querySelector("#resetForm input[type='email']");
             let answer = document.querySelector("#resetForm input[type='text']");
             let password = document.querySelector("#resetForm input[type='password']");
-            if(email.value.trim() ==""){
+            if(email.value.trim() =="") {
                 alertMessage("Please enter your Email address");
             }else{
                 
                 document.querySelector("#resetForm .answer").classList.remove("hidden");
                 document.querySelector("#resetForm .question").classList.remove("hidden");
                 
-                if(answer.value.trim() != ""){
+                if(answer.value.trim() != "") {
                     document.querySelector("#resetForm .password").classList.remove("hidden");
-                    if(password.value.trim() != ""){
+                    if(password.value.trim() != "") {
                         alertMessage("Password Reset Succesfully ")
                         email.value="";
                         answer.value="";
@@ -48,14 +49,50 @@ window.onload= function ready(){
             return false;
         }
         
+        //SIGN-IN FORM
+        document.querySelector("#signInForm").onsubmit = (event) => { 
+            let email = document.querySelector("#signInForm input[type='email']");
+            let password = document.querySelector("#signInForm input[type='password']");
+            
+            if(email.value.trim() == "") {
+                email.value = "";
+                alertMessage("Enter email address");
+            }
+            else if(password.value.trim() == "") {
+                password.value = "";
+                alertMessage("Enter Password");
+            }
+            else {
+                email.value = "";
+                password.value = "";
+                alertMessage("Login Successful");
+            }
+            return false;    
+        }
+        
+        //SIGNUP FORM
+        document.querySelector("#signUpForm").onsubmit = (event) => {
+            let password = document.querySelector("#signUpForm #password");
+            let rePassword = document.querySelector("#signUpForm #rePassword");
+            if(password.value != rePassword.value){
+                alertMessage("Password do no match");
+            }
+            else{
+                document.querySelector("#signUpForm")
+                alertMessage("Registration Sucessful!");
+                setTimeout(() =>{ location.reload()},2000);
+            }
+            return false;
+        }
+        
     }
-    if(document.querySelector("a[href='#Inbox']")){ //if on dashboard page -> inbox.html
+    if(document.querySelector("a[href='#Inbox']")) { //if on dashboard page -> inbox.html
         
         
         //delete mail
         const deleteMail = (mailID, respondMessage="") => {
             document.querySelector(mailID).classList.add("hidden");
-            if(respondMessage != ""){ 
+            if(respondMessage != "") { 
                 alertMessage(respondMessage);
             }
         }
@@ -109,7 +146,7 @@ window.onload= function ready(){
             document.querySelector(".right-draft").classList.remove("hidden");
         }
         document.querySelector("a[href='#Group']").onclick = (event) => {
-            if(document.querySelector(".inbox > input[type='hidden']").value == "Admin"){
+            if(document.querySelector(".inbox > input[type='hidden']").value == "Admin") {
                 document.querySelectorAll(".right:not(.right-group)").forEach((element) => {
                     element.classList.add("hidden");
                 });
@@ -160,12 +197,12 @@ window.onload= function ready(){
                 let selectedRadioValue = radioButton.value;
                 let inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
                 let selectGroup = document.querySelector(".inbox .right-compose .address select");
-                if(selectedRadioValue == "Individual"){
+                if(selectedRadioValue == "Individual") {
                     inputEmail.classList.remove("hidden");
                     inputEmail.required=true;
                     selectGroup.classList.add("hidden");
                     
-                }else if(selectedRadioValue == "Group"){
+                }else if(selectedRadioValue == "Group") {
                     inputEmail.classList.add("hidden");
                     inputEmail.required=false;
                     selectGroup.classList.remove("hidden");
@@ -191,7 +228,7 @@ window.onload= function ready(){
         document.querySelector("#retract").onclick = (event) => { 
             document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
                 
-                if(element.checked){
+                if(element.checked) {
                     
                    let mailID =".right-sent .inbox-view  .s" + element.value; 
                     alertMessage("Mail(s) Retracted Successfully");
@@ -209,15 +246,15 @@ window.onload= function ready(){
             let mailTo ="" ;
             let mailToType="";
             let mailID="";
-            if(topic.trim() == "" && msgBody.trim() == ""){
+            if(topic.trim() == "" && msgBody.trim() == "") {
                 alertMessage("Both subject and message body cannot be empty");
             }else{
                 document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-                   if(radioButton.checked && radioButton.value == "Individual" ){
+                   if(radioButton.checked && radioButton.value == "Individual" ) {
                        mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
                        mailToType = "Individual";
                    }
-                    else if(radioButton.checked && radioButton.value == "Group" ){
+                    else if(radioButton.checked && radioButton.value == "Group" ) {
                         let selectElement = document.querySelector(".inbox .right-compose .address select");
                         let selectedIndex = selectElement.selectedIndex; //geting index of selected option
                         let options = selectElement.options; //getting collections of all options as an array
@@ -254,13 +291,13 @@ window.onload= function ready(){
             let mailBody = mailDiv.querySelector("div .msg").innerHTML;
             
             document.querySelector(".right-compose .address input[type='radio'][value='"+mailToType+"']").checked = true;
-            if(mailToType == "Individual"){
+            if(mailToType == "Individual") {
                 document.querySelector(".right-compose .address input[type='email']").value = mailTo;
                 document.querySelector(".right-compose .address input[type='email']").classList.remove("hidden");
                 document.querySelector(".right-compose .address input[type='email']").required=true;
                 document.querySelector(".right-compose .address select").classList.add("hidden");
             }
-            else if(mailToType == "Group"){
+            else if(mailToType == "Group") {
                 let selectGroup = document.querySelector(".right-compose .address select");
                
                 document.querySelector(".right-compose .address input[type='email']").classList.add("hidden");
@@ -289,14 +326,14 @@ window.onload= function ready(){
             //alertMessage(mailBody);   
         }
         // EVENT DELEGATION 
-        document.addEventListener('click',function(e){
-            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div >*:not(input)")).includes(e.target)){
+        document.addEventListener('click',function(e) {
+            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div >*:not(input)")).includes(e.target)) {
                 let mailDiv = e.target.parentNode;
                 sendDraftMessage(mailDiv);
             }
         });
-        document.addEventListener('click',function(e){
-            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div div p")).includes(e.target)){
+        document.addEventListener('click',function(e) {
+            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div div p")).includes(e.target)) {
                 let mailDiv = e.target.parentNode.parentNode;
                 sendDraftMessage(mailDiv);
             }
@@ -306,7 +343,7 @@ window.onload= function ready(){
         document.querySelector(".right-draft .toolbar button.deleteButton").onclick = (event) => {
             document.querySelectorAll(".inbox .bottom .right-draft .inbox-view >div >input").forEach((element) => {
                 
-                if(element.checked){       
+                if(element.checked) {       
                     let mailID =".right-draft .inbox-view .s" + element.value; 
                     deleteMail(mailID,"Draft Mail(s) Deleted Successfully")
                 }
@@ -315,7 +352,7 @@ window.onload= function ready(){
         /** CREATE GROUP**/
         document.querySelector(".right-group #addMember").onsubmit = (event) => {
             let email = document.querySelector(".right-group input[type='email']");
-            if( email.value.trim() != ""){
+            if( email.value.trim() != "") {
                 let list = document.createElement("li");
                 list.innerHTML= email.value;
                 document.querySelector(".right-group ul").appendChild(list);
@@ -325,9 +362,9 @@ window.onload= function ready(){
         }
         document.querySelector(".right-group #createGroup").onsubmit = (event) => {
             let groupName = document.querySelector(".right-group input[type='text']");
-            if( groupName.value.trim() != ""){
+            if( groupName.value.trim() != "") {
                 let groupMember = document.querySelector(".right-group ul li") != null ? true : false ;
-                if(groupMember){
+                if(groupMember) {
                     
                     document.querySelector(".right-group ul ").innerHTML="";
                     let li = document.createElement("li");
@@ -347,17 +384,17 @@ window.onload= function ready(){
     }
     
     /** ALert box Event handler**/
-        document.querySelector(".alert .title-bar a").onclick = (event) => {
+    document.querySelector(".alert .title-bar a").onclick = (event) => {
             
-            document.querySelectorAll(".modal, .alert").forEach((element) => {
-                element.classList.add("hidden");
-            });
-        }
-        function alertMessage(message){
-            document.querySelector(".alert p").innerHTML=message;
-            document.querySelectorAll(".modal, .alert").forEach((element) => {
-                        element.classList.remove("hidden");
-                    });
-        }
+        document.querySelectorAll(".modal, .alert").forEach((element) => {
+            element.classList.add("hidden");
+        });
+    }
+    function alertMessage(message) {
+        document.querySelector(".alert p").innerHTML=message;
+        document.querySelectorAll(".modal, .alert").forEach((element) => {
+            element.classList.remove("hidden");
+        });
+    }
 };
 
