@@ -66,6 +66,9 @@ window.onload= function ready() {
                 email.value = "";
                 password.value = "";
                 alertMessage("Login Successful");
+                setTimeout(() =>{ 
+                    location.href="./pages/inbox.html";
+                },1000);
             }
             return false;    
         }
