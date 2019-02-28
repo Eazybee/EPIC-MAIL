@@ -31,7 +31,10 @@ input[type^="rad"]{
     height: 1.1em;
     width: 1.1em
 }
-.hidden, .homepage .sign.hidden,.inbox .right .inbox-view > div.hidden{
+.hidden, 
+.homepage .sign.hidden, 
+.homepage .sign .hidden,
+.inbox .right .inbox-view > div.hidden{
     display: none;
 }
 

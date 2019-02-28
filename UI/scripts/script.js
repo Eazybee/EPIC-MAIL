@@ -1,13 +1,53 @@
 window.onload= function ready(){
-    if( document.querySelector("#signOutLink")){ //If on home page -> index.html
-        document.querySelector("#signOutLink").onclick= (e) => {
-            document.querySelector(".signIn").classList.add("hidden");
-            document.querySelector(".signOut").classList.remove("hidden");
+    if( document.querySelector(".signUpLink")){ //If on home page -> index.html
+        document.querySelectorAll(".signUpLink").forEach((element) => {
+            element.onclick= (event) => {
+                document.querySelector(".signIn").classList.add("hidden");
+                document.querySelector(".reset").classList.add("hidden");
+                document.querySelector(".signUp").classList.remove("hidden");
+            }
+        });
+        document.querySelectorAll(".signInLink").forEach((element) => {
+            element.onclick= (e) => {
+                document.querySelector(".reset").classList.add("hidden");
+                document.querySelector(".signUp").classList.add("hidden");
+                document.querySelector(".signIn").classList.remove("hidden");
+            }
+        });
+        document.querySelectorAll(".resetLink").forEach((element) => {
+            element.onclick= (e) => {
+                document.querySelector(".reset").classList.remove("hidden");
+                document.querySelector(".signUp").classList.add("hidden");
+                document.querySelector(".signIn").classList.add("hidden");
+            }
+        });
+        
+        document.querySelector("#resetForm").onsubmit = (event) => {
+            let email = document.querySelector("#resetForm input[type='email']");
+            let answer = document.querySelector("#resetForm input[type='text']");
+            let password = document.querySelector("#resetForm input[type='password']");
+            if(email.value.trim() ==""){
+                alertMessage("Please enter your Email address");
+            }else{
+                
+                document.querySelector("#resetForm .answer").classList.remove("hidden");
+                document.querySelector("#resetForm .question").classList.remove("hidden");
+                
+                if(answer.value.trim() != ""){
+                    document.querySelector("#resetForm .password").classList.remove("hidden");
+                    if(password.value.trim() != ""){
+                        alertMessage("Password Reset Succesfully ")
+                        email.value="";
+                        answer.value="";
+                        password.value="";
+                        setTimeout(() =>{ location.reload()},3000);
+                    }
+                }
+                
+            }
+            return false;
         }
-        document.querySelector("#signInLink").onclick= (e) => {
-            document.querySelector(".signOut").classList.add("hidden");
-            document.querySelector(".signIn").classList.remove("hidden");
-        }
+        
     }
     if(document.querySelector("a[href='#Inbox']")){ //if on dashboard page -> inbox.html
         
@@ -30,14 +70,6 @@ window.onload= function ready(){
             });
             document.querySelector("a[href='#Compose']").classList.add('active');
             document.querySelector(".right-compose").classList.remove("hidden");
-        }
-        
-        /** ALert box Event hanler**/
-        document.querySelector(".alert .title-bar a").onclick = (event) => {
-            
-            document.querySelectorAll(".modal, .alert").forEach((element) => {
-                element.classList.add("hidden");
-            });
         }
         
         /** Left-panel-Menus Event **/
@@ -314,11 +346,18 @@ window.onload= function ready(){
         }
     }
     
+    /** ALert box Event handler**/
+        document.querySelector(".alert .title-bar a").onclick = (event) => {
+            
+            document.querySelectorAll(".modal, .alert").forEach((element) => {
+                element.classList.add("hidden");
+            });
+        }
+        function alertMessage(message){
+            document.querySelector(".alert p").innerHTML=message;
+            document.querySelectorAll(".modal, .alert").forEach((element) => {
+                        element.classList.remove("hidden");
+                    });
+        }
 };
 
-function alertMessage(message){
-    document.querySelector(".alert p").innerHTML=message;
-    document.querySelectorAll(".modal, .alert").forEach((element) => {
-                element.classList.remove("hidden");
-            });
-}
