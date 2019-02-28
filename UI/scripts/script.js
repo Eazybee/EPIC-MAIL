@@ -1,24 +1,13 @@
 window.onload= function ready() {
     if( document.querySelector(".signUpLink")) { //If on home page -> index.html
-        document.querySelectorAll(".signUpLink").forEach((element) => {
-            element.onclick= (event) => {
-                document.querySelector(".signIn").classList.add("hidden");
-                document.querySelector(".reset").classList.add("hidden");
-                document.querySelector(".signUp").classList.remove("hidden");
-            }
-        });
-        document.querySelectorAll(".signInLink").forEach((element) => {
-            element.onclick= (e) => {
-                document.querySelector(".reset").classList.add("hidden");
-                document.querySelector(".signUp").classList.add("hidden");
-                document.querySelector(".signIn").classList.remove("hidden");
-            }
-        });
-        document.querySelectorAll(".resetLink").forEach((element) => {
-            element.onclick= (e) => {
-                document.querySelector(".reset").classList.remove("hidden");
-                document.querySelector(".signUp").classList.add("hidden");
-                document.querySelector(".signIn").classList.add("hidden");
+        
+      /** Home Page Traverse Code **/ document.querySelectorAll(".resetLink, .signUpLink, .signInLink").forEach((element) => {
+            element.onclick = (event) => {
+                let formSelector ="." + String(element.classList).split("Link")[0];
+                document.querySelector(formSelector).classList.remove("hidden");
+                document.querySelectorAll(".sign:not("+formSelector+")").forEach((element) => {
+                    element.classList.add("hidden")
+                })
             }
         });
         
