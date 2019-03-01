@@ -167,10 +167,27 @@ body, body>div{
     border-bottom: lightblue solid 5px;
     background-color: lightblue;
 }
+.inbox .top div{
+    display: flex;
+    flex-flow: column;
+}
 .inbox .top h1{
     font-size:3em;
     font-family: cursive;
     color: #0F2D40;
+}
+.inbox .top div button{
+    padding: .6em;
+    background: lightblue;
+    color: red;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-color: #0099FF;
+}
+.inbox .top div button:hover{
+    transition: 1s;
+    background: red;
+    color: white;
 }
 .inbox .top input{
     border: lightblue solid .5em;
