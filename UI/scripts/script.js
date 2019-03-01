@@ -153,8 +153,7 @@ window.onload= function ready() {
         }
         
         //veiw Message
-        
-        document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
+          document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
             element.onclick = (event) => {
                 document.querySelector(".right-inbox ").classList.add("hidden");
                 document.querySelector(".right-compose").classList.add("hidden");
@@ -349,6 +348,21 @@ window.onload= function ready() {
                 if(element.checked) {       
                     let mailID =".right-inbox .inbox-view .s" + element.value; 
                     deleteMail(mailID,"Mail(s) Deleted Successfully")
+                }
+            });
+        }
+        
+        /** Delete sent mail **/
+        document.querySelector(".right-sent .toolbar button.deleteButton").onclick = (event) => {
+            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked) {
+                    
+                   let mailID =".right-sent .inbox-view  .s" + element.value; 
+                    alertMessage("Mail(s) Deleted Successfully");
+                    document.querySelector(mailID).classList.add("hidden");
+                    
+                   
                 }
             });
         }
