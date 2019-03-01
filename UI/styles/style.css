@@ -318,7 +318,7 @@ body, body>div{
     font-weight: bold;
     margin-right: 1em;   
 }
-.inbox .right-compose .address span{
+.inbox .right-compose .address span:not(:last-child){
     margin-right:5em;
 }
 .inbox .right-compose .address span *{
