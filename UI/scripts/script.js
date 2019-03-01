@@ -153,15 +153,23 @@ window.onload= function ready() {
         }
         
         //veiw Message
-          document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
+        document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
             element.onclick = (event) => {
                 document.querySelector(".right-inbox ").classList.add("hidden");
                 document.querySelector(".right-compose").classList.add("hidden");
                 document.querySelector(".right-sent").classList.add("hidden");
                 document.querySelector(".view-message").classList.remove("hidden");
             }
-        })
+        });
         
+        /** Log Out **/
+        document.querySelector(".inbox .top div button").onclick = (event) => {
+            alertMessage("See you soon buddy :-)");
+            setTimeout(() => {
+                location.assign("../index.html");
+            }, 1500);
+        }  
+          
         /** Send mail **/
         document.querySelector("[name='sendMail']").onsubmit = (event) => {
             let sendButton = document.querySelector("[name='sendMail'] button");
