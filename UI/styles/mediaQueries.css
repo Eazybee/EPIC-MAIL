@@ -27,6 +27,12 @@
         width:80%;
         margin:15% 10%;
     }
+    .homepage >h1{
+        font-size: 4em;
+    }
+    .homepage .sign{
+        width:28em;
+    }
     .inbox .bottom li.groups  li a{
         padding-left: 1em;
     }
@@ -34,10 +40,11 @@
         width:25%;
     }
     .inbox .right-compose .address input[type="email"],.inbox .right-compose .address select{
-    padding: .5em;
-    width:68%;
+        padding: .5em;
+        width:68%;
+
+    }
     
-}
     .right-group div >div {
         display: flex;
         flex-flow: column;
@@ -55,12 +62,23 @@
         flex-flow: column nowrap;
     }
     
+    
 }
 @media screen and (max-width:350px){
     *{
         font-size: 10.5px;
     }
-    
+}
+@media screen and (max-width:300px){
+    *{
+        font-size: 9px;
+    }
+    .homepage >h1{
+        font-size: 3em;
+    }
+    .homepage .sign{
+        width:25em;
+    }
     
 }
 
