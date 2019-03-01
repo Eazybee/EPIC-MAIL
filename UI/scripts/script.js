@@ -203,7 +203,7 @@ window.onload= function ready() {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
                         document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
-                            let name =element.innerHTML.split("» ")[1];
+                            let name =element.innerHTML.split("»")[1];
                             let option = document.createElement('option'); //create an option element(tag)
                             let groupName = document.createTextNode(name); //create a textnode 
                             option.appendChild(groupName); 			//add text to option tag created
@@ -300,7 +300,7 @@ window.onload= function ready() {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
                         document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
-                            let name =element.innerHTML.split("» ")[1];
+                            let name =element.innerHTML.split("»")[1];
                             let option = document.createElement('option'); //create an option element(tag)
                             let groupName = document.createTextNode(name); //create a textnode 
                             option.appendChild(groupName); 			//add text to option tag created
@@ -372,7 +372,7 @@ window.onload= function ready() {
                     
                     document.querySelector(".right-group ul ").innerHTML="";
                     let li = document.createElement("li");
-                    li.innerHTML="<a href='#'>&raquo; "+groupName.value+"</a>"
+                    li.innerHTML="<a href='#'>&raquo;"+groupName.value+"</a>"
                     document.querySelector(".inbox .bottom li.groups ul").appendChild(li);
                     groupName.value="";
                     alertMessage('Group Created Successfully!')
