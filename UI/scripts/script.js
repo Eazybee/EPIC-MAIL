@@ -179,6 +179,7 @@ window.onload= function ready() {
             setTimeout(() => {
                 sendButton.innerHTML = "SENT";
                 sendButton.classList.add("sent");
+                alertMessage("Message Sent Successffuly");
             }, 2000);
             setTimeout(() => {
                 
