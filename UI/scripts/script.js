@@ -153,7 +153,6 @@ window.onload= function ready() {
         }
         
         //veiw Message
-        
         document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
             element.onclick = (event) => {
                 document.querySelector(".right-inbox ").classList.add("hidden");
@@ -161,8 +160,16 @@ window.onload= function ready() {
                 document.querySelector(".right-sent").classList.add("hidden");
                 document.querySelector(".view-message").classList.remove("hidden");
             }
-        })
+        });
         
+        /** Log Out **/
+        document.querySelector(".inbox .top div button").onclick = (event) => {
+            alertMessage("See you soon buddy :-)");
+            setTimeout(() => {
+                location.assign("../index.html");
+            }, 1500);
+        }  
+          
         /** Send mail **/
         document.querySelector("[name='sendMail']").onsubmit = (event) => {
             let sendButton = document.querySelector("[name='sendMail'] button");
@@ -203,7 +210,7 @@ window.onload= function ready() {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
                         document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
-                            let name =element.innerHTML.split("» ")[1];
+                            let name =element.innerHTML.split("»")[1];
                             let option = document.createElement('option'); //create an option element(tag)
                             let groupName = document.createTextNode(name); //create a textnode 
                             option.appendChild(groupName); 			//add text to option tag created
@@ -300,7 +307,7 @@ window.onload= function ready() {
                         selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
                         document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
                             
-                            let name =element.innerHTML.split("» ")[1];
+                            let name =element.innerHTML.split("»")[1];
                             let option = document.createElement('option'); //create an option element(tag)
                             let groupName = document.createTextNode(name); //create a textnode 
                             option.appendChild(groupName); 			//add text to option tag created
@@ -353,6 +360,21 @@ window.onload= function ready() {
             });
         }
         
+        /** Delete sent mail **/
+        document.querySelector(".right-sent .toolbar button.deleteButton").onclick = (event) => {
+            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
+                
+                if(element.checked) {
+                    
+                   let mailID =".right-sent .inbox-view  .s" + element.value; 
+                    alertMessage("Mail(s) Deleted Successfully");
+                    document.querySelector(mailID).classList.add("hidden");
+                    
+                   
+                }
+            });
+        }
+        
         /** CREATE GROUP**/
         document.querySelector(".right-group #addMember").onsubmit = (event) => {
             let email = document.querySelector(".right-group input[type='email']");
@@ -372,7 +394,7 @@ window.onload= function ready() {
                     
                     document.querySelector(".right-group ul ").innerHTML="";
                     let li = document.createElement("li");
-                    li.innerHTML="<a href='#'>&raquo; "+groupName.value+"</a>"
+                    li.innerHTML="<a href='#'>&raquo;"+groupName.value+"</a>"
                     document.querySelector(".inbox .bottom li.groups ul").appendChild(li);
                     groupName.value="";
                     alertMessage('Group Created Successfully!')
