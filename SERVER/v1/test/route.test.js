@@ -25,12 +25,12 @@ describe('route', () => {
         };
       });
 
-      it('should return status 200', (done) => {
+      it('should return status 201', (done) => {
         chai.request(app)
           .post('/api/v1/auth/signup')
           .send(obj)
           .end((err, res) => {
-            expect(res).to.have.status(200);
+            expect(res).to.have.status(201);
             done();
           });
       });
