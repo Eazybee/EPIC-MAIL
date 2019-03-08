@@ -4,7 +4,7 @@
   "description": "Epic Mail API",
   "main": "src/index.js",
   "scripts": {
-    "test": ""
+    "test": "mocha --require @babel/polyfill --require @babel/register --recursive --exit"
   },
   "author": "Ilori Ezekiel",
   "license": "ISC",
