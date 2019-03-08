@@ -45,8 +45,8 @@ class RouteController {
     const newUser = new User(req.body.email,
       req.body.firstName, req.body.lastName, req.body.password);
     users.push(newUser);
-    return jwt.sign({ newUser }, 'Andela42', (err, token) => res.status(200).json({
-      status: 200,
+    return jwt.sign({ newUser }, 'Andela42', (err, token) => res.status(201).json({
+      status: 201,
       data: [{
         token,
       }],
@@ -54,7 +54,34 @@ class RouteController {
   }
 
   static login(req, res) {
-    return false;
+    const schema = Joi.object().keys({
+      email: Joi.string().email().required(),
+      password: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      RouteController.handleError(res, new Error(error.details[0].message), 400);
+    }
+
+    const user = users.find(dbuser => (dbuser.getEmail() === req.body.email)
+    && (dbuser.getPassword() === req.body.password));
+
+    if (user) {
+      RouteController.user = user;
+      jwt.sign({ user }, 'Andela42', (err, token) => {
+        res.status(200).json({
+          status: 200,
+          data: [{
+            token,
+          }],
+        });
+      });
+    } else {
+      res.status(401).json({
+        status: 401,
+        data: 'Unauthorized',
+      });
+    }
   }
 
   static saveMail(req, res) {
