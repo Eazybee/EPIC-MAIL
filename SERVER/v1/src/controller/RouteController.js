@@ -12,6 +12,13 @@ class RouteController {
   }
 
   static validateLogin(res) {
+    if (RouteController.user !== null) {
+      return true;
+    }
+    res.status(401).json({
+      status: 401,
+      data: 'Unauthorized',
+    });
     return false;
   }
 
@@ -109,7 +116,12 @@ class RouteController {
   }
 
   static getInbox(req, res) {
-    return false;
+    if (RouteController.validateLogin(res)) {
+      res.status(200).json({
+        status: 200,
+        data: RouteController.user.inbox(),
+      });
+    }
   }
 
   static getReadInbox(req, res) {
