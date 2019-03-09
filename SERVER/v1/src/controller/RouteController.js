@@ -125,7 +125,12 @@ class RouteController {
   }
 
   static getReadInbox(req, res) {
-    return false;
+    if (RouteController.validateLogin(res)) {
+      res.status(200).json({
+        status: 200,
+        data: RouteController.user.readInbox(),
+      });
+    }
   }
 
   static getUnreadInbox(req, res) {
