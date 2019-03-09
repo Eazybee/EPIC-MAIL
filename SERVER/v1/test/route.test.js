@@ -88,108 +88,112 @@ describe('route', () => {
     });
 
     describe('messages', () => {
-      it('should return status 201', (done) => { //  testing for saving message as draft
-        obj = {
-          type: 'save',
-          subject: 'WOW',
-          message: 'you won again',
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res).to.have.status(201);
-            done();
-          });
+      describe('save', () => {
+        it('should return status 201', (done) => { //  testing for saving message as draft
+          obj = {
+            type: 'save',
+            subject: 'WOW',
+            message: 'you won again',
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res).to.have.status(201);
+              done();
+            });
+        });
+        it('should return status of message as draft', (done) => { //  testing for saving message as draft
+          obj = {
+            type: 'save',
+            subject: 'WOW',
+            message: 'you won again',
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res.body.data[0].status).to.equal('draft');
+              done();
+            });
+        });
       });
-      it('should return status of message as draft', (done) => { //  testing for saving message as draft
-        obj = {
-          type: 'save',
-          subject: 'WOW',
-          message: 'you won again',
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res.body.data[0].status).to.equal('draft');
-            done();
+      describe('send', () => {
+        it('should return status 201', (done) => { //  testing for sending draft
+          const sorryMsg = mary.createMail({// creating draft message
+            subject: 'Sorry!',
+            message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
           });
-      });
 
-      it('should return status 201', (done) => { //  testing for sending draft
-        const sorryMsg = mary.createMail({// creating draft message
-          subject: 'Sorry!',
-          message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
+          obj = {
+            type: 'send',
+            id: sorryMsg.getId(),
+            subject: 'Holla',
+            message: 'you won again',
+            toUserId: ayo.getId(),
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res).to.have.status(201);
+              done();
+            });
         });
 
-        obj = {
-          type: 'send',
-          id: sorryMsg.getId(),
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: ayo.getId(),
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res).to.have.status(201);
-            done();
+        it('should return status of message as sent', (done) => { //  testing for sending draft
+          const sorryMsg = mary.createMail({// creating draft message
+            subject: 'Sorry!',
+            message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
           });
-      });
 
-      it('should return status of message as sent', (done) => { //  testing for sending draft
-        const sorryMsg = mary.createMail({// creating draft message
-          subject: 'Sorry!',
-          message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
+          obj = {
+            type: 'send',
+            id: sorryMsg.getId(),
+            subject: 'Holla',
+            message: 'you won again',
+            toUserId: ayo.getId(),
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res.body.data[0].status).to.equal('sent');
+              done();
+            });
         });
-
-        obj = {
-          type: 'send',
-          id: sorryMsg.getId(),
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: ayo.getId(),
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res.body.data[0].status).to.equal('sent');
-            done();
-          });
       });
-
-      it('should return status 201', (done) => { //  testing for saving and message...
-        obj = {
-          type: 'saveAndSend',
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: 2,
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res).to.have.status(201);
-            done();
-          });
-      });
-      it('should return status of message as sent', (done) => { //  testing for saving and message...
-        obj = {
-          type: 'saveAndSend',
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: 2,
-        };
-        chai.request(app)
-          .post('/api/v1/messages')
-          .send(obj)
-          .end((err, res) => {
-            expect(res.body.data[0].status).to.equal('sent');
-            done();
-          });
+      describe('saveAndSend', () => {
+        it('should return status 201', (done) => { //  testing for saving and message...
+          obj = {
+            type: 'saveAndSend',
+            subject: 'Holla',
+            message: 'you won again',
+            toUserId: 2,
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res).to.have.status(201);
+              done();
+            });
+        });
+        it('should return status of message as sent', (done) => { //  testing for saving and message...
+          obj = {
+            type: 'saveAndSend',
+            subject: 'Holla',
+            message: 'you won again',
+            toUserId: 2,
+          };
+          chai.request(app)
+            .post('/api/v1/messages')
+            .send(obj)
+            .end((err, res) => {
+              expect(res.body.data[0].status).to.equal('sent');
+              done();
+            });
+        });
       });
     });
   });
