@@ -105,6 +105,28 @@ class RouteController {
   }
 
   static deletMail(req, res) {
+    if (RouteController.validateLogin(res)) {
+      const schema = Joi.number().required();
+      const { error } = Joi.validate(req.params.id, schema);
+      if (error) {
+        return RouteController.handleError(res, new Error(error.details[0].message), 400);
+      }
+      const mailId = parseInt(req.params.id, 10);
+      try {
+        // Checking if mail exist and return message
+        const mailMessage = Message.getMails(mailId)[0].getMessage();
+        // Delete mail
+        User.deleteMail(mailId);
+        return res.status(200).json({
+          status: 200,
+          data: [{
+            message: mailMessage,
+          }],
+        });
+      } catch (err) {
+        return RouteController.handleError(res, new Error(err.message), 404);
+      }
+    }
     return false;
   }
 
