@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import jwt from 'jsonwebtoken';
+import Message from '../model/Message';
 import users from '../model/Database';
 import User from '../model/User';
 
@@ -112,7 +113,19 @@ class RouteController {
   }
 
   static getMailId(req, res) {
-    return false;
+    if (RouteController.validateLogin(res)) {
+      try {
+        res.status(200).json({
+          status: 200,
+          data: Message.getMails(parseInt(req.params.id, 10)),
+        });
+      } catch (er) {
+        res.status(404).json({
+          status: 404,
+          data: er.message,
+        });
+      }
+    }
   }
 
   static getInbox(req, res) {
