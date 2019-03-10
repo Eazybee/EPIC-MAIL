@@ -8,20 +8,27 @@ class RouteController {
   static handleError(res, err, status = 400) {
     res.status(status).send({
       status,
-      data: err.message,
+      error: err.message,
     });
   }
 
   static validateLogin(req, res, next) {
+    if (RouteController.user) {
     //  Get auth header value
-    const bearerHeader = req.headers.authorization;
-    if (bearerHeader) {
-      req.token = bearerHeader;
-      next();
+      const bearerHeader = req.headers.authorization;
+      if (bearerHeader) {
+        req.token = bearerHeader;
+        next();
+      } else {
+        res.status(401).json({
+          status: 401,
+          error: 'Unauthorized',
+        });
+      }
     } else {
       res.status(401).json({
         status: 401,
-        data: 'Unauthorized',
+        error: 'Unauthorized',
       });
     }
   }
@@ -41,14 +48,14 @@ class RouteController {
     if (req.body.password !== req.body.rePassword) {
       return res.status(400).json({
         status: 400,
-        data: 'Password does not match',
+        error: 'Password does not match',
       });
     }
     const userExist = User.getUsers().some(user => user.getEmail() === req.body.email);
     if (userExist) {
       return res.status(400).json({
         status: 400,
-        data: 'User with this email exist',
+        error: 'User with this email exist',
       });
     }
 
@@ -90,14 +97,13 @@ class RouteController {
     } else {
       res.status(401).json({
         status: 401,
-        data: 'Unauthorized',
+        error: 'Unauthorized',
       });
     }
   }
 
   static saveMail(req, res) {
     const schema = Joi.object().keys({
-      type: Joi.string().equal('save'),
       subject: Joi.string().required(),
       message: Joi.string().required(),
       receiverId: Joi.string(),
@@ -130,9 +136,8 @@ class RouteController {
     }
   }
 
-  static sendDraft(req, res) {
+  static sendDraftUtility(req, res) {
     const schema = Joi.object().keys({
-      type: Joi.string().equal('send').required(),
       id: Joi.number().required(),
       subject: Joi.string().required(),
       message: Joi.string().required(),
@@ -170,37 +175,12 @@ class RouteController {
     }
   }
 
-  static saveAndSend(req, res) {
-    const schema = Joi.object().keys({
-      type: Joi.string().equal('saveAndSend').required(),
-      subject: Joi.string().required(),
-      message: Joi.string().required(),
-      parentMessageId: Joi.number(),
-      toUserId: Joi.number().required(),
-    });
-    const { error } = Joi.validate(req.body, schema);
-    if (error) {
-      RouteController.handleError(res, new Error(error.details[0].message), 400);
-    }
-
-    // Save the mail
-    req.body.type = 'save';
-    const savedMail = RouteController.saveMail(req, res);
-
-    // Send the mail
-    req.body.type = 'send';
-    req.body.id = savedMail.data[0].id;
-    // req.body.id = receiverID;
-    const sentMail = RouteController.sendDraft(req, res);
-    return sentMail;
-  }
-
   static getSentMail(req, res) {
     jwt.verify(req.token, 'Andela42', (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         res.status(200).json({
@@ -216,7 +196,7 @@ class RouteController {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         const schema = Joi.number().required();
@@ -243,29 +223,58 @@ class RouteController {
     });
   }
 
+  static saveDraft(req, res) {
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          error: 'Unauthorized',
+        });
+      } else {
+        res.status(201).send(RouteController.saveMail(req, res));
+      }
+    });
+  }
+
+  static sendDraft(req, res) {
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          error: 'Unauthorized',
+        });
+      } else {
+        res.status(201).json(RouteController.sendDraftUtility(req, res));
+      }
+    });
+  }
+
   static message(req, res) {
     jwt.verify(req.token, 'Andela42', (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
-      } else if (req.body && req.body.type) {
-        if (req.body.type === 'save') { // if it save post request
-          res.status(201).send(RouteController.saveMail(req, res));
-        } else if (req.body.type === 'send') {
-          if (req.body.id) { //  If it has been saved as draft before
-            res.status(201).json(RouteController.sendDraft(req, res));
-          } else {
-            RouteController.handleError(res, new Error('id is required'), 400);
-          }
-        } else if (req.body.type === 'saveAndSend') {
-          res.status(201).json(RouteController.saveAndSend(req, res));
-        } else {
-          RouteController.handleError(res, new Error('type can only have value= "save" or value= "send"'), 400);
-        }
       } else {
-        RouteController.handleError(res, new Error('type is required'), 400);
+        const schema = Joi.object().keys({
+          subject: Joi.string().required(),
+          message: Joi.string().required(),
+          parentMessageId: Joi.number(),
+          toUserId: Joi.number().required(),
+        });
+        const { error } = Joi.validate(req.body, schema);
+        if (error) {
+          RouteController.handleError(res, new Error(error.details[0].message), 400);
+        } else {
+        // Save the mail
+          const savedMail = RouteController.saveMail(req, res);
+
+          // Send the mail
+          req.body.id = savedMail.data[0].id;
+          const sentMail = RouteController.sendDraftUtility(req, res);
+          res.status(201).json(sentMail);
+        }
       }
     });
   }
@@ -275,7 +284,7 @@ class RouteController {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         try {
@@ -286,7 +295,7 @@ class RouteController {
         } catch (er) {
           res.status(404).json({
             status: 404,
-            data: er.message,
+            error: er.message,
           });
         }
       }
@@ -298,7 +307,7 @@ class RouteController {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         res.status(200).json({
@@ -314,7 +323,7 @@ class RouteController {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         res.status(200).json({
@@ -330,7 +339,7 @@ class RouteController {
       if (err) {
         res.status(401).json({
           status: 401,
-          data: 'Unauthorized',
+          error: 'Unauthorized',
         });
       } else {
         res.status(200).json({
