@@ -93,40 +93,6 @@ class RouteController {
   }
 
   static saveMail(req, res) {
-    if (RouteController.validateLogin(res)) {
-      const schema = Joi.object().keys({
-        type: Joi.string().equal('save'),
-        subject: Joi.string().required(),
-        message: Joi.string().required(),
-        receiverId: Joi.string(),
-        toUserId: Joi.number(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        RouteController.handleError(res, new Error(error.details[0].message), 400);
-      }
-      try {
-        const mail = RouteController.user.createMail({
-          subject: req.body.subject,
-          message: req.body.message,
-          receiverId: req.body.receiverId,
-        });
-
-        return {
-          status: 201,
-          data: [{
-            id: mail.getId(),
-            createdOn: mail.getCreationDateTime(),
-            subject: mail.getSubject(),
-            message: mail.getMessage(),
-            parentMessageId: mail.getParentMessageId(),
-            status: mail.getStatus(),
-          }],
-        };
-      } catch (err) {
-        return RouteController.handleError(res, err, 400);
-      }
-    }
     return false;
   }
 
@@ -165,25 +131,7 @@ class RouteController {
   }
 
   static message(req, res) {
-    if (RouteController.validateLogin(res)) {
-      if (req.body && req.body.type) {
-        if (req.body.type === 'save') { // if it save post request
-          res.status(201).send(RouteController.saveMail(req, res));
-        } else if (req.body.type === 'send') {
-          if (req.body.id) { //  If it has been saved as draft before
-            res.status(201).json(RouteController.sendDraft(req, res));
-          } else {
-            RouteController.handleError(res, new Error('id is required'), 400);
-          }
-        } else if (req.body.type === 'saveAndSend') {
-          res.status(201).json(RouteController.saveAndSend(req, res));
-        } else {
-          RouteController.handleError(res, new Error('type can only have value= "save" or value= "send"'), 400);
-        }
-      } else {
-        RouteController.handleError(res, new Error('type is required'), 400);
-      }
-    }
+    return false;
   }
 
   static getMailId(req, res) {
