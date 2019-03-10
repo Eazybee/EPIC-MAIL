@@ -131,6 +131,45 @@ class RouteController {
   }
 
   static sendDraft(req, res) {
+    if (RouteController.validateLogin(res)) {
+      const schema = Joi.object().keys({
+        type: Joi.string().equal('send').required(),
+        id: Joi.number().required(),
+        subject: Joi.string().required(),
+        message: Joi.string().required(),
+        parentMessageId: Joi.number(),
+        toUserId: Joi.number().required(),
+      });
+      const { error } = Joi.validate(req.body, schema);
+      if (error) {
+        RouteController.handleError(res, new Error(error.details[0].message), 400);
+      }
+
+      try {
+        const mail = Message.getMails(parseInt(req.body.id, 10))[0];
+        mail.setSubject(req.body.subject);
+        mail.setMessage(req.body.message);
+
+        RouteController.user.sendMail({
+          message: mail,
+          toUserId: parseInt(req.body.toUserId, 10),
+        });
+        const [mailObj] = Message.getMails(req.body.id);
+        return {
+          status: 201,
+          data: [{
+            id: mailObj.getId(),
+            createdOn: mailObj.getCreationDateTime(),
+            subject: mailObj.getSubject(),
+            message: mailObj.getMessage(),
+            parentMessageId: mailObj.getParentMessageId(),
+            status: mailObj.getStatus(),
+          }],
+        };
+      } catch (err) {
+        return RouteController.handleError(res, err, 404);
+      }
+    }
     return false;
   }
 
