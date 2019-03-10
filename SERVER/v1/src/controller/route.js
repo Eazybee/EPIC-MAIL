@@ -7,18 +7,18 @@ app.use(express.json());
 //  POST
 app.post('/api/v1/auth/signup', RouteController.signUp);
 app.post('/api/v1/auth/login', RouteController.login);
-app.post('/api/v1/messages', RouteController.message);
+app.post('/api/v1/messages', RouteController.validateLogin, RouteController.message);
 
 //  GET
-app.get('/api/v1/messages', RouteController.getInbox);
-app.get('/api/v1/messages/unread', RouteController.getUnreadInbox);
-app.get('/api/v1/messages/read', RouteController.getReadInbox);
-app.get('/api/v1/messages/sent', RouteController.getSentMail);
-app.get('/api/v1/messages/:id', RouteController.getMailId);
+app.get('/api/v1/messages', RouteController.validateLogin, RouteController.getInbox);
+app.get('/api/v1/messages/unread', RouteController.validateLogin, RouteController.getUnreadInbox);
+app.get('/api/v1/messages/read', RouteController.validateLogin, RouteController.getReadInbox);
+app.get('/api/v1/messages/sent', RouteController.validateLogin, RouteController.getSentMail);
+app.get('/api/v1/messages/:id', RouteController.validateLogin, RouteController.getMailId);
 
 
 //  DELETE
-app.delete('/api/v1/messages/:id', RouteController.deletMail);
+app.delete('/api/v1/messages/:id', RouteController.validateLogin, RouteController.deleteMail);
 
 
 // PORT
