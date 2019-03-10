@@ -12,15 +12,18 @@ class RouteController {
     });
   }
 
-  static validateLogin(res) {
-    if (RouteController.user !== null) {
-      return true;
+  static validateLogin(req, res, next) {
+    //  Get auth header value
+    const bearerHeader = req.headers.authorization;
+    if (bearerHeader) {
+      req.token = bearerHeader;
+      next();
+    } else {
+      res.status(401).json({
+        status: 401,
+        data: 'Unauthorized',
+      });
     }
-    res.status(401).json({
-      status: 401,
-      data: 'Unauthorized',
-    });
-    return false;
   }
 
   static signUp(req, res) {
@@ -93,152 +96,161 @@ class RouteController {
   }
 
   static saveMail(req, res) {
-    if (RouteController.validateLogin(res)) {
-      const schema = Joi.object().keys({
-        type: Joi.string().equal('save'),
-        subject: Joi.string().required(),
-        message: Joi.string().required(),
-        receiverId: Joi.string(),
-        toUserId: Joi.number(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        RouteController.handleError(res, new Error(error.details[0].message), 400);
-      }
-      try {
-        const mail = RouteController.user.createMail({
-          subject: req.body.subject,
-          message: req.body.message,
-          receiverId: req.body.receiverId,
-        });
-
-        return {
-          status: 201,
-          data: [{
-            id: mail.getId(),
-            createdOn: mail.getCreationDateTime(),
-            subject: mail.getSubject(),
-            message: mail.getMessage(),
-            parentMessageId: mail.getParentMessageId(),
-            status: mail.getStatus(),
-          }],
-        };
-      } catch (err) {
-        return RouteController.handleError(res, err, 400);
-      }
+    const schema = Joi.object().keys({
+      type: Joi.string().equal('save'),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      receiverId: Joi.string(),
+      toUserId: Joi.number(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      RouteController.handleError(res, new Error(error.details[0].message), 400);
     }
-    return false;
+    try {
+      const mail = RouteController.user.createMail({
+        subject: req.body.subject,
+        message: req.body.message,
+        receiverId: req.body.receiverId,
+      });
+
+      return {
+        status: 201,
+        data: [{
+          id: mail.getId(),
+          createdOn: mail.getCreationDateTime(),
+          subject: mail.getSubject(),
+          message: mail.getMessage(),
+          parentMessageId: mail.getParentMessageId(),
+          status: mail.getStatus(),
+        }],
+      };
+    } catch (err) {
+      return RouteController.handleError(res, err, 400);
+    }
   }
 
   static sendDraft(req, res) {
-    if (RouteController.validateLogin(res)) {
-      const schema = Joi.object().keys({
-        type: Joi.string().equal('send').required(),
-        id: Joi.number().required(),
-        subject: Joi.string().required(),
-        message: Joi.string().required(),
-        parentMessageId: Joi.number(),
-        toUserId: Joi.number().required(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        RouteController.handleError(res, new Error(error.details[0].message), 400);
-      }
-
-      try {
-        const mail = Message.getMails(parseInt(req.body.id, 10))[0];
-        mail.setSubject(req.body.subject);
-        mail.setMessage(req.body.message);
-
-        RouteController.user.sendMail({
-          message: mail,
-          toUserId: parseInt(req.body.toUserId, 10),
-        });
-        const [mailObj] = Message.getMails(req.body.id);
-        return {
-          status: 201,
-          data: [{
-            id: mailObj.getId(),
-            createdOn: mailObj.getCreationDateTime(),
-            subject: mailObj.getSubject(),
-            message: mailObj.getMessage(),
-            parentMessageId: mailObj.getParentMessageId(),
-            status: mailObj.getStatus(),
-          }],
-        };
-      } catch (err) {
-        return RouteController.handleError(res, err, 404);
-      }
+    const schema = Joi.object().keys({
+      type: Joi.string().equal('send').required(),
+      id: Joi.number().required(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      parentMessageId: Joi.number(),
+      toUserId: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      RouteController.handleError(res, new Error(error.details[0].message), 400);
     }
-    return false;
+
+    try {
+      const mail = Message.getMails(parseInt(req.body.id, 10))[0];
+      mail.setSubject(req.body.subject);
+      mail.setMessage(req.body.message);
+
+      RouteController.user.sendMail({
+        message: mail,
+        toUserId: parseInt(req.body.toUserId, 10),
+      });
+      const [mailObj] = Message.getMails(req.body.id);
+      return {
+        status: 201,
+        data: [{
+          id: mailObj.getId(),
+          createdOn: mailObj.getCreationDateTime(),
+          subject: mailObj.getSubject(),
+          message: mailObj.getMessage(),
+          parentMessageId: mailObj.getParentMessageId(),
+          status: mailObj.getStatus(),
+        }],
+      };
+    } catch (err) {
+      return RouteController.handleError(res, err, 404);
+    }
   }
 
   static saveAndSend(req, res) {
-    if (RouteController.validateLogin(res)) {
-      const schema = Joi.object().keys({
-        type: Joi.string().equal('saveAndSend').required(),
-        subject: Joi.string().required(),
-        message: Joi.string().required(),
-        parentMessageId: Joi.number(),
-        toUserId: Joi.number().required(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        RouteController.handleError(res, new Error(error.details[0].message), 400);
-      }
-
-      // Save the mail
-      req.body.type = 'save';
-      const savedMail = RouteController.saveMail(req, res);
-
-      // Send the mail
-      req.body.type = 'send';
-      req.body.id = savedMail.data[0].id;
-      // req.body.id = receiverID;
-      const sentMail = RouteController.sendDraft(req, res);
-      return sentMail;
+    const schema = Joi.object().keys({
+      type: Joi.string().equal('saveAndSend').required(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      parentMessageId: Joi.number(),
+      toUserId: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      RouteController.handleError(res, new Error(error.details[0].message), 400);
     }
-    return false;
+
+    // Save the mail
+    req.body.type = 'save';
+    const savedMail = RouteController.saveMail(req, res);
+
+    // Send the mail
+    req.body.type = 'send';
+    req.body.id = savedMail.data[0].id;
+    // req.body.id = receiverID;
+    const sentMail = RouteController.sendDraft(req, res);
+    return sentMail;
   }
 
   static getSentMail(req, res) {
-    if (RouteController.validateLogin(res)) {
-      res.status(200).json({
-        status: 200,
-        data: RouteController.user.getSentMail(),
-      });
-    }
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: RouteController.user.getSentMail(),
+        });
+      }
+    });
   }
 
-  static deletMail(req, res) {
-    if (RouteController.validateLogin(res)) {
-      const schema = Joi.number().required();
-      const { error } = Joi.validate(req.params.id, schema);
-      if (error) {
-        return RouteController.handleError(res, new Error(error.details[0].message), 400);
-      }
-      const mailId = parseInt(req.params.id, 10);
-      try {
-        // Checking if mail exist and return message
-        const mailMessage = Message.getMails(mailId)[0].getMessage();
-        // Delete mail
-        User.deleteMail(mailId);
-        return res.status(200).json({
-          status: 200,
-          data: [{
-            message: mailMessage,
-          }],
+  static deleteMail(req, res) {
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
         });
-      } catch (err) {
-        return RouteController.handleError(res, new Error(err.message), 404);
+      } else {
+        const schema = Joi.number().required();
+        const { error } = Joi.validate(req.params.id, schema);
+        if (error) {
+          RouteController.handleError(res, new Error(error.details[0].message), 400);
+        }
+        const mailId = parseInt(req.params.id, 10);
+        try {
+          // Checking if mail exist and return message
+          const mailMessage = Message.getMails(mailId)[0].getMessage();
+          // Delete mail
+          User.deleteMail(mailId);
+          res.status(200).json({
+            status: 200,
+            data: [{
+              message: mailMessage,
+            }],
+          });
+        } catch (er) {
+          RouteController.handleError(res, new Error(er.message), 404);
+        }
       }
-    }
-    return false;
+    });
   }
 
   static message(req, res) {
-    if (RouteController.validateLogin(res)) {
-      if (req.body && req.body.type) {
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
+        });
+      } else if (req.body && req.body.type) {
         if (req.body.type === 'save') { // if it save post request
           res.status(201).send(RouteController.saveMail(req, res));
         } else if (req.body.type === 'send') {
@@ -255,50 +267,78 @@ class RouteController {
       } else {
         RouteController.handleError(res, new Error('type is required'), 400);
       }
-    }
+    });
   }
 
   static getMailId(req, res) {
-    if (RouteController.validateLogin(res)) {
-      try {
-        res.status(200).json({
-          status: 200,
-          data: Message.getMails(parseInt(req.params.id, 10)),
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
         });
-      } catch (er) {
-        res.status(404).json({
-          status: 404,
-          data: er.message,
-        });
+      } else {
+        try {
+          res.status(200).json({
+            status: 200,
+            data: Message.getMails(parseInt(req.params.id, 10)),
+          });
+        } catch (er) {
+          res.status(404).json({
+            status: 404,
+            data: er.message,
+          });
+        }
       }
-    }
+    });
   }
 
   static getInbox(req, res) {
-    if (RouteController.validateLogin(res)) {
-      res.status(200).json({
-        status: 200,
-        data: RouteController.user.inbox(),
-      });
-    }
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: RouteController.user.inbox(),
+        });
+      }
+    });
   }
 
   static getReadInbox(req, res) {
-    if (RouteController.validateLogin(res)) {
-      res.status(200).json({
-        status: 200,
-        data: RouteController.user.readInbox(),
-      });
-    }
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: RouteController.user.readInbox(),
+        });
+      }
+    });
   }
 
   static getUnreadInbox(req, res) {
-    if (RouteController.validateLogin(res)) {
-      res.status(200).json({
-        status: 200,
-        data: RouteController.user.unReadInbox(),
-      });
-    }
+    jwt.verify(req.token, 'Andela42', (err) => {
+      if (err) {
+        res.status(401).json({
+          status: 401,
+          data: 'Unauthorized',
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: RouteController.user.unReadInbox(),
+        });
+      }
+    });
   }
 }
 RouteController.user = null;

@@ -6,6 +6,7 @@ import Message from '../src/model/Message';
 
 const mary = users[2];
 const ayo = users[0];
+let authToken;
 chai.use(chaiHttp);
 
 const { expect } = chai;
@@ -31,6 +32,7 @@ describe('route', () => {
           .send(obj)
           .end((err, res) => {
             expect(res).to.have.status(201);
+            authToken = res.body.data[0].token;
             done();
           });
       });
@@ -97,6 +99,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res).to.have.status(201);
@@ -111,6 +114,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res.body.data[0].status).to.equal('draft');
@@ -134,6 +138,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res).to.have.status(201);
@@ -156,6 +161,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res.body.data[0].status).to.equal('sent');
@@ -173,6 +179,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res).to.have.status(201);
@@ -188,6 +195,7 @@ describe('route', () => {
           };
           chai.request(app)
             .post('/api/v1/messages')
+            .set('authorization', authToken)
             .send(obj)
             .end((err, res) => {
               expect(res.body.data[0].status).to.equal('sent');
@@ -203,6 +211,7 @@ describe('route', () => {
       it('should return status 200', (done) => {
         chai.request(app)
           .get('/api/v1/messages')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
             done();
@@ -212,6 +221,7 @@ describe('route', () => {
       it('should have the following property: data, status', (done) => {
         chai.request(app)
           .get('/api/v1/messages')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
             expect(res.body).to.have.property('status');
@@ -222,6 +232,7 @@ describe('route', () => {
       it('should return logged-in user\'s inbox', (done) => {
         chai.request(app)
           .get('/api/v1/messages')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data
               .every(message => parseInt(message.receiverId, 10) === 3))
@@ -235,6 +246,7 @@ describe('route', () => {
       it('should return status 200', (done) => {
         chai.request(app)
           .get('/api/v1/messages/unread')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
             done();
@@ -244,6 +256,7 @@ describe('route', () => {
       it('should have the following property: data, status', (done) => {
         chai.request(app)
           .get('/api/v1/messages/unread')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
             expect(res.body).to.have.property('status');
@@ -254,6 +267,7 @@ describe('route', () => {
       it('should return logged-in user\'s unread inbox', (done) => {
         chai.request(app)
           .get('/api/v1/messages/unread')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data
               .every(message => message.status === 'sent'))
@@ -267,6 +281,7 @@ describe('route', () => {
       it('should return status 200', (done) => {
         chai.request(app)
           .get('/api/v1/messages/read')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
             done();
@@ -276,6 +291,7 @@ describe('route', () => {
       it('should have the following property: data, status', (done) => {
         chai.request(app)
           .get('/api/v1/messages/read')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
             expect(res.body).to.have.property('status');
@@ -286,6 +302,7 @@ describe('route', () => {
       it('should return logged-in user\'s read inbox', (done) => {
         chai.request(app)
           .get('/api/v1/messages/read')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data
               .every(message => message.status === 'read'))
@@ -299,6 +316,7 @@ describe('route', () => {
       it('should return status 200', (done) => {
         chai.request(app)
           .get('/api/v1/messages/1')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
             done();
@@ -307,6 +325,7 @@ describe('route', () => {
       it('should have the following property: data, status', (done) => {
         chai.request(app)
           .get('/api/v1/messages/1')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
             expect(res.body).to.have.property('status');
@@ -317,6 +336,7 @@ describe('route', () => {
       it('should return mail of id 1', (done) => {
         chai.request(app)
           .get('/api/v1/messages/1')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data[0].id).to.equal(1);
             done();
@@ -330,6 +350,7 @@ describe('route', () => {
       it('should return status 200', (done) => {
         chai.request(app)
           .delete('/api/v1/messages/3')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
             done();
@@ -340,6 +361,7 @@ describe('route', () => {
         const mailMessage = Message.getMails(2)[0].getMessage();
         chai.request(app)
           .delete('/api/v1/messages/2')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data[0].message).to.equal(mailMessage);
             done();
@@ -349,6 +371,7 @@ describe('route', () => {
       it('should have the following property: data, status', (done) => {
         chai.request(app)
           .delete('/api/v1/messages/1')
+          .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
             expect(res.body).to.have.property('status');
