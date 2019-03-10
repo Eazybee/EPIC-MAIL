@@ -115,8 +115,18 @@ describe('User', () => {
     });
   });
 
+  describe('getSentMail method', () => {
+    it('should return array', () => {
+      assert.isArray(userA.getSentMail());
+    });
+
+    it('should return array of sent message by logged in user', () => {
+      assert.isTrue(userA.getSentMail().every(mail => mail.senderId === userA.getId()));
+    });
+  });
+
   describe('inbox method', () => {
-    it('should return array object', () => {
+    it('should return array', () => {
       assert.isArray(userA.inbox());
     });
 
@@ -132,7 +142,7 @@ describe('User', () => {
   });
 
   describe('unReadInbox method', () => {
-    it('should return array object', () => {
+    it('should return array', () => {
       assert.isArray(userA.unReadInbox());
     });
 
@@ -142,7 +152,7 @@ describe('User', () => {
   });
 
   describe('readInbox method', () => {
-    it('should return array object', () => {
+    it('should return array', () => {
       assert.isArray(userA.readInbox());
     });
 

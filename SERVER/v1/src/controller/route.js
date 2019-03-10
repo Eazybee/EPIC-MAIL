@@ -13,6 +13,7 @@ app.post('/api/v1/messages', RouteController.message);
 app.get('/api/v1/messages', RouteController.getInbox);
 app.get('/api/v1/messages/unread', RouteController.getUnreadInbox);
 app.get('/api/v1/messages/read', RouteController.getReadInbox);
+app.get('/api/v1/messages/sent', RouteController.getSentMail);
 app.get('/api/v1/messages/:id', RouteController.getMailId);
 
 

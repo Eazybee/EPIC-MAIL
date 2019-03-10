@@ -90,6 +90,11 @@ class User {
     message.setStatus('sent');
   }
 
+  getSentMail() {
+    const sent = Message.getMails().filter(message => message.getSenderId() === this.id);
+    return sent;
+  }
+
   inbox() {
     const inboxes = Message.getMails().filter(message => message.getReceiverId() === this.id);
     return inboxes;
