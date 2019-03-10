@@ -201,6 +201,15 @@ class RouteController {
     return false;
   }
 
+  static getSentMail(req, res) {
+    if (RouteController.validateLogin(res)) {
+      res.status(200).json({
+        status: 200,
+        data: RouteController.user.getSentMail(),
+      });
+    }
+  }
+
   static deletMail(req, res) {
     if (RouteController.validateLogin(res)) {
       const schema = Joi.number().required();
