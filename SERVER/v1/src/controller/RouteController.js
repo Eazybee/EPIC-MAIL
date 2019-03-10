@@ -174,6 +174,30 @@ class RouteController {
   }
 
   static saveAndSend(req, res) {
+    if (RouteController.validateLogin(res)) {
+      const schema = Joi.object().keys({
+        type: Joi.string().equal('saveAndSend').required(),
+        subject: Joi.string().required(),
+        message: Joi.string().required(),
+        parentMessageId: Joi.number(),
+        toUserId: Joi.number().required(),
+      });
+      const { error } = Joi.validate(req.body, schema);
+      if (error) {
+        RouteController.handleError(res, new Error(error.details[0].message), 400);
+      }
+
+      // Save the mail
+      req.body.type = 'save';
+      const savedMail = RouteController.saveMail(req, res);
+
+      // Send the mail
+      req.body.type = 'send';
+      req.body.id = savedMail.data[0].id;
+      // req.body.id = receiverID;
+      const sentMail = RouteController.sendDraft(req, res);
+      return sentMail;
+    }
     return false;
   }
 
