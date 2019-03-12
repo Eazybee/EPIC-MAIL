@@ -11,6 +11,9 @@
     color: #000;
     position: relative;
 }
+::placeholder {
+  color: #dde2de;
+}
 input,textarea,button,select{
     border: 1px solid cyan;
     border-radius: .2em;
@@ -19,7 +22,6 @@ input,textarea,button,select{
 button{
     border-color: #296B73;
     border-radius: .3em;
-    font-weight: bold;
 }
 button:hover{
     transition: linear .3s;
@@ -40,9 +42,10 @@ input[type^="rad"]{
 
 body, body>div{
     width:100%;
+    height: 100%;
 }
 body{
-    background-image: url(../img/worldmaps.jpg);
+    
 }
 .modal, .alert{
     position: absolute;
@@ -53,13 +56,14 @@ body{
 .modal{
     background-color: black;
     opacity: .5;
+    position: fixed;
 }
 .alert{
     width:50%;
     height: auto;
     background-color: white;
-    border: cyan solid .3em;
-    border-radius: .5em;
+    border: cyan solid .08em;
+    border-radius: 0 0 .5em .5em;
     margin:15% 25%;
 }
 .alert div{
@@ -68,7 +72,7 @@ body{
 .alert .title-bar{
     display: flex;
     justify-content: space-between;
-    background-color: #317175;
+    background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);;
 }
 .alert .title-bar label{
     font-size: 1.5em;
@@ -97,7 +101,9 @@ body{
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
-    
+    height: 100vh;
+    background-image: url("../img/email-background-images-1.v1.jpg");
+    background-size: cover;
 }
 .homepage >h1{
     position: fixed;
@@ -107,8 +113,8 @@ body{
     width: 100vw;
     text-align: center;
     padding:.2em 0;
-    color: #0F2D40;
-    background: linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+    color: white;
+    background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
     z-index: 2;
 }
 .homepage .sign{
@@ -122,10 +128,6 @@ body{
     display: flex;
     flex-flow: column nowrap;
     text-align: center;
-}
-.homepage .sign >div label{
-    font-size:1.5em;
-    font-weight: bold;
 }
 .homepage .sign label.top{
     font-size:1.5em;
@@ -144,16 +146,13 @@ body{
     font-size: 1.2em;
     margin: 2px;
 }
-.homepage .sign form div label{
-    width:30%;
-}
-.sign form div *:not(label){
-    width:70%;
+.sign form div *{
+    width:100%;
     border: 1px solid cyan;
     border-radius: .2em;
 }
 .homepage .sign form div input{
-    width:65%;
+    width:100%;
     padding-left: 5%;
 }
 .homepage .sign form button{
@@ -164,27 +163,30 @@ body{
 }
 .homepage .sign p a{
     font-weight: bold;
-    color:darkblue
+    color:white;
 }
 .homepage .sign p{
     padding-left: 1em;
+    color: white;
 }
 .inbox >.top{
     display: flex;
     justify-content: space-between;
     padding: .8em;
     border-bottom: lightblue solid 5px;
-    background: linear-gradient(-45deg, #EE7752, #E73C7E, #23A6D5, #23D5AB);
+    background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
 }
 
-.inbox .top div{
+.inbox .top div:first-child{
     display: flex;
     flex-flow: column;
 }
 .inbox .top h1{
-    font-size:2.5em;
+    font-size:2em;
     font-family: cursive;
-    color: #0F2D40;
+}
+.inbox .top h1, .inbox .top p{
+    color: white;
 }
 .inbox .top div button{
     padding: .6em;
@@ -198,21 +200,28 @@ body{
     background: red;
     color: white;
 }
+.inbox .search{
+    margin-top: 1em;
+}
+.inbox .search a img{
+    width: 2em;
+    height: 2em;
+    top: .7em;
+    right: 2.5em;
+}
 .inbox .top input{
-    border: transparent solid .5em;;
+    border: transparent solid .3em;;
     border-radius: 1em;
-    padding: .3em;
+    padding: .3em .5em;
     transition: 1s;
 }
 .inbox .top input:hover, .inbox .top input:active{
-    border: #194759 solid .5em;;
+    border: #194759 solid .3em;;
 }
 .inbox .bottom {
     display: flex;
 }
 .inbox .bottom .left{
-    border:lightblue solid ;
-    border-width: 0 .3em .3em 0;
     width:20%;
 }
 .inbox .bottom ul{
@@ -246,9 +255,15 @@ body{
     background-color:#46A394;
     
 }
+.inbox .bottom .vline{
+    border:lightblue solid ;
+    border-width: 0 .3em 0 0;
+    position: absolute;
+    height: 100vh;
+    left:19.2%;
+}
 .inbox .bottom .right{
-    width: 100%;
-    border-bottom:lightblue solid 5px;
+    width: 80%;
     padding: 1em;
 }
 .inbox .bottom .toolbar{
@@ -383,8 +398,6 @@ body{
 }
 .inbox .right-compose button{
     float: right;
-    font-size: 1.2em;
-    font-weight: bold;
     padding: .5em 2em;
     border-radius: 
 }
