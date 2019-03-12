@@ -44,7 +44,22 @@
         width:68%;
 
     }
-    
+    .inbox .top{
+        flex-flow: row wrap;
+    }
+    .inbox .top div:nth-child(2){
+        order: 3;
+        width: 100vw;
+    }
+    .inbox .top input{
+        width: 93%;
+        margin-top: 1em;
+    }
+    .inbox .search a img{
+        position: absolute;
+        top: -0.4em;
+        right: .4em;
+    }
     .right-group div >div {
         display: flex;
         flex-flow: column;
@@ -57,12 +72,6 @@
     *{
         font-size: 11.5px;
     }
-    .inbox .top{
-        display: flex;
-        flex-flow: column nowrap;
-    }
-    
-    
 }
 @media screen and (max-width:350px){
     *{
