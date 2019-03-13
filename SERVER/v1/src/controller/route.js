@@ -1,8 +1,13 @@
 import express from 'express';
+import swaggerUi from 'swagger-ui-express';
+import cors from 'cors';
 import RouteController from './RouteController';
+import swagger from '../../swagger.json';
 
 const app = express();
+app.use(cors());
 app.use(express.json());
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swagger));
 
 //  POST
 app.post('/api/v1/auth/signup', RouteController.signUp);

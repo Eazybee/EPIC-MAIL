@@ -16,7 +16,7 @@ class RouteController {
     if (RouteController.user) {
     //  Get auth header value
       const bearerHeader = req.headers.authorization;
-      if (bearerHeader) {
+      if (bearerHeader && RouteController.token === bearerHeader) {
         req.token = bearerHeader;
         next();
       } else {
@@ -87,6 +87,7 @@ class RouteController {
     if (user) {
       RouteController.user = user;
       jwt.sign({ user }, 'Andela42', (err, token) => {
+        RouteController.token = token;
         res.status(200).json({
           status: 200,
           data: [{
@@ -111,7 +112,8 @@ class RouteController {
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) {
-      RouteController.handleError(res, new Error(error.details[0].message), 400);
+      const errorMessage = new Error(error.details[0].message);
+      RouteController.handleError(res, errorMessage, 400);
     }
     try {
       const mail = RouteController.user.createMail({
@@ -310,6 +312,7 @@ class RouteController {
           error: 'Unauthorized',
         });
       } else {
+
         res.status(200).json({
           status: 200,
           data: RouteController.user.inbox(),
@@ -351,4 +354,5 @@ class RouteController {
   }
 }
 RouteController.user = null;
+RouteController.token = null;
 export default RouteController;

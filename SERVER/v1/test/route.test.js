@@ -32,7 +32,6 @@ describe('route', () => {
           .send(obj)
           .end((err, res) => {
             expect(res).to.have.status(201);
-            authToken = res.body.data[0].token;
             done();
           });
       });
@@ -72,6 +71,7 @@ describe('route', () => {
           .post('/api/v1/auth/login')
           .send(obj)
           .end((err, res) => {
+            authToken = res.body.data[0].token;
             expect(res).to.have.status(200);
             done();
           });

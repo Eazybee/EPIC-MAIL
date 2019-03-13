@@ -5,28 +5,15 @@ window.onload = function ready() {
       element.classList.remove('hidden');
     });
   };
-  const inputValidator = (element, message) => {
-    element.addListener('invalid', (e) => {
-      if (element.value.trim() === '') {
-        e.target.setCustomValidity(message);
-      } else if (element.validity.valueMissing) {
-        e.target.setCustomValidity(message);
-      } else if (!element.validity.valid) {
-        e.target.setCustomValidity(message);
-      }
 
-      element.addListener('input', (e2) => {
-        e2.target.setCustomValidity('');
-      });
-    }, false);
-  };
   if (document.querySelector('.signUpLink')) { // If on home page -> index.html
-    /** Home Page Traverse Code * */ document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
+    /** Home Page Traverse Code * */
+    document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
       element.onclick = () => {
         const formSelector = `.${String(element.classList).split('Link')[0]}`;
         document.querySelector(formSelector).classList.remove('hidden');
-        document.querySelectorAll(`.sign:not(${formSelector})`).forEach((element1) => {
-          element1.classList.add('hidden');
+        document.querySelectorAll(`.sign:not(${formSelector})`).forEach((ele) => {
+          ele.classList.add('hidden');
         });
       };
     });
@@ -63,10 +50,10 @@ window.onload = function ready() {
 
       if (email.value.trim() === '') {
         email.value = '';
-        // alertMessage("Enter email address");
+        alertMessage('Enter email address');
       } else if (password.value.trim() === '') {
         password.value = '';
-        // alertMessage("Enter Password");
+        alertMessage('Enter Password');
       } else {
         email.value = '';
         password.value = '';
@@ -91,10 +78,6 @@ window.onload = function ready() {
       }
       return false;
     };
-
-    inputValidator(document.querySelector("[name = 'loginEmail']"), 'Please Enter Your Email Here');
-    inputValidator(document.querySelector("[name = 'loginPassword']"), 'Please Enter Your Password Here');
-    inputValidator(document.querySelector("[name = 'loginPassword']"), 'Please Enter Your Password Here');
   }
   if (document.querySelector("a[href='#Inbox']")) { // if on dashboard page -> inbox.html
     // delete mail
@@ -117,7 +100,7 @@ window.onload = function ready() {
       document.querySelector('.right-compose').classList.remove('hidden');
     };
 
-    /** Left-panel-Menus  * */
+    /** Left-panel-Menus Event * */
     document.querySelector("a[href='#Inbox']").onclick = () => {
       document.querySelectorAll('.right:not(.right-inbox)').forEach((element) => {
         element.classList.add('hidden');
@@ -253,10 +236,8 @@ window.onload = function ready() {
       let mailTo = '';
       let mailToType = '';
       let mailID = '';
-      if (topic.trim() === '') {
-        alertMessage('Subject cannot be empty');
-      } else if (msgBody.trim() === '') {
-        alertMessage('Message body cannot be empty');
+      if (topic.trim() === '' && msgBody.trim() === '') {
+        alertMessage('Both subject and message body cannot be empty');
       } else {
         document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
           if (radioButton.checked && radioButton.value === 'Individual') {
@@ -270,17 +251,17 @@ window.onload = function ready() {
             mailToType = 'Group';
           }
         });
-        mailID = document.querySelector('.right-draft .inbox-view >div:last-child input') != null ? parseInt(document.querySelector('.right-draft .inbox-view >div:last-child input').value, 10) + 1 : 0;
+        mailID = document.querySelector('.right-draft .inbox-view >div:last-child input') !== null ? parseInt(document.querySelector('.right-draft .inbox-view >div:last-child input').value, 10) + 1 : 0;
 
         const divElement = document.createElement('div');
         divElement.innerHTML = `<input type="hidden" value="${mailToType}">`
-                                    + `<input type="checkbox" value="${mailID}">`
-                                    + `<p>${mailTo}</p>`
-                                    + '<div>'
-                                        + `<p class="subject">${topic}</p>`
-                                        + `<p class="msg">s${msgBody}</p>`
-                                    + '</div>'
-                                    + `<label>${new Date().getDate()}-${new Date().getMonth()}</label>`;
+                                  + `<input type="checkbox" value="${mailID}">`
+                                  + `<p>${mailTo}</p>`
+                                  + '<div>'
+                                      + `<p class="subject">${topic}</p>`
+                                      + `<p class="msg">s${msgBody}</p>`
+                                  + '</div>'
+                                  + `<label>${new Date().getDate()}-${new Date().getMonth()}</label>`;
         divElement.setAttribute('class', `s${mailID}`);
         document.querySelector('.right-draft .inbox-view').appendChild(divElement);
         alertMessage('Message saved as draft succesfully');
@@ -328,14 +309,14 @@ window.onload = function ready() {
       showCompose();
       // alertMessage(mailBody);
     };
-    //  DELEGATION
-    document.addListener('click', (e) => {
+    // EVENT DELEGATION
+    document.addEventListener('click', (e) => {
       if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div >*:not(input)')).includes(e.target)) {
         const mailDiv = e.target.parentNode;
         sendDraftMessage(mailDiv);
       }
     });
-    document.addListener('click', (e) => {
+    document.addEventListener('click', (e) => {
       if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div div p')).includes(e.target)) {
         const mailDiv = e.target.parentNode.parentNode;
         sendDraftMessage(mailDiv);
@@ -387,7 +368,7 @@ window.onload = function ready() {
     document.querySelector('.right-group #createGroup').onsubmit = () => {
       const groupName = document.querySelector(".right-group input[type='text']");
       if (groupName.value.trim() !== '') {
-        const groupMember = document.querySelector('.right-group ul li') != null;
+        const groupMember = document.querySelector('.right-group ul li') !== null;
         if (groupMember) {
           document.querySelector('.right-group ul ').innerHTML = '';
           const li = document.createElement('li');
@@ -405,7 +386,7 @@ window.onload = function ready() {
     };
   }
 
-  /** ALert box  handler* */
+  /** ALert box Event handler* */
   document.querySelector('.alert .title-bar a').onclick = () => {
     document.querySelectorAll('.modal, .alert').forEach((element) => {
       element.classList.add('hidden');
