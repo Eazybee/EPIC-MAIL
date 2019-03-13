@@ -1,8 +1,11 @@
 import Joi from 'joi';
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 import Message from '../model/Message';
 import users from '../model/Database';
 import User from '../model/User';
+
+dotenv.config();
 
 class RouteController {
   static handleError(res, err, status = 400) {
@@ -63,7 +66,7 @@ class RouteController {
     const newUser = new User(req.body.email,
       req.body.firstName, req.body.lastName, req.body.password);
     users.push(newUser);
-    return jwt.sign({ newUser }, 'Andela42', (err, token) => res.status(201).json({
+    return jwt.sign({ newUser }, process.env.JWT_SECRET, (err, token) => res.status(201).json({
       status: 201,
       data: [{
         token,
@@ -86,7 +89,7 @@ class RouteController {
 
     if (user) {
       RouteController.user = user;
-      jwt.sign({ user }, 'Andela42', (err, token) => {
+      jwt.sign({ user }, process.env.JWT_SECRET, (err, token) => {
         RouteController.token = token;
         res.status(200).json({
           status: 200,
