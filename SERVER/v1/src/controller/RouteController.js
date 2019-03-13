@@ -181,7 +181,7 @@ class RouteController {
   }
 
   static getSentMail(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -197,7 +197,7 @@ class RouteController {
   }
 
   static deleteMail(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -229,7 +229,7 @@ class RouteController {
   }
 
   static saveDraft(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -242,7 +242,7 @@ class RouteController {
   }
 
   static sendDraft(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -255,7 +255,7 @@ class RouteController {
   }
 
   static message(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -285,7 +285,7 @@ class RouteController {
   }
 
   static getMailId(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -308,7 +308,7 @@ class RouteController {
   }
 
   static getInbox(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -325,7 +325,7 @@ class RouteController {
   }
 
   static getReadInbox(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
@@ -341,7 +341,7 @@ class RouteController {
   }
 
   static getUnreadInbox(req, res) {
-    jwt.verify(req.token, 'Andela42', (err) => {
+    jwt.verify(req.token, process.env.JWT_SECRET, (err) => {
       if (err) {
         res.status(401).json({
           status: 401,
