@@ -50,16 +50,6 @@ class User {
   }
 
   createMail(mail) {
-    const schema = Joi.object().keys({
-      subject: Joi.string().required(),
-      message: Joi.string().required(),
-      receiverId: Joi.string(),
-    });
-    const { error } = Joi.validate(mail, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
-
     const obj = mail;
     obj.senderId = this.id;
     return new Message(obj);
