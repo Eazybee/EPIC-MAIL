@@ -27,11 +27,6 @@ class Message {
   }
 
   setSubject(subject) {
-    const schema = Joi.string().required();
-    const { error } = Joi.validate(subject, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.subject = subject;
   }
 
@@ -40,11 +35,6 @@ class Message {
   }
 
   setMessage(message) {
-    const schema = Joi.string().required();
-    const { error } = Joi.validate(message, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.message = message;
   }
 
@@ -53,11 +43,6 @@ class Message {
   }
 
   setStatus(status) {
-    const schema = Joi.string().required();
-    const { error } = Joi.validate(status, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.status = status;
   }
 
@@ -79,11 +64,6 @@ class Message {
   }
 
   setSenderId(senderId) {
-    const schema = Joi.number().required();
-    const { error } = Joi.validate(senderId, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.senderId = senderId;
   }
 
@@ -92,11 +72,6 @@ class Message {
   }
 
   setReceiverId(receiverId) {
-    const schema = Joi.number().required();
-    const { error } = Joi.validate(receiverId, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.receiverId = receiverId;
   }
 
@@ -105,13 +80,8 @@ class Message {
   }
 
   static getMails(mailId) {
-    const schema = Joi.number().not(0);
-    const { error } = Joi.validate(mailId, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     if (mailId) {
-      if (!Message.messages[mailId]) {
+      if (mailId === 0 || !Message.messages[mailId]) {
         throw new Error('Mail does not exist');
       }
       return [Message.messages[mailId]];
