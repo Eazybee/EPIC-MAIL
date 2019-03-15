@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 
+dotenv.config();
 class Utility {
   static getToken(payload) {
-    dotenv.config();
     const token = jwt.sign({ payload }, process.env.JWT_PRIVATE_SECRET);
     return token;
   }

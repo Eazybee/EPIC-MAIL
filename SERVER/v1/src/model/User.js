@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import Message from './Message';
+import db from './Db';
 
 class User {
   constructor(email, firstName, lastName, password) {
@@ -11,6 +12,12 @@ class User {
     this.password = password;
     this.admin = false;
     User.users[User.counter] = this;
+    const query = {
+      text: 'INSERT INTO Users(first_name, last_name, email, password, status) VALUES($1, $2, $3, $4, $5)',
+      values: [this.firstName, this.lastName, this.email, this.password, 'user'],
+    };
+
+    db.insert(query).then(res => res.rowCount);
   }
 
   getId() {
