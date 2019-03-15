@@ -1,427 +1,390 @@
-window.onload= function ready() {
-    if( document.querySelector(".signUpLink")) { //If on home page -> index.html
-        
-      /** Home Page Traverse Code **/ document.querySelectorAll(".resetLink, .signUpLink, .signInLink").forEach((element) => {
-            element.onclick = (event) => {
-                let formSelector ="." + String(element.classList).split("Link")[0];
-                document.querySelector(formSelector).classList.remove("hidden");
-                document.querySelectorAll(".sign:not("+formSelector+")").forEach((element) => {
-                    element.classList.add("hidden")
-                })
-            }
+window.onload = function ready() {
+  const alertMessage = (message) => {
+    document.querySelector('.alert p').innerHTML = message;
+    document.querySelectorAll('.modal, .alert').forEach((element) => {
+      element.classList.remove('hidden');
+    });
+  };
+  const loadGroup = () => {
+    const selectGroup = document.querySelector('.inbox .right-compose .address select');
+    selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
+    document.querySelectorAll('.right-group .groups div a').forEach((element) => {
+      const name = element.innerHTML;
+      const option = document.createElement('option'); // create an option element(tag)
+      const groupName = document.createTextNode(name); // create a textnode
+      option.appendChild(groupName); // add text to option tag created
+      option.setAttribute('value', name); // set value = name
+      selectGroup.appendChild(option); // add option to Select element
+    });
+  };
+  if (document.querySelector('.slider')) {
+    document.querySelector('.log-in').onclick = () => {
+      window.location.href = './pages/loginPage.html';
+    };
+  } else {
+    /** ALert box Event handler* */
+    document.querySelector('.alert .title-bar a').onclick = () => {
+      document.querySelectorAll('.modal, .alert').forEach((element) => {
+        element.classList.add('hidden');
+      });
+    };
+  }
+  if (document.querySelector('.signUpLink')) { // If on home page -> loginPage.html
+    /** Home Page Traverse Code * */
+    document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
+      const elem = element;
+      elem.onclick = () => {
+        const formSelector = `.${String(element.classList).split('Link')[0]}`;
+        document.querySelector(formSelector).classList.remove('hidden');
+        document.querySelectorAll(`.sign:not(${formSelector})`).forEach((ele) => {
+          ele.classList.add('hidden');
         });
-        
-        //RESET FORM
-        document.querySelector("#resetForm").onsubmit = (event) => {
-            let email = document.querySelector("#resetForm input[type='email']");
-            let answer = document.querySelector("#resetForm input[type='text']");
-            let password = document.querySelector("#resetForm input[type='password']");
-            if(email.value.trim() =="") {
-                alertMessage("Please enter your Email address");
-            }else{
-                
-                document.querySelector("#resetForm .answer").classList.remove("hidden");
-                document.querySelector("#resetForm .question").classList.remove("hidden");
-                
-                if(answer.value.trim() != "") {
-                    document.querySelector("#resetForm .password").classList.remove("hidden");
-                    if(password.value.trim() != "") {
-                        alertMessage("Password Reset Succesfully ")
-                        email.value="";
-                        answer.value="";
-                        password.value="";
-                        setTimeout(() =>{ location.reload()},3000);
-                    }
-                }
-                
-            }
-            return false;
+      };
+    });
+
+    // RESET FORM
+    document.querySelector('#resetForm').onsubmit = () => {
+      const email = document.querySelector("#resetForm input[type='email']");
+      const answer = document.querySelector("#resetForm input[type='text']");
+      const password = document.querySelector("#resetForm input[type='password']");
+      if (email.value.trim() === '') {
+        alertMessage('Please enter your Email address');
+      } else {
+        document.querySelector('#resetForm .answer').classList.remove('hidden');
+        document.querySelector('#resetForm .question').classList.remove('hidden');
+
+        if (answer.value.trim() !== '') {
+          document.querySelector('#resetForm .password').classList.remove('hidden');
+          if (password.value.trim() !== '') {
+            alertMessage('Password Reset Succesfully ');
+            email.value = '';
+            answer.value = '';
+            password.value = '';
+            setTimeout(() => { window.location.reload(); }, 3000);
+          }
         }
-        
-        //SIGN-IN FORM
-        document.querySelector("#signInForm").onsubmit = (event) => { 
-            let email = document.querySelector("#signInForm input[type='email']");
-            let password = document.querySelector("#signInForm input[type='password']");
-            
-            if(email.value.trim() == "") {
-                email.value = "";
-                alertMessage("Enter email address");
-            }
-            else if(password.value.trim() == "") {
-                password.value = "";
-                alertMessage("Enter Password");
-            }
-            else {
-                email.value = "";
-                password.value = "";
-                alertMessage("Login Successful");
-                setTimeout(() =>{ 
-                    location.href="./pages/inbox.html";
-                },1000);
-            }
-            return false;    
-        }
-        
-        //SIGNUP FORM
-        document.querySelector("#signUpForm").onsubmit = (event) => {
-            let password = document.querySelector("#signUpForm #password");
-            let rePassword = document.querySelector("#signUpForm #rePassword");
-            if(password.value != rePassword.value){
-                alertMessage("Password do no match");
-            }
-            else{
-                document.querySelector("#signUpForm")
-                alertMessage("Registration Sucessful!");
-                setTimeout(() =>{ location.reload()},2000);
-            }
-            return false;
-        }
-        
-    }
-    if(document.querySelector("a[href='#Inbox']")) { //if on dashboard page -> inbox.html
-        
-        
-        //delete mail
-        const deleteMail = (mailID, respondMessage="") => {
-            document.querySelector(mailID).classList.add("hidden");
-            if(respondMessage != "") { 
-                alertMessage(respondMessage);
-            }
-        }
-        
-        //Show Compose Panel
-        const showCompose = () => {
-            document.querySelectorAll(".right:not(.right-compose)").forEach((element) => {
-                element.classList.add("hidden");
-            });
-            document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Compose'])").forEach((element) => {
-                element.classList.remove('active');
-            });
-            document.querySelector("a[href='#Compose']").classList.add('active');
-            document.querySelector(".right-compose").classList.remove("hidden");
-        }
-        
-        /** Left-panel-Menus Event **/
-        document.querySelector("a[href='#Inbox']").onclick = (event) => {
-            
-            document.querySelectorAll(".right:not(.right-inbox)").forEach((element) => {
-                element.classList.add("hidden");
-            });
-            document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Inbox'])").forEach((element) => {
-                element.classList.remove('active');
-            });
-            document.querySelector("a[href='#Inbox']").classList.add('active');
-            document.querySelector(".right-inbox").classList.remove("hidden");
-        }
-        
-        document.querySelector("a[href='#Compose']").onclick = (event) => {
-            showCompose();
-        }
-        document.querySelector("a[href='#Sent']").onclick = (event) => {
-            document.querySelectorAll(".right:not(.right-sent)").forEach((element) => {
-                element.classList.add("hidden");
-            });
-            document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Sent'])").forEach((element) => {
-                element.classList.remove('active');
-            });
-            document.querySelector("a[href='#Sent']").classList.add('active');
-            document.querySelector(".right-sent").classList.remove("hidden");
-        }
-        document.querySelector("a[href='#Draft']").onclick = (event) => {
-            document.querySelectorAll(".right:not(.right-draft)").forEach((element) => {
-                element.classList.add("hidden");
-            });
-            document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Draft'])").forEach((element) => {
-                element.classList.remove('active');
-            });
-            document.querySelector("a[href='#Draft']").classList.add('active');
-            document.querySelector(".right-draft").classList.remove("hidden");
-        }
-        document.querySelector("a[href='#Group']").onclick = (event) => {
-            if(document.querySelector(".inbox > input[type='hidden']").value == "Admin") {
-                document.querySelectorAll(".right:not(.right-group)").forEach((element) => {
-                    element.classList.add("hidden");
-                });
-                document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
-                    element.classList.remove('active');
-                });
-                document.querySelector("a[href='#Group']").classList.add('active');
-                document.querySelector(".right-group").classList.remove("hidden");
-            }else{
-                alertMessage("Only an Admin is allowed to create group");
-            }
-        }
-        
-        //veiw Message
-        document.querySelectorAll(".right:not(.right-draft) .inbox-view >div >*:not(input)").forEach((element) => {
-            element.onclick = (event) => {
-                document.querySelector(".right-inbox ").classList.add("hidden");
-                document.querySelector(".right-compose").classList.add("hidden");
-                document.querySelector(".right-sent").classList.add("hidden");
-                document.querySelector(".view-message").classList.remove("hidden");
-            }
+      }
+      return false;
+    };
+
+    // SIGN-IN FORM
+    document.querySelector('#signInForm').onsubmit = () => {
+      const email = document.querySelector("#signInForm input[type='email']");
+      const password = document.querySelector("#signInForm input[type='password']");
+
+      if (email.value.trim() === '') {
+        email.value = '';
+        alertMessage('Enter email address');
+      } else if (password.value.trim() === '') {
+        password.value = '';
+        alertMessage('Enter Password');
+      } else {
+        email.value = '';
+        password.value = '';
+        alertMessage('Login Successful');
+        setTimeout(() => {
+          window.location.href = './inbox.html';
+        }, 1000);
+      }
+      return false;
+    };
+
+    // SIGNUP FORM
+    document.querySelector('#signUpForm').onsubmit = () => {
+      const password = document.querySelector('#signUpForm #password');
+      const rePassword = document.querySelector('#signUpForm #rePassword');
+      if (password.value !== rePassword.value) {
+        alertMessage('Password do no match');
+      } else {
+        document.querySelector('#signUpForm');
+        alertMessage('Registration Sucessful!');
+        setTimeout(() => { window.location.reload(); }, 2000);
+      }
+      return false;
+    };
+  }
+  if (document.querySelector("a[href='#Inbox']")) { // if on dashboard page -> inbox.html
+    // delete mail
+    const deleteMail = (mailID, respondMessage = '') => {
+      document.querySelector(mailID).classList.add('hidden');
+      if (respondMessage !== '') {
+        alertMessage(respondMessage);
+      }
+    };
+
+    // Show Compose Panel
+    const showCompose = () => {
+      document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
+        element.classList.add('hidden');
+      });
+      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Compose'])").forEach((element) => {
+        element.classList.remove('active');
+      });
+      document.querySelector("a[href='#Compose']").classList.add('active');
+      document.querySelector('.right-compose').classList.remove('hidden');
+    };
+
+    /** Left-panel-Menus Event * */
+    document.querySelector("a[href='#Inbox']").onclick = () => {
+      document.querySelectorAll('.right > div:not(.right-inbox)').forEach((element) => {
+        element.classList.add('hidden');
+      });
+      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Inbox'])").forEach((element) => {
+        element.classList.remove('active');
+      });
+      document.querySelector("a[href='#Inbox']").classList.add('active');
+      document.querySelector('.right-inbox').classList.remove('hidden');
+    };
+
+    document.querySelector("a[href='#Compose']").onclick = () => {
+      showCompose();
+      loadGroup();
+    };
+    document.querySelector("a[href='#Sent']").onclick = () => {
+      document.querySelectorAll('.right  > div:not(.right-sent)').forEach((element) => {
+        element.classList.add('hidden');
+      });
+      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Sent'])").forEach((element) => {
+        element.classList.remove('active');
+      });
+      document.querySelector("a[href='#Sent']").classList.add('active');
+      document.querySelector('.right-sent').classList.remove('hidden');
+    };
+    document.querySelector("a[href='#Draft']").onclick = () => {
+      document.querySelectorAll('.right  > div:not(.right-draft)').forEach((element) => {
+        element.classList.add('hidden');
+      });
+      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Draft'])").forEach((element) => {
+        element.classList.remove('active');
+      });
+      document.querySelector("a[href='#Draft']").classList.add('active');
+      document.querySelector('.right-draft').classList.remove('hidden');
+    };
+    document.querySelector("a[href='#Group']").onclick = () => {
+      if (document.querySelector(".inbox > input[type='hidden']").value === 'Admin') {
+        document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
+          element.classList.add('hidden');
         });
-        
-        /** Log Out **/
-        document.querySelector(".inbox .top div button").onclick = (event) => {
-            alertMessage("See you soon buddy :-)");
-            setTimeout(() => {
-                location.assign("../index.html");
-            }, 1500);
-        }  
-          
-        /** Send mail **/
-        document.querySelector("[name='sendMail']").onsubmit = (event) => {
-            let sendButton = document.querySelector("[name='sendMail'] button");
-            sendButton.innerHTML = 'SENDING';
-            sendButton.classList.add("sending");
-            
-            setTimeout(() => {
-                sendButton.innerHTML = "SENT";
-                sendButton.classList.add("sent");
-                alertMessage("Message Sent Successffuly");
-            }, 2000);
-            setTimeout(() => {
-                
-                sendButton.innerHTML = "SEND"
-                sendButton.classList.remove("sending");
-                sendButton.classList.remove("sent");
-                document.querySelector("[name='sendMail']").reset();
-            }, 3000);
-            
-            return false;
+        document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
+          element.classList.remove('active');
+        });
+        document.querySelector("a[href='#Group']").classList.add('active');
+        document.querySelector('.right-group').classList.remove('hidden');
+      } else {
+        alertMessage('Only an Admin is allowed to create group');
+      }
+    };
+
+    // veiw Message
+    document.querySelectorAll('.right  > div:not(.right-draft) .inbox-view >div >*:not(input)').forEach((element) => {
+      const elem = element;
+      elem.onclick = () => {
+        document.querySelector('.right-inbox ').classList.add('hidden');
+        document.querySelector('.right-compose').classList.add('hidden');
+        document.querySelector('.right-sent').classList.add('hidden');
+        document.querySelector('.view-message').classList.remove('hidden');
+      };
+    });
+
+    /** Log Out * */
+    document.querySelector('.inbox .top div button').onclick = () => {
+      alertMessage('See you soon buddy :-)');
+      setTimeout(() => {
+        window.location.assign('./loginPage.html');
+      }, 1500);
+    };
+
+    /** Send mail * */
+    document.querySelector("[name='sendMail']").onsubmit = () => {
+      const sendButton = document.querySelector("[name='sendMail'] button");
+      sendButton.innerHTML = 'SENDING';
+      sendButton.classList.add('sending');
+
+      setTimeout(() => {
+        sendButton.innerHTML = 'SENT';
+        sendButton.classList.add('sent');
+        alertMessage('Message Sent Successffuly');
+      }, 2000);
+      setTimeout(() => {
+        sendButton.innerHTML = 'SEND';
+        sendButton.classList.remove('sending');
+        sendButton.classList.remove('sent');
+        document.querySelector("[name='sendMail']").reset();
+      }, 3000);
+
+      return false;
+    };
+
+    document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
+      const radioElement = radioButton;
+      radioElement.onchange = () => {
+        const selectedRadioValue = radioButton.value;
+        const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+        const selectGroup = document.querySelector('.inbox .right-compose .address select');
+        if (selectedRadioValue === 'Individual') {
+          inputEmail.classList.remove('hidden');
+          inputEmail.required = true;
+          selectGroup.classList.add('hidden');
+        } else if (selectedRadioValue === 'Group') {
+          inputEmail.classList.add('hidden');
+          inputEmail.required = false;
+          selectGroup.classList.remove('hidden');
+          loadGroup();
         }
-        
+      };
+    });
+
+    /** Retract a sent mail * */
+    document.querySelector('#retract').onclick = () => {
+      document.querySelectorAll('.inbox .bottom .right-sent .inbox-view >div >input').forEach((element) => {
+        if (element.checked) {
+          const mailID = `.right-sent .inbox-view  .s${element.value}`;
+          alertMessage('Mail(s) Retracted Successfully');
+          document.querySelector(mailID).classList.add('hidden');
+        }
+      });
+    };
+
+    /** Save mail as draft * */
+    document.querySelector('#saveMail').onclick = () => {
+      const topic = document.querySelector('.inbox .right-compose .message input').value;
+      const msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
+      let mailTo = '';
+      let mailToType = '';
+      let mailID = '';
+      if (topic.trim() === '') {
+        alertMessage('Subject cannot be empty');
+      } else if (msgBody.trim() === '') {
+        alertMessage('Message body cannot be empty');
+      } else {
         document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-            radioButton.onchange = (event) => {
-                let selectedRadioValue = radioButton.value;
-                let inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
-                let selectGroup = document.querySelector(".inbox .right-compose .address select");
-                if(selectedRadioValue == "Individual") {
-                    inputEmail.classList.remove("hidden");
-                    inputEmail.required=true;
-                    selectGroup.classList.add("hidden");
-                    
-                }else if(selectedRadioValue == "Group") {
-                    inputEmail.classList.add("hidden");
-                    inputEmail.required=false;
-                    selectGroup.classList.remove("hidden");
-                    
-                    (() => {
-                        selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
-                        document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
-                            
-                            let name =element.innerHTML.split("»")[1];
-                            let option = document.createElement('option'); //create an option element(tag)
-                            let groupName = document.createTextNode(name); //create a textnode 
-                            option.appendChild(groupName); 			//add text to option tag created
-                            option.setAttribute("value", name); //set value = name
-                            selectGroup.appendChild(option);	//add option to Select element
-                        })
-                        
-                    })();
-                }
-            }
+          if (radioButton.checked && radioButton.value === 'Individual') {
+            mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
+            mailToType = 'Individual';
+          } else if (radioButton.checked && radioButton.value === 'Group') {
+            const selectElement = document.querySelector('.inbox .right-compose .address select');
+            const { selectedIndex } = selectElement; // geting index of selected option
+            const { options } = selectElement; // getting collections of all options as an array
+            mailTo = options[selectedIndex].value; // returning the value of selected option
+            mailToType = 'Group';
+          }
         });
-        
-        /** Retract a sent mail **/
-        document.querySelector("#retract").onclick = (event) => { 
-            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
-                
-                if(element.checked) {
-                    
-                   let mailID =".right-sent .inbox-view  .s" + element.value; 
-                    alertMessage("Mail(s) Retracted Successfully");
-                    document.querySelector(mailID).classList.add("hidden");
-                    
-                   
-                }
-            });
-        }
-        
-        /** Save mail as draft **/
-        document.querySelector("#saveMail").onclick = (event) => {
-            let topic = document.querySelector('.inbox .right-compose .message input').value;
-            let msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
-            let mailTo ="" ;
-            let mailToType="";
-            let mailID="";
-            if(topic.trim() == "" && msgBody.trim() == "") {
-                alertMessage("Both subject and message body cannot be empty");
-            }else{
-                document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-                   if(radioButton.checked && radioButton.value == "Individual" ) {
-                       mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
-                       mailToType = "Individual";
-                   }
-                    else if(radioButton.checked && radioButton.value == "Group" ) {
-                        let selectElement = document.querySelector(".inbox .right-compose .address select");
-                        let selectedIndex = selectElement.selectedIndex; //geting index of selected option
-                        let options = selectElement.options; //getting collections of all options as an array
-                        mailTo = options[selectedIndex].value; //returning the value of selected option
-                        mailToType = "Group";
-                   }
-                    
-                });
-                mailID = document.querySelector(".right-draft .inbox-view >div:last-child input") != null ?parseInt(document.querySelector(".right-draft .inbox-view >div:last-child input").value) +1 : 0;
-        
-                let divElement = document.createElement('div');
-                divElement.innerHTML ='<input type="hidden" value="'+mailToType+'">'+
-                                    '<input type="checkbox" value="'+mailID+'">'+
-                                    '<p>'+mailTo+'</p>'+
-                                    '<div>'+
-                                        '<p class="subject">'+topic+'</p>'+
-                                        '<p class="msg">s'+msgBody+'</p>'+
-                                    '</div>'+
-                                    '<label>'+new Date().getDate()+'-'+new Date().getMonth()+'</label>';
-                divElement.setAttribute("class","s"+mailID);            
-                document.querySelector('.right-draft .inbox-view').appendChild(divElement);
-                alertMessage("Message saved as draft succesfully");
-                document.querySelector("[name='sendMail']").reset();
-            }
-            
-        }
+        mailID = document.querySelector('.right-draft .inbox-view >div:last-child input') !== null ? parseInt(document.querySelector('.right-draft .inbox-view >div:last-child input').value, 10) + 1 : 0;
 
-        /**Send Draft Message **/
-        const sendDraftMessage = (mailDiv) => {
-            let mailID = ".right-draft .inbox-view .s" + mailDiv.querySelector("input[type='checkbox']").value;
-            let mailToType  = mailDiv.querySelector("input[type='hidden']").value;
-            let mailTo = mailDiv.querySelector("p").innerHTML;
-            let mailSubject = mailDiv.querySelector("div .subject").innerHTML;
-            let mailBody = mailDiv.querySelector("div .msg").innerHTML;
-            
-            document.querySelector(".right-compose .address input[type='radio'][value='"+mailToType+"']").checked = true;
-            if(mailToType == "Individual") {
-                document.querySelector(".right-compose .address input[type='email']").value = mailTo;
-                document.querySelector(".right-compose .address input[type='email']").classList.remove("hidden");
-                document.querySelector(".right-compose .address input[type='email']").required=true;
-                document.querySelector(".right-compose .address select").classList.add("hidden");
-            }
-            else if(mailToType == "Group") {
-                let selectGroup = document.querySelector(".right-compose .address select");
-               
-                document.querySelector(".right-compose .address input[type='email']").classList.add("hidden");
-                document.querySelector(".right-compose .address input[type='email']").required=false;
-                selectGroup.classList.remove("hidden");
-                
-                (() => {
-                        selectGroup.innerHTML="<option disabled selected value=''>Select Group</option>";
-                        document.querySelectorAll(".inbox .bottom li.groups  li a").forEach((element) => {
-                            
-                            let name =element.innerHTML.split("»")[1];
-                            let option = document.createElement('option'); //create an option element(tag)
-                            let groupName = document.createTextNode(name); //create a textnode 
-                            option.appendChild(groupName); 			//add text to option tag created
-                            option.setAttribute("value", name); //set value = name
-                            selectGroup.appendChild(option);	//add option to Select element
-                        })
-                        
-                    })();
-                 selectGroup.value = mailTo;
-            }
-            document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
-            document.querySelector(".right-compose .message textarea").value = mailBody;
-            deleteMail(mailID);
-            showCompose();
-            //alertMessage(mailBody);   
+        const divElement = document.createElement('div');
+        divElement.innerHTML = `<input type="hidden" value="${mailToType}">`
+                                  + `<input type="checkbox" value="${mailID}">`
+                                  + `<p>${mailTo}</p>`
+                                  + '<div>'
+                                      + `<p class="subject">${topic}</p>`
+                                      + `<p class="msg">s${msgBody}</p>`
+                                  + '</div>'
+                                  + `<label>${new Date().getDate()}-${new Date().getMonth()}</label>`;
+        divElement.setAttribute('class', `s${mailID}`);
+        document.querySelector('.right-draft .inbox-view').appendChild(divElement);
+        alertMessage('Message saved as draft succesfully');
+        document.querySelector("[name='sendMail']").reset();
+      }
+    };
+
+    /** Send Draft Message * */
+    const sendDraftMessage = (mailDiv) => {
+      const mailID = `.right-draft .inbox-view .s${mailDiv.querySelector("input[type='checkbox']").value}`;
+      const mailToType = mailDiv.querySelector("input[type='hidden']").value;
+      const mailTo = mailDiv.querySelector('p').innerHTML;
+      const mailSubject = mailDiv.querySelector('div .subject').innerHTML;
+      const mailBody = mailDiv.querySelector('div .msg').innerHTML;
+
+      document.querySelector(`.right-compose .address input[type='radio'][value='${mailToType}']`).checked = true;
+      if (mailToType === 'Individual') {
+        document.querySelector(".right-compose .address input[type='email']").value = mailTo;
+        document.querySelector(".right-compose .address input[type='email']").classList.remove('hidden');
+        document.querySelector(".right-compose .address input[type='email']").required = true;
+        document.querySelector('.right-compose .address select').classList.add('hidden');
+      } else if (mailToType === 'Group') {
+        const selectGroup = document.querySelector('.right-compose .address select');
+
+        document.querySelector(".right-compose .address input[type='email']").classList.add('hidden');
+        document.querySelector(".right-compose .address input[type='email']").required = false;
+        selectGroup.classList.remove('hidden');
+
+        loadGroup();
+        selectGroup.value = mailTo;
+      }
+      document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
+      document.querySelector('.right-compose .message textarea').value = mailBody;
+      deleteMail(mailID);
+      showCompose();
+      // alertMessage(mailBody);
+    };
+    // EVENT DELEGATION
+    document.addEventListener('click', (e) => {
+      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div >*:not(input)')).includes(e.target)) {
+        const mailDiv = e.target.parentNode;
+        sendDraftMessage(mailDiv);
+      }
+    });
+    document.addEventListener('click', (e) => {
+      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.parentNode;
+        sendDraftMessage(mailDiv);
+      }
+    });
+
+    /** Delete draft * */
+    document.querySelector('.right-draft .toolbar button.deleteButton').onclick = () => {
+      document.querySelectorAll('.inbox .bottom .right-draft .inbox-view >div >input').forEach((element) => {
+        if (element.checked) {
+          const mailID = `.right-draft .inbox-view .s${element.value}`;
+          deleteMail(mailID, 'Draft Mail(s) Deleted Successfully');
         }
-        // EVENT DELEGATION 
-        document.addEventListener('click',function(e) {
-            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div >*:not(input)")).includes(e.target)) {
-                let mailDiv = e.target.parentNode;
-                sendDraftMessage(mailDiv);
-            }
-        });
-        document.addEventListener('click',function(e) {
-            if(e.target  && Array.from(document.querySelectorAll(".right-draft .inbox-view >div div p")).includes(e.target)) {
-                let mailDiv = e.target.parentNode.parentNode;
-                sendDraftMessage(mailDiv);
-            }
-        });
-        
-        /** Delete draft **/
-        document.querySelector(".right-draft .toolbar button.deleteButton").onclick = (event) => {
-            document.querySelectorAll(".inbox .bottom .right-draft .inbox-view >div >input").forEach((element) => {
-                
-                if(element.checked) {       
-                    let mailID =".right-draft .inbox-view .s" + element.value; 
-                    deleteMail(mailID,"Draft Mail(s) Deleted Successfully")
-                }
-            });
+      });
+    };
+
+    /** Delete inbox * */
+    document.querySelector('.right-inbox .toolbar button.deleteButton').onclick = () => {
+      document.querySelectorAll('.inbox .bottom .right-inbox .inbox-view >div >input').forEach((element) => {
+        if (element.checked) {
+          const mailID = `.right-inbox .inbox-view .s${element.value}`;
+          deleteMail(mailID, 'Mail(s) Deleted Successfully');
         }
-        
-        /** Delete inbox **/
-        document.querySelector(".right-inbox .toolbar button.deleteButton").onclick = (event) => {
-            document.querySelectorAll(".inbox .bottom .right-inbox .inbox-view >div >input").forEach((element) => {
-                
-                if(element.checked) {       
-                    let mailID =".right-inbox .inbox-view .s" + element.value; 
-                    deleteMail(mailID,"Mail(s) Deleted Successfully")
-                }
-            });
+      });
+    };
+
+    /** Delete sent mail * */
+    document.querySelector('.right-sent .toolbar button.deleteButton').onclick = () => {
+      document.querySelectorAll('.inbox .bottom .right-sent .inbox-view >div >input').forEach((element) => {
+        if (element.checked) {
+          const mailID = `.right-sent .inbox-view  .s${element.value}`;
+          alertMessage('Mail(s) Deleted Successfully');
+          document.querySelector(mailID).classList.add('hidden');
         }
-        
-        /** Delete sent mail **/
-        document.querySelector(".right-sent .toolbar button.deleteButton").onclick = (event) => {
-            document.querySelectorAll(".inbox .bottom .right-sent .inbox-view >div >input").forEach((element) => {
-                
-                if(element.checked) {
-                    
-                   let mailID =".right-sent .inbox-view  .s" + element.value; 
-                    alertMessage("Mail(s) Deleted Successfully");
-                    document.querySelector(mailID).classList.add("hidden");
-                    
-                   
-                }
-            });
+      });
+    };
+
+    /** Delete Group* */
+    document.querySelector('.right-group .groups .btn button').onclick = () => {
+      document.querySelectorAll('.right-group .groups input').forEach((element) => {
+        if (element.checked) {
+          alertMessage('Group(s) Deleted Successfully');
+          element.parentNode.classList.add('hidden');
         }
-        
-        /** CREATE GROUP**/
-        document.querySelector(".right-group #addMember").onsubmit = (event) => {
-            let email = document.querySelector(".right-group input[type='email']");
-            if( email.value.trim() != "") {
-                let list = document.createElement("li");
-                list.innerHTML= email.value;
-                document.querySelector(".right-group ul").appendChild(list);
-                email.value="";
-            }
-            return false;
-        }
-        document.querySelector(".right-group #createGroup").onsubmit = (event) => {
-            let groupName = document.querySelector(".right-group input[type='text']");
-            if( groupName.value.trim() != "") {
-                let groupMember = document.querySelector(".right-group ul li") != null ? true : false ;
-                if(groupMember) {
-                    
-                    document.querySelector(".right-group ul ").innerHTML="";
-                    let li = document.createElement("li");
-                    li.innerHTML="<a href='#'>&raquo;"+groupName.value+"</a>"
-                    document.querySelector(".inbox .bottom li.groups ul").appendChild(li);
-                    groupName.value="";
-                    alertMessage('Group Created Successfully!')
-                }
-                else{
-                    alertMessage("Cannot create an empty group!")
-                }
-            }else{
-                alertMessage("Group Name cannot be empty")
-            }
-            return false;
-        }
-    }
-    
-    /** ALert box Event handler**/
-    document.querySelector(".alert .title-bar a").onclick = (event) => {
-            
-        document.querySelectorAll(".modal, .alert").forEach((element) => {
-            element.classList.add("hidden");
-        });
-    }
-    function alertMessage(message) {
-        document.querySelector(".alert p").innerHTML=message;
-        document.querySelectorAll(".modal, .alert").forEach((element) => {
-            element.classList.remove("hidden");
-        });
-    }
+      });
+    };
+
+    /** CREATE GROUP* */
+    document.querySelector('.right-group #createGroup').onsubmit = () => {
+      const groupName = document.querySelector(".right-group input[type='text']");
+      if (groupName.value.trim() !== '') {
+        const div = document.createElement('div');
+        div.innerHTML = `<input type="checkbox"><a href="#">${groupName.value.trim()}</a>`;
+        document.querySelector('.right-group .groups').appendChild(div);
+        groupName.value = '';
+        alertMessage('Group Created Successfully!');
+      } else {
+        alertMessage('Group name cannot be empty');
+      }
+      return false;
+    };
+  }
 };
-

@@ -11,6 +11,7 @@
         </style>
     </head>
     <body>
+        <div class="vline"></div>
         <div class="inbox">
             <!-- User Type--><input type="hidden" value="Admin">
             <div class="top">
@@ -19,7 +20,6 @@
                     <p>Johndoe@epicmail.com</p>
                 </div>
                 <div>
-                    <input type="text" placeholder="SEARCH">
                     <button>Log Out</button>
                 </div>
             </div>
@@ -30,42 +30,42 @@
                         <li><a href="#Inbox">Inbox</a></li>
                         <li><a href="#Sent">Sent</a></li>
                         <li><a href="#Draft">Draft</a></li>
-                        <li class="groups"><a href="#Group">Create Group</a>
-                            <ul>
-                                <li><a href="#">&raquo;Family</a></li>
-                                <li><a href="#">&raquo;Andela Group</a></li>
-                            </ul>
+                        <li class="groups"><a href="#Group">Groups</a>
                         </li>
                             
                         
                     </ul>
                     
                 </div>
-                <!-- Create Group -->
-                <div class="right right-group hidden">
-                    <div>
+                <div class="right">
+                    <!-- Create Group -->
+                <div class="right-group hidden">
+                    <div class = "create">
                         <form action="#" id="createGroup"></form>
-                        <form action="#" id="addMember"></form>
                             <div>
-                                <label>Group Name</label>
                                 <input type="text" placeholder="Group Name" form="createGroup" required>
-                            </div>
-                            <div>
-                                
-                                    <label>Member Mail</label>
-                                    <input form="addMember" type="email" placeholder="Johndoe@epicmail.com" required>
-                                    <button form="addMember" type="submit"> Add Member </button>
-                               
-                            </div>
-                            <div><button form="createGroup" type="submit">Create Group</button></div>
+                                <button form="createGroup" type="submit">Create Group</button>
+                        </div>
                         
                     </div>
-                    <div>
-                        <ul></ul>
+                    <div class="groups">
+                        <div class="btn">
+                            <button>Delete</button>
+                        </div>
+                        <div>
+                            <input type="checkbox">
+                            <a href="#">Family</a>
+                        </div>
+                        <div>
+                            <input type="checkbox">
+                            <a href="#">Andela</a>
+                        </div>
                     </div>
                 </div>
+                    <!--Viewing group-->
+                <div class="right-group hidden"></div>
                 <!-- For Draft Mail -->
-                <div class="right right-draft hidden">
+                <div class="right-draft hidden">
                     <div class="toolbar">
                         <button class="deleteButton">Delete</button>
                     </div>
@@ -78,7 +78,7 @@
                                 <p class="subject">SUBJECT</p>
                                 <p class="msg">some part of the body message to be seen or not seen</p>
                             </div>
-                            <label>date/time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <div class="s2">
                             <input type="hidden" value="Group">
@@ -93,7 +93,7 @@
                     </div>
                 </div>
                 <!-- For Sent Mail -->
-                <div class="right right-sent hidden">
+                <div class="right-sent hidden">
                     <div class="toolbar">
                         <button class="deleteButton">Delete</button>
                         <button id="retract">Retract</button>
@@ -106,7 +106,7 @@
                                 <p class="subject">SUBJECT</p>
                                 <p class="msg">some part of the body message to be seen or not seen</p>
                             </div>
-                            <label>date/time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <div class="s2">
                             <input type="checkbox" value="2">
@@ -120,7 +120,7 @@
                     </div>
                 </div>
                 <!-- For Composing and send mail -->
-                <div class="right right-compose">
+                <div class="right-compose">
                     <form name="sendMail" action="#">
                         <div class="address">
                             <div>
@@ -149,7 +149,7 @@
                     </form>
                 </div>
                 <!-- For viewing message in the inbox view -->
-               <div class="right right-inbox hidden">
+               <div class=" right-inbox hidden">
                     <div class="toolbar">
                         <button class="deleteButton">Delete</button>
                     </div>
@@ -162,7 +162,7 @@
                                 <p class="subject">SUBJECT</p>
                                 <p class="msg">some part of the body message to be seen or not seen</p>
                             </div>
-                            <label>date/time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <div class="s2">
                             <input type="hidden" value="Group">
@@ -177,7 +177,7 @@
                     </div>
                 </div>
                 <!-- For reading messages -->
-                <div class="right view-message hidden">
+                <div class="view-message hidden">
                     <div>
                         <div class="top away">
                             <div>
@@ -187,7 +187,7 @@
                                     <p>Johndoe@epicmail.com</p>
                                 </div>
                             </div>
-                            <label>Date/Time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <h2>Email Subject or Topic</h2>
                         <div>
@@ -203,7 +203,7 @@
                                     <p>Johndoe@epicmail.com</p>
                                 </div>
                             </div>
-                            <label>Date/Time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <h2>Email Subject or Topic</h2>
                         <div>
@@ -219,7 +219,7 @@
                                     <p>Johndoe@epicmail.com</p>
                                 </div>
                             </div>
-                            <label>Date/Time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <h2>Email Subject or Topic</h2>
                         <div>
@@ -235,13 +235,14 @@
                                     <p>Johndoe@epicmail.com</p>
                                 </div>
                             </div>
-                            <label>Date/Time</label>
+                            <label>20/03/2019</label>
                         </div>
                         <h2>Email Subject or Topic</h2>
                         <div>
                             This is where the email body or message will be dispalyed
                         </div>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
