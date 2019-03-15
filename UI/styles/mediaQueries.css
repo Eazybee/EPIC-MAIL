@@ -71,7 +71,16 @@
     }
     
 }
-
+@media screen and (min-height:400px){
+    .inbox .bottom {
+        height: 93vh;
+    }
+}
+/*@media screen and (min-height:700px){
+    .inbox .bottom {
+        height: 90vh;
+    }
+}*/
 
 
 
