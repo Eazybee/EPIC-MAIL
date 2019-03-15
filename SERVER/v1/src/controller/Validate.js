@@ -28,7 +28,7 @@ class Validate {
   static signup(req, res, next) {
     const userExist = User.getUsers().some(user => user.getEmail() === req.body.email);
     const schema = Joi.object().keys({
-      email: Joi.string().required(),
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
       firstName: Joi.string().required(),
       lastName: Joi.string().required(),
       password: Joi.string().required(),
@@ -51,7 +51,7 @@ class Validate {
 
   static login(req, res, next) {
     const schema = Joi.object().keys({
-      email: Joi.string().email().required(),
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
       password: Joi.string().required(),
     });
     const { error } = Joi.validate(req.body, schema);
