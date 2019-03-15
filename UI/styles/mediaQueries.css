@@ -27,10 +27,10 @@
         width:80%;
         margin:15% 10%;
     }
-    .homepage >h1{
+    .loginPage >h1{
         font-size: 4em;
     }
-    .homepage .sign{
+    .loginPage .sign{
         width:28em;
     }
     .inbox .bottom li.groups  li a{
@@ -44,28 +44,9 @@
         width:68%;
 
     }
-    .inbox .top{
-        flex-flow: row wrap;
-    }
-    .inbox .top div:nth-child(2){
-        order: 3;
-        width: 100vw;
-    }
-    .inbox .top input{
-        width: 93%;
-        margin-top: 1em;
-    }
-    .inbox .search a img{
-        position: absolute;
-        top: -0.4em;
-        right: .4em;
-    }
     .right-group div >div {
         display: flex;
         flex-flow: column;
-    }
-    .right-group div >div label{
-        width:80%
     }
 }
 @media screen and (max-width:399px){
@@ -82,10 +63,10 @@
     *{
         font-size: 9px;
     }
-    .homepage >h1{
+    .loginPage >h1{
         font-size: 3em;
     }
-    .homepage .sign{
+    .loginPage .sign{
         width:25em;
     }
     

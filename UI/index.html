@@ -5,89 +5,24 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title></title>
         <style>
-            @import url('styles/style.css');
-            @import url('styles/mediaQueries.css');
+            @import url('./styles/style.css');
+            @import url('./styles/mediaQueries.css');
         </style>
     </head>
     <body>
-        <div class="homepage">
-            <h1>Epic Mail</h1>
-            <div class="sign signIn">
+        <div class="body">
+            <div id="home" class="slider">
+                <img src="./img/email-background-images-1.v1%20(1).jpg">
                 <div>
-                    <label class='top'>WELCOME BACK</label>
-                    <label> </label>
+                    <h1>Welcome To <span>Epic Mail</span></h1>
+                    <p>Epic Mail is a mailing web app that enables user to exchange information over the internet.
+                    <p class="bold">Bringing the world together</p>
+                    <a href="#a"><span class='arrowDown'>&#709;</span></a>
+                    
+                    <span class="btns"><button class="log-in">Join Us Today!</button></span>
                 </div>
-                <form name="signin" id="signInForm" action=""   >
-                    <div>
-                        <input type='email' placeholder="Johndoe@epicmail.com" id="loginEmailAddress" name="loginEmail" required>
-                    </div>
-                    <div> 
-                        <input type='password' placeholder="******" id="loginPassword" name="loginPassword" required>
-                    </div>
-                    <button type="submit">Login</button>
-
-                </form>
-                <p>Forget Your Password? <a href="#" class="resetLink">Reset</a></p>
-                <p>Dont have an account? <a href="#" class="signUpLink"> Sign Up</a></p>
-            </div>
-            <div class="sign signUp hidden">
-                <div>
-                    <label class='top'>JOIN EPICMAIL TODAY</label>
-                    <label> </label>
-                </div>
-                <form name="signup" id="signUpForm" action="#" >
-                    <div>
-                        <input type='text' placeholder="First Name" id="fName" name="signupFirstName" required>
-                    </div>
-                    <div>
-                        <input type="text" id="emailAddress" name="signupEmail" placeholder="Email Address">
-                    </div>
-                    <div>
-                        <input type="password" id="password" placeholder="Password" name="signupPassword" required>
-                    </div>
-                    <div> <input type="password" id="rePassword" name="signupRePassword" placeholder="Re-Password" required>
-                    </div>
-                    <button type="submit">Sign Up</button>
-
-                </form>
-                <p>Already registered? <a href="#" class="signInLink"> Sign In</a></p>
-                <p>Forget Your Password? <a href="#" class="resetLink">Reset</a></p>
-            </div>
-            <div class=" sign reset hidden">
-                <div>
-                    <label class='top'>RESET PASSWORD</label>
-                    <label> </label>
-                </div>
-                <form name="signin" id="resetForm" action="#"   >
-                    <div>
-                        <input type='email' placeholder="Email Address" class="loginEmailAddress" required>
-                    </div>
-                    <div class="question hidden">
-                        <p>What is your first pet name?</p>
-                    </div>
-                    <div class="answer hidden">
-                        <input type="text" placeholder="Answer">
-                    </div>
-                    <div class="password hidden">
-                        <input type="password" placeholder="New Password">
-                    </div>
-                    <button type="submit">Reset</button>
-
-                </form>
-                <p>Already registered? <a href="#" class="signInLink"> Sign In</a></p>
-                    <p>Dont have an account ? <a href="#" class="signUpLink"> Sign Up</a></p>
             </div>
         </div>
-        <div class="modal hidden"></div>
-        <div class="alert hidden">
-            <div class="title-bar">
-                <label>EPIC MAIL</label>
-                <a href="#">X</a>
-            </div>
-            <div class="alert-message">
-                <p></p>
-            </div>
-        </div>
-        <script type="text/javascript" src="scripts/script.js"></script>
+        <script type="text/javascript" src="./scripts/script.js"></script>
     </body>
 </html>
