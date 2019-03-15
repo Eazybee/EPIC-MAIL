@@ -12,7 +12,7 @@
     position: relative;
 }
 ::placeholder {
-  color: #dde2de;
+  color: #b2beb5;
 }
 input,textarea,button,select{
     border: 1px solid cyan;
@@ -34,8 +34,9 @@ input[type^="rad"]{
     width: 1.1em
 }
 .hidden, 
-.homepage .sign.hidden, 
-.homepage .sign .hidden,
+.loginPage .sign.hidden, 
+.loginPage .sign .hidden,
+.right-group .groups .hidden,
 .inbox .right .inbox-view > div.hidden{
     display: none;
 }
@@ -97,7 +98,86 @@ body{
 .alert p{
     font-size: 1.2em
 }
-.homepage{
+
+.body{
+    overflow: hidden;
+}
+.slider{
+    height: 100vh;
+}
+.slider img, .slider div{
+    position: absolute;
+    width: 100%;
+    height: 100%;  
+}
+
+.slider div{
+    background-color: transparent;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    justify-content: center;
+    padding: 0 10%; 
+    width: 80%;
+}
+.slider  p.bold{
+    font-weight: bold;
+}
+.slider p, .slider h1{
+    color: white;
+    font-size: 1.5em;
+    padding: .5em;
+    text-align: center;
+    text-shadow: .7px .7px .5px #194759;
+}
+
+.slider span{
+    font-family: cursive;
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+.slider h1{
+    font-family: "Time New Roman";
+    font-size:3em;
+}
+.slider .btns{
+    top:2em;
+    
+}
+.slider .btns button{
+    background-color: #194759;
+    color:white;
+    padding: .5em;
+    width: 8em;
+}
+.slider .btns button:hover, .slider .btns button:active{
+    border: .15em solid lightblue;
+}
+.slider .btns button:first-child{
+    margin-right: .5em
+}
+.slider .arrowDown{
+    -moz-animation: pointdown 1s infinite both linear;
+    -webkit-animation: pointdown 1s infinite both linear;
+    -o-animation: pointdown 1s infinite both linear;
+    animation: pointdown 1s infinite both linear;
+    position: relative;
+    color: lightblue;
+}
+@keyframes pointdown{
+    0%{
+        top: 0;
+        opacity: 0;
+    }
+    100%{
+        top: 2em;
+        opacity: 1
+    }
+    
+}
+
+.loginPage{
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
@@ -105,7 +185,7 @@ body{
     background-image: url("../img/email-background-images-1.v1.jpg");
     background-size: cover;
 }
-.homepage >h1{
+.loginPage >h1{
     position: fixed;
     font-size: 4em;
     font-family: cursive;
@@ -117,31 +197,31 @@ body{
     background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
     z-index: 2;
 }
-.homepage .sign{
+.loginPage .sign{
     margin-top: 1em;
     width:30em;
     display: flex;
     flex-flow: column nowrap;
     padding-top: 10em;
 }
-.homepage .sign >div{
+.loginPage .sign >div{
     display: flex;
     flex-flow: column nowrap;
     text-align: center;
 }
-.homepage .sign label.top{
+.loginPage .sign label.top{
     font-size:1.5em;
     padding: .7em 0;
     background-color: lightblue; 
 }
-.homepage .sign form{
+.loginPage .sign form{
     padding: 1em 1em 0 1em;
 }
-.homepage .sign form div{
+.loginPage .sign form div{
     display: flex;
     flex-flow: row nowrap;
 }
-.homepage .sign form div *{
+.loginPage .sign form div *{
     padding: .5em 0;
     font-size: 1.2em;
     margin: 2px;
@@ -151,23 +231,27 @@ body{
     border: 1px solid cyan;
     border-radius: .2em;
 }
-.homepage .sign form div input{
+.loginPage .sign form div input{
     width:100%;
     padding-left: 5%;
 }
-.homepage .sign form button{
+.loginPage .sign form button{
     margin: 1em  auto .5em auto;
     width: 100%;
     padding: .3em 0;
     font-size: 1.5em;
 }
-.homepage .sign p a{
+.loginPage .sign p a{
     font-weight: bold;
     color:white;
 }
-.homepage .sign p{
+.loginPage .sign p{
     padding-left: 1em;
     color: white;
+}
+.inbox{
+    height: 100vh;
+    overflow: hidden;
 }
 .inbox >.top{
     display: flex;
@@ -175,8 +259,8 @@ body{
     padding: .8em;
     border-bottom: lightblue solid 5px;
     background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
+    
 }
-
 .inbox .top div:first-child{
     display: flex;
     flex-flow: column;
@@ -200,36 +284,23 @@ body{
     background: red;
     color: white;
 }
-.inbox .search{
-    margin-top: 1em;
-}
-.inbox .search a img{
-    width: 2em;
-    height: 2em;
-    top: .7em;
-    right: 2.5em;
-}
-.inbox .top input{
-    border: transparent solid .3em;;
-    border-radius: 1em;
-    padding: .3em .5em;
-    transition: 1s;
-}
-.inbox .top input:hover, .inbox .top input:active{
-    border: #194759 solid .3em;;
-}
 .inbox .bottom {
     display: flex;
+    height: 85vh;
+    overflow: hidden;
+    width: 100%;
 }
+
 .inbox .bottom .left{
     width:20%;
+    border-right:lightblue solid .3em;
+    height: 100vh;
 }
 .inbox .bottom ul{
     width:100%;
-    overflow: hidden;
 }
 .inbox .bottom li {
-    display:inline;
+    display:block;
 }
 .inbox .bottom li a{
     display:block;
@@ -247,24 +318,10 @@ body{
     color:white;
     transition: .5s;
 }
-
-.inbox .bottom li.groups  li a{
-    padding-left: 2em;
-}
-.inbox .bottom li.groups  li a:hover{
-    background-color:#46A394;
-    
-}
-.inbox .bottom .vline{
-    border:lightblue solid ;
-    border-width: 0 .3em 0 0;
-    position: absolute;
-    height: 100vh;
-    left:19.2%;
-}
 .inbox .bottom .right{
-    width: 80%;
+    width: 100%;
     padding: 1em;
+    overflow: auto;
 }
 .inbox .bottom .toolbar{
     padding: .2em;
@@ -322,10 +379,14 @@ body{
     width:1.2em;
     height: 1.2em
 }
+.inbox .view-message{
+    width: 100%;
+}
 .inbox .view-message >div{
     border: 1px solid lightblue;
     padding: .5em;
     margin-bottom: 1em;
+    width: :100%;
 }
 .inbox .view-message .top{
     display: flex;
@@ -335,8 +396,8 @@ body{
     background: lightblue;
 }
 .inbox .view-message .top >div{
-    display: flex;
-    flex-flow: row wrap;
+   /* display: flex;
+    flex-flow: row wrap;*/
 }
 .inbox .view-message .top img{
     width:3em;
@@ -399,7 +460,6 @@ body{
 .inbox .right-compose button{
     float: right;
     padding: .5em 2em;
-    border-radius: 
 }
 button.sending{
     background-color:orange;
@@ -418,23 +478,51 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-.right-group div div {
+
+.right-group >div >div {
     padding: 1em;
+    display: flex;
+    flex-flow: column;
+}
+.right-group .create{
+    margin: 3em 0;
+}
+.right-group .create input, .right-group .create button{
+    padding:.7em;
+    margin-bottom: 1em;
+}
+.right-group .groups{
+    border: .1em lightblue solid;
+    padding: 1em;
+}
+.right-group .groups div {
+    flex-flow: row nowrap;
+}
+.right-group .groups div.btn{
+    border-bottom: .3em lightblue solid;
+    margin-bottom: 1em;
+    padding: .7em 1em;
+}
+.right-group .groups .btn button{
+    padding: .5em 2em;
+}
+.right-group .groups div input{
+    width:1.2em;
+    height: 1.2em;
+    margin: .5em 0;
+}
+.right-group .groups div:not(.btn){
+    padding: 0 1em
+}
+.right-group .groups div a{
+    width: 90%;
+    padding: .5em 0;
+    margin-left: 1em;
     
 }
-.right-group label{
-    font-weight: bold;
-    font-size: 1.2em;
-    width: 25%;
-    display: inline-block
+.right-group .groups div:not(.btn):hover{
+    background-color: lightblue;
 }
-.right-group input, .right-group button{
-    padding: 1em;
-}
-.right-group button[form='createGroup']{
-    width: 100%;
-}
-
 .right-group ul{
     display: flex;
     flex-flow: column nowrap;

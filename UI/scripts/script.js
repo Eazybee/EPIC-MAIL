@@ -5,11 +5,35 @@ window.onload = function ready() {
       element.classList.remove('hidden');
     });
   };
-
-  if (document.querySelector('.signUpLink')) { // If on home page -> index.html
+  const loadGroup = () => {
+    const selectGroup = document.querySelector('.inbox .right-compose .address select');
+    selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
+    document.querySelectorAll('.right-group .groups div a').forEach((element) => {
+      const name = element.innerHTML;
+      const option = document.createElement('option'); // create an option element(tag)
+      const groupName = document.createTextNode(name); // create a textnode
+      option.appendChild(groupName); // add text to option tag created
+      option.setAttribute('value', name); // set value = name
+      selectGroup.appendChild(option); // add option to Select element
+    });
+  };
+  if (document.querySelector('.slider')) {
+    document.querySelector('.log-in').onclick = () => {
+      window.location.href = './pages/loginPage.html';
+    };
+  } else {
+    /** ALert box Event handler* */
+    document.querySelector('.alert .title-bar a').onclick = () => {
+      document.querySelectorAll('.modal, .alert').forEach((element) => {
+        element.classList.add('hidden');
+      });
+    };
+  }
+  if (document.querySelector('.signUpLink')) { // If on home page -> loginPage.html
     /** Home Page Traverse Code * */
     document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
-      element.onclick = () => {
+      const elem = element;
+      elem.onclick = () => {
         const formSelector = `.${String(element.classList).split('Link')[0]}`;
         document.querySelector(formSelector).classList.remove('hidden');
         document.querySelectorAll(`.sign:not(${formSelector})`).forEach((ele) => {
@@ -59,7 +83,7 @@ window.onload = function ready() {
         password.value = '';
         alertMessage('Login Successful');
         setTimeout(() => {
-          window.location.href = './pages/inbox.html';
+          window.location.href = './inbox.html';
         }, 1000);
       }
       return false;
@@ -90,7 +114,7 @@ window.onload = function ready() {
 
     // Show Compose Panel
     const showCompose = () => {
-      document.querySelectorAll('.right:not(.right-compose)').forEach((element) => {
+      document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
         element.classList.add('hidden');
       });
       document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Compose'])").forEach((element) => {
@@ -102,7 +126,7 @@ window.onload = function ready() {
 
     /** Left-panel-Menus Event * */
     document.querySelector("a[href='#Inbox']").onclick = () => {
-      document.querySelectorAll('.right:not(.right-inbox)').forEach((element) => {
+      document.querySelectorAll('.right > div:not(.right-inbox)').forEach((element) => {
         element.classList.add('hidden');
       });
       document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Inbox'])").forEach((element) => {
@@ -114,9 +138,10 @@ window.onload = function ready() {
 
     document.querySelector("a[href='#Compose']").onclick = () => {
       showCompose();
+      loadGroup();
     };
     document.querySelector("a[href='#Sent']").onclick = () => {
-      document.querySelectorAll('.right:not(.right-sent)').forEach((element) => {
+      document.querySelectorAll('.right  > div:not(.right-sent)').forEach((element) => {
         element.classList.add('hidden');
       });
       document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Sent'])").forEach((element) => {
@@ -126,7 +151,7 @@ window.onload = function ready() {
       document.querySelector('.right-sent').classList.remove('hidden');
     };
     document.querySelector("a[href='#Draft']").onclick = () => {
-      document.querySelectorAll('.right:not(.right-draft)').forEach((element) => {
+      document.querySelectorAll('.right  > div:not(.right-draft)').forEach((element) => {
         element.classList.add('hidden');
       });
       document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Draft'])").forEach((element) => {
@@ -137,7 +162,7 @@ window.onload = function ready() {
     };
     document.querySelector("a[href='#Group']").onclick = () => {
       if (document.querySelector(".inbox > input[type='hidden']").value === 'Admin') {
-        document.querySelectorAll('.right:not(.right-group)').forEach((element) => {
+        document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
           element.classList.add('hidden');
         });
         document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
@@ -151,8 +176,9 @@ window.onload = function ready() {
     };
 
     // veiw Message
-    document.querySelectorAll('.right:not(.right-draft) .inbox-view >div >*:not(input)').forEach((element) => {
-      element.onclick = () => {
+    document.querySelectorAll('.right  > div:not(.right-draft) .inbox-view >div >*:not(input)').forEach((element) => {
+      const elem = element;
+      elem.onclick = () => {
         document.querySelector('.right-inbox ').classList.add('hidden');
         document.querySelector('.right-compose').classList.add('hidden');
         document.querySelector('.right-sent').classList.add('hidden');
@@ -164,7 +190,7 @@ window.onload = function ready() {
     document.querySelector('.inbox .top div button').onclick = () => {
       alertMessage('See you soon buddy :-)');
       setTimeout(() => {
-        window.location.assign('../index.html');
+        window.location.assign('./loginPage.html');
       }, 1500);
     };
 
@@ -190,7 +216,8 @@ window.onload = function ready() {
     };
 
     document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-      radioButton.onchange = () => {
+      const radioElement = radioButton;
+      radioElement.onchange = () => {
         const selectedRadioValue = radioButton.value;
         const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
         const selectGroup = document.querySelector('.inbox .right-compose .address select');
@@ -202,18 +229,7 @@ window.onload = function ready() {
           inputEmail.classList.add('hidden');
           inputEmail.required = false;
           selectGroup.classList.remove('hidden');
-
-          (() => {
-            selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
-            document.querySelectorAll('.inbox .bottom li.groups  li a').forEach((element) => {
-              const name = element.innerHTML.split('»')[1];
-              const option = document.createElement('option'); // create an option element(tag)
-              const groupName = document.createTextNode(name); // create a textnode
-              option.appendChild(groupName); // add text to option tag created
-              option.setAttribute('value', name); // set value = name
-              selectGroup.appendChild(option); // add option to Select element
-            });
-          })();
+          loadGroup();
         }
       };
     });
@@ -236,8 +252,10 @@ window.onload = function ready() {
       let mailTo = '';
       let mailToType = '';
       let mailID = '';
-      if (topic.trim() === '' && msgBody.trim() === '') {
-        alertMessage('Both subject and message body cannot be empty');
+      if (topic.trim() === '') {
+        alertMessage('Subject cannot be empty');
+      } else if (msgBody.trim() === '') {
+        alertMessage('Message body cannot be empty');
       } else {
         document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
           if (radioButton.checked && radioButton.value === 'Individual') {
@@ -290,17 +308,7 @@ window.onload = function ready() {
         document.querySelector(".right-compose .address input[type='email']").required = false;
         selectGroup.classList.remove('hidden');
 
-        (() => {
-          selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
-          document.querySelectorAll('.inbox .bottom li.groups  li a').forEach((element) => {
-            const name = element.innerHTML.split('»')[1];
-            const option = document.createElement('option'); // create an option element(tag)
-            const groupName = document.createTextNode(name); // create a textnode
-            option.appendChild(groupName); // add text to option tag created
-            option.setAttribute('value', name); // set value = name
-            selectGroup.appendChild(option); // add option to Select element
-          });
-        })();
+        loadGroup();
         selectGroup.value = mailTo;
       }
       document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
@@ -354,42 +362,29 @@ window.onload = function ready() {
       });
     };
 
-    /** CREATE GROUP* */
-    document.querySelector('.right-group #addMember').onsubmit = () => {
-      const email = document.querySelector(".right-group input[type='email']");
-      if (email.value.trim() !== '') {
-        const list = document.createElement('li');
-        list.innerHTML = email.value;
-        document.querySelector('.right-group ul').appendChild(list);
-        email.value = '';
-      }
-      return false;
+    /** Delete Group* */
+    document.querySelector('.right-group .groups .btn button').onclick = () => {
+      document.querySelectorAll('.right-group .groups input').forEach((element) => {
+        if (element.checked) {
+          alertMessage('Group(s) Deleted Successfully');
+          element.parentNode.classList.add('hidden');
+        }
+      });
     };
+
+    /** CREATE GROUP* */
     document.querySelector('.right-group #createGroup').onsubmit = () => {
       const groupName = document.querySelector(".right-group input[type='text']");
       if (groupName.value.trim() !== '') {
-        const groupMember = document.querySelector('.right-group ul li') !== null;
-        if (groupMember) {
-          document.querySelector('.right-group ul ').innerHTML = '';
-          const li = document.createElement('li');
-          li.innerHTML = `<a href='#'>&raquo;${groupName.value}</a>`;
-          document.querySelector('.inbox .bottom li.groups ul').appendChild(li);
-          groupName.value = '';
-          alertMessage('Group Created Successfully!');
-        } else {
-          alertMessage('Cannot create an empty group!');
-        }
+        const div = document.createElement('div');
+        div.innerHTML = `<input type="checkbox"><a href="#">${groupName.value.trim()}</a>`;
+        document.querySelector('.right-group .groups').appendChild(div);
+        groupName.value = '';
+        alertMessage('Group Created Successfully!');
       } else {
-        alertMessage('Group Name cannot be empty');
+        alertMessage('Group name cannot be empty');
       }
       return false;
     };
   }
-
-  /** ALert box Event handler* */
-  document.querySelector('.alert .title-bar a').onclick = () => {
-    document.querySelectorAll('.modal, .alert').forEach((element) => {
-      element.classList.add('hidden');
-    });
-  };
 };
