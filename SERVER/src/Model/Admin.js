@@ -1,4 +1,3 @@
-import Joi from 'joi';
 import User from './User';
 import Group from './Group';
 
@@ -8,16 +7,7 @@ class Admin extends User {
     this.admin = true;
   }
 
-  createGroup(group) {
-    const schema = Joi.object().keys({
-      groupName: Joi.string().required(),
-      groupMembers: Joi.array(),
-    }).required();
-    const { error } = Joi.validate(group, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
-    const { groupName, groupMembers } = group;
+  createGroup(group) {const { groupName, groupMembers } = group;
     return new Group(groupName, this.id, groupMembers);
   }
 

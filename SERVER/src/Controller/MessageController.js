@@ -1,6 +1,5 @@
 import UserController from './UserController';
-import Message from '../model/Message';
-import User from '../model/User';
+import Message from '../Model/Message';
 
 class MessageController {
   static sendMail(req, res) {
@@ -106,7 +105,7 @@ class MessageController {
     const mailId = parseInt(req.params.id, 10);
     const mailMessage = Message.getMails(mailId)[0].getMessage();
     // Delete mail
-    User.deleteMail(mailId);
+    UserController.user.deleteMail(mailId);
     res.status(200).json({
       status: 200,
       data: [{

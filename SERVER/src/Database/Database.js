@@ -1,4 +1,4 @@
-import User from './User';
+import User from '../Model/User';
 
 const ayo = new User('ayomipo@test.com', 'Ayomipo', 'Shittu', 'ayo123');
 const john = new User('johndoe@test.com', 'John', 'Doe', 'john123');
@@ -43,7 +43,10 @@ john.sendMail({
   message: sureMsg,
   toUserId: mary.getId(),
 });
-
+john.createMail({
+  subject: 'Sure',
+  message: 'ihoiof course yes, he can have my phone',
+});
 const users = [
   ayo,
   john,
