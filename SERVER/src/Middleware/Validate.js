@@ -1,10 +1,10 @@
 import Joi from 'joi';
 import jwt from 'jsonwebtoken';
-import User from '../model/User';
-import users from '../model/Database';
-import Utility from './Uitility';
-import UserController from './UserController';
-import Message from '../model/Message';
+import User from '../Model/User';
+import users from '../Database/Database';
+import Utility from '../Utility/Uitility';
+import UserController from '../Controller/UserController';
+import Message from '../Model/Message';
 
 class Validate {
   static isLoggedIn(req, res, next) {
@@ -132,16 +132,25 @@ class Validate {
   }
 
   static mailId(req, res, next) {
+    const mailId = parseInt(req.params.id, 10) || parseInt(req.body.id, 10);
     const schema = Joi.number().required();
-    const { error } = Joi.validate(req.params.id, schema);
+    const { error } = Joi.validate(mailId, schema);
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      const mailId = parseInt(req.params.id, 10);
       try {
-        Message.getMails(mailId); //  Checking if mail exist
-        next();
+        const mail = Message.getMails(mailId)[0]; //  Checking if mail exist
+        const receiverId = mail.getReceiverId();
+        const senderId = mail.getSenderId();
+        const loggedInUser = UserController.user;
+
+        if (loggedInUser.getId() === receiverId || loggedInUser.getId() === senderId) {
+          next();
+        } else {
+          const errorMessage = 'Unauthorized';
+          Utility.handleError(res, errorMessage, 401);
+        }
       } catch (err) {
         Utility.handleError(res, err.message, 404);
       }

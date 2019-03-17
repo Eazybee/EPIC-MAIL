@@ -4,11 +4,11 @@
   "description": "Epic Mail API",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha SERVER/v1/test --require @babel/polyfill --require @babel/register --recursive --exit",
-    "build": "babel SERVER/v1/src --out-dir SERVER/v1/build/dist --exit",
-    "dev-start": "babel-watch SERVER/v1/src/controller/route.js",
+    "test": "nyc mocha SERVER/test --require @babel/register --recursive --exit",
+    "build": "babel SERVER/src --out-dir SERVER/build/dist --exit",
+    "dev-start": "babel-watch SERVER/src/app.js",
     "testCoverall": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-    "deploy-heroku": "npm run build && node SERVER/v1/build/dist/controller/route"
+    "deploy-heroku": "npm run build && node SERVER/build/dist/app"
   },
   "author": "Ilori Ezekiel",
   "license": "ISC",

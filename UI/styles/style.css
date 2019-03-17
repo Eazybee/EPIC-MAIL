@@ -104,11 +104,18 @@ body{
 }
 .slider{
     height: 100vh;
+    background-image: url('../img/email-background-images-1.v1.jpg');
+    background-position: left;
 }
-.slider img, .slider div{
+.slider div{
     position: absolute;
     width: 100%;
     height: 100%;  
+}
+
+.slider div:first-child{
+    background: #576CA8;
+    opacity: .4;
 }
 
 .slider div{
@@ -150,6 +157,7 @@ body{
     color:white;
     padding: .5em;
     width: 8em;
+    border-width: .15em;
 }
 .slider .btns button:hover, .slider .btns button:active{
     border: .15em solid lightblue;
