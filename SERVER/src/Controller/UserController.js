@@ -1,20 +1,27 @@
-import users from '../Database/Database';
-import User from '../Model/User';
 import Utility from '../Utility/Uitility';
-
+import db from '../Utility/Db';
 
 class UserController {
   static signUp(req, res) {
-    const newUser = new User(req.body.email,
-      req.body.firstName, req.body.lastName, req.body.password);
+    const {
+      firstName, lastName, email, password,
+    } = req.body;
 
-    const token = Utility.getToken(newUser);
-    users.push(newUser);
-    res.status(201).json({
-      status: 201,
-      data: [{
-        token,
-      }],
+    const values = [firstName, lastName, email, password, 'user'];
+
+    db.addUser(values).then((row) => {
+      if (row > 0) {
+        const token = Utility.getToken(values);
+        res.status(201).json({
+          status: 201,
+          data: [{
+            token,
+          }],
+        });
+      }
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 400);
     });
   }
 

@@ -1,6 +1,6 @@
 class Message {
   constructor(messageObj) {
-    this.createdOn = new Date().toLocaleString('en-US', { timeZone: 'UTC' });
+    this.createdOn = new Date();
     this.subject = messageObj.subject; // req
     this.message = messageObj.message; // req
     this.senderId = messageObj.senderId; // req   The owner is also the sender

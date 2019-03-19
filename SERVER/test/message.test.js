@@ -1,11 +1,7 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../src/app';
-import users from '../src/Database/Database';
-import Message from '../src/Model/Message';
 
-const mary = users[2];
-const ayo = users[0];
 let authToken;
 chai.use(chaiHttp);
 
@@ -36,11 +32,11 @@ describe('Messages', () => {
 
   describe('post', () => {
     describe('/messages', () => {
-      it('should return status 201', (done) => { //  testing for saving and message...
+      it('should return status 201', (done) => {
         obj = {
           subject: 'Holla',
           message: 'you won again',
-          toUserId: 2,
+          receiverId: 2,
         };
         chai.request(app)
           .post('/api/v1/messages')
@@ -51,11 +47,11 @@ describe('Messages', () => {
             done();
           });
       });
-      it('should return status of message as sent', (done) => { //  testing for saving and message...
+      it('should return status of message as sent', (done) => {
         obj = {
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: 2,
+          subject: 'Howdy',
+          message: 'how have you been',
+          receiverId: 1,
         };
         chai.request(app)
           .post('/api/v1/messages')
@@ -100,6 +96,77 @@ describe('Messages', () => {
     });
   });
 
+  describe('put', () => {
+    describe('/messages', () => {
+      let draftId1;
+      let draftId2;
+      it('should return status 201', (done) => { // saving message as draft
+        obj = {
+          subject: 'WOW',
+          message: 'you won again',
+        };
+        chai.request(app)
+          .post('/api/v1/messages/save')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            draftId1 = res.body.data[0].id;
+            done();
+          });
+      });
+      it('should return status 201', (done) => { // saving message as draft
+        obj = {
+          subject: 'WOW',
+          message: 'you won again',
+        };
+        chai.request(app)
+          .post('/api/v1/messages/save')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            draftId2 = res.body.data[0].id;
+            done();
+          });
+      });
+
+      it('should return status 200', (done) => { //  testing for sending draft
+        obj = {
+          id: draftId1,
+          subject: 'Holla',
+          message: 'you won again',
+          receiverId: 1,
+        };
+        chai.request(app)
+          .put('/api/v1/messages')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return status of message as sent', (done) => { //  testing for sending draft
+        obj = {
+          id: draftId2,
+          subject: 'Holla',
+          message: 'you won again',
+          receiverId: 1,
+        };
+        chai.request(app)
+          .put('/api/v1/messages')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res.body.data[0].status).to.equal('sent');
+            done();
+          });
+      });
+    });
+  });
+
   describe('get', () => {
     describe('/api/v1/messages', () => {
       it('should return status 200', (done) => {
@@ -129,7 +196,7 @@ describe('Messages', () => {
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data
-              .every(message => parseInt(message.receiverId, 10) === 2))
+              .every(message => parseInt(message.receiverId, 10) === 3))
               .to.equal(true);
             done();
           });
@@ -164,7 +231,7 @@ describe('Messages', () => {
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body.data
-              .every(message => message.status === 'sent'))
+              .every(message => message.status === 'unread'))
               .to.equal(true);
             done();
           });
@@ -206,10 +273,10 @@ describe('Messages', () => {
       });
     });
 
-    describe('/api/v1/messages/1', () => {
+    describe('/api/v1/messages/2', () => {
       it('should return status 200', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/1')
+          .get('/api/v1/messages/2')
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
@@ -218,7 +285,7 @@ describe('Messages', () => {
       });
       it('should have the following property: data, status', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/1')
+          .get('/api/v1/messages/2')
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
@@ -227,12 +294,12 @@ describe('Messages', () => {
           });
       });
 
-      it('should return mail of id 1', (done) => {
+      it('should return mail of id 2', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/1')
+          .get('/api/v1/messages/2')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res.body.data[0].id).to.equal(1);
+            expect(res.body.data[0].id).to.equal(2);
             done();
           });
       });
@@ -264,55 +331,7 @@ describe('Messages', () => {
           .get('/api/v1/messages/sent')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res.body.data.every(mail => mail.senderId === mary.getId())).to.equal(true);
-            done();
-          });
-      });
-    });
-  });
-
-  describe('put', () => {
-    describe('/messages', () => {
-      it('should return status 201', (done) => { //  testing for sending draft
-        const sorryMsg = mary.createMail({// creating draft message
-          subject: 'Sorry!',
-          message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
-        });
-
-        obj = {
-          id: sorryMsg.getId(),
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: ayo.getId(),
-        };
-        chai.request(app)
-          .put('/api/v1/messages')
-          .set('authorization', authToken)
-          .send(obj)
-          .end((err, res) => {
-            expect(res).to.have.status(201);
-            done();
-          });
-      });
-
-      it('should return status of message as sent', (done) => { //  testing for sending draft
-        const sorryMsg = mary.createMail({// creating draft message
-          subject: 'Sorry!',
-          message: 'my cell phone has been stolen. i will ask john if he can borrow you his\' own',
-        });
-
-        obj = {
-          id: sorryMsg.getId(),
-          subject: 'Holla',
-          message: 'you won again',
-          toUserId: ayo.getId(),
-        };
-        chai.request(app)
-          .put('/api/v1/messages')
-          .set('authorization', authToken)
-          .send(obj)
-          .end((err, res) => {
-            expect(res.body.data[0].status).to.equal('sent');
+            expect(res.body.data.every(mail => parseInt(mail.senderId, 10) === 3)).to.equal(true);
             done();
           });
       });
@@ -320,34 +339,23 @@ describe('Messages', () => {
   });
 
   describe('delete', () => {
-    describe('/api/v1/messages/3', () => {
-      it('should return status 200', (done) => {
-        chai.request(app)
-          .delete('/api/v1/messages/3')
-          .set('authorization', authToken)
-          .end((err, res) => {
-            expect(res).to.have.status(200);
-            done();
-          });
-      });
-
-      it('should return deleted mails\'s message', (done) => {
-        const mailMessage = Message.getMails(2)[0].getMessage();
-        chai.request(app)
-          .delete('/api/v1/messages/2')
-          .set('authorization', authToken)
-          .end((err, res) => {
-            expect(res.body.data[0].message).to.equal(mailMessage);
-            done();
-          });
-      });
-
-      it('should have the following property: data, status', (done) => {
+    describe('/api/v1/messages/1', () => {
+      it('should return status 404', (done) => {
         chai.request(app)
           .delete('/api/v1/messages/1')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res.body).to.have.property('data');
+            expect(res).to.have.status(404);
+            done();
+          });
+      });
+
+      it('should have the following property: data, error', (done) => {
+        chai.request(app)
+          .delete('/api/v1/messages/1')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res.body).to.have.property('error');
             expect(res.body).to.have.property('status');
             done();
           });
