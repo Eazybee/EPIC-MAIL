@@ -1,0 +1,46 @@
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    first_name VARCHAR(128) NULL,
+    last_name VARCHAR(128) NULL,
+    email VARCHAR(128) NULL,
+    password VARCHAR(128) NULL,
+    question VARCHAR(128) NULL,
+    answer VARCHAR(128) NULL,
+    status VARCHAR(128) NULL
+);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id SERIAL PRIMARY KEY,
+    subject VARCHAR(128) NULL,
+    message TEXT NULL,
+    owner_id INTEGER NULL,
+    status VARCHAR(128) NULL,
+    date_time BIGINT NULL
+);
+
+CREATE TABLE IF NOT EXISTS inboxes (
+    id SERIAL PRIMARY KEY,
+    msg_id INTEGER NULL,
+    receiver_id INTEGER NULL,
+    status VARCHAR(128) NULL,
+    date_time BIGINT NULL
+);
+
+CREATE TABLE IF NOT EXISTS sents (
+    id SERIAL PRIMARY KEY,
+    msg_id INTEGER NULL,
+    sender_id INTEGER NULL,
+    status VARCHAR(128) NULL,
+    date_time BIGINT NULL
+);
+
+CREATE TABLE IF NOT EXISTS groups (
+    id SERIAL PRIMARY KEY,
+    owner_id INTEGER NULL,
+    name  VARCHAR(128) NULL
+);
+
+CREATE TABLE IF NOT EXISTS group_member (
+    group_id INTEGER NULL,
+	owner_id INTEGER NULL
+);
