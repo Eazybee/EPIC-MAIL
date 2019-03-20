@@ -125,6 +125,60 @@ describe('groups', () => {
             done();
           });
       });
+      it('should return a status of 201', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/1/users')
+          .set('authorization', authToken)
+          .send({ userId: 1 })
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            done();
+          });
+      });
+    });
+
+    describe('/groups/<group-id>/messages', () => {
+      before(() => {
+        obj = {
+          subject: 'EKALE',
+          message: 'It means good evening',
+        };
+      });
+
+      it('should return a status of 400', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/1/messages/')
+          .set('authorization', authToken)
+          .send({
+            subject: 'EKALE',
+          })
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+
+      it('should return a status of 201', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/1/messages/')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            done();
+          });
+      });
+
+      it('should return a status of 400', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/8/messages/')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
     });
   });
 

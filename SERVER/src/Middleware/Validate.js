@@ -409,5 +409,47 @@ class Validate {
       });
     }
   }
+
+  static messageGroup(req, res, next) {
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+    const schema2 = Joi.object().keys({
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      parentMessageId: Joi.number(),
+    });
+    const { error } = Joi.validate(req.params, schema);
+    const error2 = Joi.validate(req.body, schema2);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else if (error2.error) {
+      const errorMessage = error2.error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getGroups(UserController.user.getId()).then((groups) => {
+        const groupId = parseInt(req.params.id, 10);
+        const groupExist = groups.find(group => group.id === groupId);
+        if (groupExist) {
+          db.getGroupMember(groupId).then((rows) => {
+            if (rows.length > 0) {
+              req.members = rows;
+              next();
+            } else {
+              const errorMessage = 'Sending message to an empty group';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
+        } else {
+          const errorMessage = 'Group with the id does not exist';
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
 }
 export default Validate;

@@ -119,5 +119,43 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static messageGroup(req, res) {
+    const { members } = req;
+    let mailId;
+    const dateTime = Date.now();
+    const { subject, message } = req.body;
+    members.forEach((member) => {
+      // Save the mail
+      let values = [subject, message, UserController.user.getId(), dateTime, 'sent'];
+      db.addMessage(values).then((rows) => {
+        const [savedMail] = rows;
+        mailId = savedMail.id;
+        const receiverId = member.user_id;
+        values = [mailId, UserController.user.getId(), 'sent', dateTime];
+
+        // insert into sents table
+        db.insertSents(values);
+        // insert into the inboxes table
+        values = [mailId, receiverId, 'unread', dateTime];
+        db.insertInboxes(values);
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    });
+
+    res.status(201).json({
+      status: 201,
+      data: [{
+        id: mailId,
+        createdOn: new Date(parseInt(dateTime, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+        subject,
+        message,
+        parentMessageId: null,
+        status: 'sent',
+      }],
+    });
+  }
 }
 export default GroupController;
