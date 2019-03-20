@@ -17,10 +17,10 @@ router.get('/sent', Validate.isLoggedIn, MessageController.getSentMail); // get 
 router.get('/:id', Validate.isLoggedIn, Validate.mailId, MessageController.getMailId); // get inbox  with id
 
 //  PUT
-router.put('/', Validate.isLoggedIn, Validate.sendDraft, Validate.mailId, MessageController.sendDraft); // send draft
+router.put('/', Validate.isLoggedIn, Validate.sendDraft, MessageController.sendDraft); // send draft
 
 //  DELETE
-router.delete('/:id', Validate.isLoggedIn, Validate.mailId, MessageController.deleteMail); // delete inbox with id
+router.delete('/:id', Validate.isLoggedIn, Validate.deleteMailId, MessageController.deleteMail); // delete inbox with id
 
 
 export default router;
