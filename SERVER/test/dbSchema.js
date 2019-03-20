@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS groups (
 
 CREATE TABLE IF NOT EXISTS group_member (
   group_id INTEGER NULL,
-owner_id INTEGER NULL
+user_id INTEGER NULL
 );
 
 INSERT INTO users(first_name, last_name, email, password, status) VALUES('shittu', 'ayomipo', 'ayomipo@test.com', 'ayo123', 'user');

@@ -7,6 +7,7 @@ const router = express.Router();
 
 //  POST
 router.post('/', Validate.isLoggedIn, Validate.isAdmin, Validate.createGroup, GroupController.createGroup); // create groups
+router.post('/:id/users', Validate.isLoggedIn, Validate.isAdmin, Validate.addGroupMember, GroupController.addGroupMember);
 
 // GET
 router.get('/', Validate.isLoggedIn, Validate.isAdmin, GroupController.getGroups);

@@ -80,5 +80,26 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static addGroupMember(req, res) {
+    const values = [
+      req.params.id,
+      req.body.userId,
+    ];
+
+    db.addGroupMember(values).then(() => {
+      res.status(201).json({
+        status: 201,
+        data: [{
+          id: req.params.id,
+          userId: req.body.userId,
+          role: 'member',
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default GroupController;

@@ -86,6 +86,48 @@ describe('groups', () => {
     });
   });
 
+  describe('post', () => {
+    describe('/groups/<group-id>/users/', () => {
+      beforeEach(() => {
+        obj = {
+          userId: 2,
+        };
+      });
+      it('should return a status of 201', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/1/users')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            done();
+          });
+      });
+
+      it('should return a status of 400', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/6/users')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+
+      it('should return a status of 400', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups/1/users')
+          .set('authorization', authToken)
+          .send({ userId: 9 })
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+    });
+  });
+
   describe('patch', () => {
     describe('/groups/<group-id>/name', () => {
       it('should return a status of 200', (done) => {
