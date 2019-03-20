@@ -25,5 +25,22 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static getGroups(req, res) {
+    db.getGroups(UserController.user.getId()).then((groups) => {
+      const data = groups.map(group => ({
+        id: group.id,
+        name: group.name,
+        role: 'admin',
+      }));
+      res.status(200).json({
+        status: 200,
+        data,
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default GroupController;
