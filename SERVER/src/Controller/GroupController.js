@@ -42,5 +42,26 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static updateGroupName(req, res) {
+    const values = [
+      req.body.name,
+      req.params.id,
+    ];
+
+    db.updateGroupName(values).then(() => {
+      res.status(200).json({
+        status: 200,
+        data: [{
+          id: req.params.id,
+          name: req.body.name,
+          role: 'admin',
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default GroupController;

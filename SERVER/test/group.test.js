@@ -32,12 +32,25 @@ describe('groups', () => {
 
   describe('post', () => {
     describe('/groups', () => {
-      obj = {
-        name: 'Family',
-      };
+      beforeEach(() => {
+        obj = {
+          name: 'friend',
+        };
+      });
+      it('should return a status of 201', (done) => {
+        chai.request(app)
+          .post('/api/v1/groups')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(201);
+            done();
+          });
+      });
+
       it('should return a status of 400', (done) => {
         chai.request(app)
-          .post('/api/v1/groups/')
+          .post('/api/v1/groups')
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
@@ -60,13 +73,57 @@ describe('groups', () => {
           });
       });
 
-      it('should return only users group', (done) => {
+      it('should return object with property status and data', (done) => {
         chai.request(app)
           .get('/api/v1/groups/')
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('status');
             expect(res.body).to.have.property('data');
+            done();
+          });
+      });
+    });
+  });
+
+  describe('patch', () => {
+    describe('/groups/<group-id>/name', () => {
+      it('should return a status of 200', (done) => {
+        obj = {
+          name: 'Family',
+        };
+        chai.request(app)
+          .patch('/api/v1/groups/1/name')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return object with property status and data', (done) => {
+        obj = {
+          name: 'Goons',
+        };
+        chai.request(app)
+          .patch('/api/v1/groups/1/name')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res.body).to.have.property('status');
+            expect(res.body).to.have.property('data');
+            done();
+          });
+      });
+
+      it('should return a status of 404', (done) => {
+        chai.request(app)
+          .patch('/api/v1/groups/2/name')
+          .set('authorization', authToken)
+          .send(obj)
+          .end((err, res) => {
+            expect(res.body).to.have.status(404);
             done();
           });
       });

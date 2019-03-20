@@ -11,4 +11,7 @@ router.post('/', Validate.isLoggedIn, Validate.isAdmin, Validate.createGroup, Gr
 // GET
 router.get('/', Validate.isLoggedIn, Validate.isAdmin, GroupController.getGroups);
 
+// PATCH
+router.patch('/:id/name', Validate.isLoggedIn, Validate.isAdmin, Validate.updateGroupName, GroupController.updateGroupName);
+
 export default router;
