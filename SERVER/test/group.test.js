@@ -47,4 +47,29 @@ describe('groups', () => {
       });
     });
   });
+
+  describe('get', () => {
+    describe('/groups', () => {
+      it('should return a status of 200', (done) => {
+        chai.request(app)
+          .get('/api/v1/groups/')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return only users group', (done) => {
+        chai.request(app)
+          .get('/api/v1/groups/')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res.body).to.have.property('status');
+            expect(res.body).to.have.property('data');
+            done();
+          });
+      });
+    });
+  });
 });
