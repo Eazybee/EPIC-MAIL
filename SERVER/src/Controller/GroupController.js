@@ -101,5 +101,23 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static deleteGroupMember(req, res) {
+    const values = [
+      req.params.groupId,
+      req.params.userId,
+    ];
+    db.deleteGroupMember(values).then(() => {
+      res.status(200).json({
+        status: 200,
+        data: [{
+          message: `Member ${req.params.userId}  deleted`,
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default GroupController;

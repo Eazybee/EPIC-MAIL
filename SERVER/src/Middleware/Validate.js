@@ -375,5 +375,39 @@ class Validate {
       });
     }
   }
+
+  static deleteGroupMember(req, res, next) {
+    const schema = Joi.object().keys({
+      groupId: Joi.number().required(),
+      userId: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.params, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      const groupId = parseInt(req.params.groupId, 10);
+      db.getGroups(UserController.user.getId()).then((groups) => {
+        const groupExist = groups.find(group => group.id === groupId);
+        if (groupExist) {
+          const userId = parseInt(req.params.userId, 10);
+          db.getGroupMember(groupId, userId).then((rows) => {
+            if (rows.length === 1) {
+              next();
+            } else {
+              const errorMessage = 'User with this id does not exist in this group';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
+        } else {
+          const errorMessage = 'Group with this id does not exist';
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
 }
 export default Validate;

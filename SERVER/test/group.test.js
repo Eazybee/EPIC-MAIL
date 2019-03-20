@@ -173,6 +173,38 @@ describe('groups', () => {
   });
 
   describe('delete', () => {
+    describe('/groups/<group-id>/users/<user-id>', () => {
+      it('should return status 200', (done) => {
+        chai.request(app)
+          .delete('/api/v1/groups/1/users/2')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return status 400', (done) => {
+        chai.request(app)
+          .delete('/api/v1/groups/1/users/2')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+
+      it('should return status 400', (done) => {
+        chai.request(app)
+          .delete('/api/v1/groups/3/users/2')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+    });
+
     describe('/groups/<group-id>', () => {
       it('should return a status of 200', (done) => {
         chai.request(app)
