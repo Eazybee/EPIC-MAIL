@@ -201,5 +201,21 @@ class Database {
     const result = await client.query(query);
     return result.rows;
   }
+
+  static async addGroupMember(values) {
+    let query = {
+      text: 'SELECT * FROM group_member WHERE group_id =$1 and user_id =$2',
+      values,
+    };
+    let result = await client.query(query);
+    if (result.rowCount === 0) {
+      query = {
+        text: 'INSERT INTO group_member(group_id, user_id) VALUES($1, $2)',
+        values,
+      };
+      result = await client.query(query);
+    }
+    return result.rows;
+  }
 }
 export default Database;

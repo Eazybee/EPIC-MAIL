@@ -336,5 +336,44 @@ class Validate {
       });
     }
   }
+
+  static addGroupMember(req, res, next) {
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+    const schema2 = Joi.object().keys({
+      userId: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.params, schema);
+    const error2 = Joi.validate(req.body, schema2);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else if (error2.error) {
+      const errorMessage = error2.error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getGroups(UserController.user.getId()).then((groups) => {
+        const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+        if (groupExist) {
+          const userId = parseInt(req.body.userId, 10);
+          db.getUsers(userId).then((rows) => {
+            if (rows.length === 1) {
+              next();
+            } else {
+              const errorMessage = 'User with this id does not exist';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
+        } else {
+          const errorMessage = 'Group with the id does not exist';
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
 }
 export default Validate;
