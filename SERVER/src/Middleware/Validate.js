@@ -231,5 +231,48 @@ class Validate {
       });
     }
   }
+
+  static createGroup(req, res, next) {
+    const schema = Joi.object().keys({
+      name: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getGroups(UserController.user.getId()).then((groups) => {
+        if (groups.length > 0) {
+          const groupExist = groups.some(group => group.name === req.body.name);
+          if (groupExist) {
+            const errorMessage = 'Group with the same name exist';
+            Utility.handleError(res, errorMessage, 400);
+          } else {
+            next();
+          }
+        } else {
+          next();
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static isAdmin(req, res, next) {
+    db.getUsers(UserController.user.getId()).then((users) => {
+      const user = users[0];
+      if (user.status !== 'admin') {
+        const errorMessage = 'Unauthorized';
+        Utility.handleError(res, errorMessage, 401);
+      } else {
+        next();
+      }
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default Validate;
