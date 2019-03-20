@@ -187,5 +187,19 @@ class Database {
     const result = await client.query(query);
     return result.rows;
   }
+
+  static async deleteGroup(id) {
+    let query = {
+      text: 'DELETE FROM group_member WHERE group_id =$1',
+      values: [id],
+    };
+    await client.query(query);
+    query = {
+      text: 'DELETE FROM groups WHERE id =$1 RETURNING *',
+      values: [id],
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
 }
 export default Database;
