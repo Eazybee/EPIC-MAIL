@@ -129,4 +129,30 @@ describe('groups', () => {
       });
     });
   });
+
+  describe('delete', () => {
+    describe('/groups/<group-id>', () => {
+      it('should return a status of 200', (done) => {
+        chai.request(app)
+          .delete('/api/v1/groups/1')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+
+      it('should return a status of 404', (done) => {
+        chai.request(app)
+          .delete('/api/v1/groups/1')
+          .set('authorization', authToken)
+          .end((err, res) => {
+            expect(res).to.have.status(404);
+            expect(res.body).to.have.property('status');
+            expect(res.body).to.have.property('error');
+            done();
+          });
+      });
+    });
+  });
 });

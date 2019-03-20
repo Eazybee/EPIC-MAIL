@@ -312,5 +312,29 @@ class Validate {
       });
     }
   }
+
+  static deleteGroup(req, res, next) {
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.params, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getGroups(UserController.user.getId()).then((groups) => {
+        const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+        if (groupExist) {
+          next();
+        } else {
+          const errorMessage = 'Group with the id does not exist';
+          Utility.handleError(res, errorMessage, 404);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
 }
 export default Validate;

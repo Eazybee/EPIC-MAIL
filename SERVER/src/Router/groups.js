@@ -14,4 +14,7 @@ router.get('/', Validate.isLoggedIn, Validate.isAdmin, GroupController.getGroups
 // PATCH
 router.patch('/:id/name', Validate.isLoggedIn, Validate.isAdmin, Validate.updateGroupName, GroupController.updateGroupName);
 
+// DELETE
+router.delete('/:id', Validate.isLoggedIn, Validate.isAdmin, Validate.deleteGroup, GroupController.deleteGroup);
+
 export default router;

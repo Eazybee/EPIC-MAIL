@@ -63,5 +63,22 @@ class GroupController {
       Utility.handleError(res, errorMessage, 500);
     });
   }
+
+  static deleteGroup(req, res) {
+    const groudId = req.params.id;
+
+    db.deleteGroup(groudId).then((rows) => {
+      const message = `Group ${rows[0].name} deleted `;
+      res.status(200).json({
+        status: 200,
+        data: [{
+          message,
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
 }
 export default GroupController;
