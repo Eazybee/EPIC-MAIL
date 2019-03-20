@@ -217,5 +217,29 @@ class Database {
     }
     return result.rows;
   }
+
+  static async getGroupMember(groupId, userId) {
+    let query = {
+      text: 'select * from group_member where group_id = $1',
+      values: [groupId],
+    };
+    if (userId) {
+      query = {
+        text: 'select * from group_member where group_id = $1 and user_id =$2',
+        values: [groupId, userId],
+      };
+    }
+    const result = await client.query(query);
+    return result.rows;
+  }
+
+  static async deleteGroupMember(values) {
+    const query = {
+      text: 'DELETE FROM group_member WHERE group_id =$1 and user_id =$2',
+      values,
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
 }
 export default Database;
