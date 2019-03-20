@@ -4,6 +4,7 @@ import cors from 'cors';
 import swagger from './swagger.json';
 import auth from './Router/auth';
 import messages from './Router/messages';
+import groups from './Router/groups';
 
 const app = express();
 app.use(cors());
@@ -12,6 +13,7 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swagger));
 app.use('/api/v1/auth', auth);
 app.use('/api/v1/messages', messages);
+app.use('/api/v1/groups', groups);
 app.get('/', (req, res) => res.redirect(301, '/api-docs'));
 
 

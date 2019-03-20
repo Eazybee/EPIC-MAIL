@@ -160,5 +160,23 @@ class Database {
     const result = await client.query(query);
     return result.rows;
   }
+
+  static async getGroups(userId) {
+    const query = {
+      text: 'select * from groups where owner_id = $1',
+      values: [userId],
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
+
+  static async createGroup(values) {
+    const query = {
+      text: 'INSERT INTO groups(owner_id, name) VALUES($1, $2) RETURNING *',
+      values,
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
 }
 export default Database;

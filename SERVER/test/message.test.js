@@ -273,10 +273,10 @@ describe('Messages', () => {
       });
     });
 
-    describe('/api/v1/messages/2', () => {
+    describe('/api/v1/messages/6', () => {
       it('should return status 200', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/2')
+          .get('/api/v1/messages/6')
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res).to.have.status(200);
@@ -285,7 +285,7 @@ describe('Messages', () => {
       });
       it('should have the following property: data, status', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/2')
+          .get('/api/v1/messages/6')
           .set('authorization', authToken)
           .end((err, res) => {
             expect(res.body).to.have.property('data');
@@ -294,12 +294,12 @@ describe('Messages', () => {
           });
       });
 
-      it('should return mail of id 2', (done) => {
+      it('should return mail of id 6', (done) => {
         chai.request(app)
-          .get('/api/v1/messages/2')
+          .get('/api/v1/messages/6')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res.body.data[0].id).to.equal(2);
+            expect(res.body.data[0].id).to.equal(6);
             done();
           });
       });
@@ -340,12 +340,12 @@ describe('Messages', () => {
 
   describe('delete', () => {
     describe('/api/v1/messages/1', () => {
-      it('should return status 404', (done) => {
+      it('should return status 200', (done) => {
         chai.request(app)
           .delete('/api/v1/messages/1')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res).to.have.status(404);
+            expect(res).to.have.status(200);
             done();
           });
       });
