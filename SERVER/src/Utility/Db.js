@@ -178,5 +178,14 @@ class Database {
     const result = await client.query(query);
     return result.rows;
   }
+
+  static async updateGroupName(values) {
+    const query = {
+      text: 'UPDATE groups SET name=$1 WHERE id=$2 RETURNING *',
+      values,
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
 }
 export default Database;
