@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 class Utility {
   static getToken(payload) {
     dotenv.config();
-    const token = jwt.sign({ payload }, process.env.JWT_PRIVATE_SECRET);
+    const token = jwt.sign({ payload }, process.env.JWT_PRIVATE_SECRET, { expiresIn: '1h' });
     return token;
   }
 

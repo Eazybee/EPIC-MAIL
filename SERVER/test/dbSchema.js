@@ -58,9 +58,9 @@ CREATE TABLE IF NOT EXISTS group_member (
 user_id INTEGER NULL
 );
 
-INSERT INTO users(first_name, last_name, email, password, status) VALUES('shittu', 'ayomipo', 'ayomipo@test.com', 'ayo123', 'user');
-INSERT INTO users(first_name, last_name, email, password, status) VALUES('John', 'doe', 'johndoe@test.com', 'john123', 'user');
-INSERT INTO users(first_name, last_name, email, password, status) VALUES('mary', 'jane', 'maryj@test.com', 'spiderman123', 'admin');
+INSERT INTO users(first_name, last_name, email, password, status) VALUES('shittu', 'ayomipo', 'ayomipo@test.com', '$2b$10$eFWRnCkmKZCKQvPBs9Yk8.qifcq1fQXq/Rr1.IzxotMJelrOTnixG', 'user');
+INSERT INTO users(first_name, last_name, email, password, status) VALUES('John', 'doe', 'johndoe@test.com', '$2b$10$AJW6ktnBTwP2OKO.QkY5uenU7BWDo5IrwlCVTwf0LNkM6CGHrOtmq', 'user');
+INSERT INTO users(first_name, last_name, email, password, status) VALUES('mary', 'jane', 'maryj@test.com', '$2b$10$OfMdyxqVvb0Iq/DWPFsWAuPy.Tqx5MPz.5H81Q5Zh2IYyaRPUufAG', 'admin');
 
 INSERT INTO messages(subject, message, owner_id, date_time, status) VALUES('Hi buddy', 'Just wanna say Hi', 3, 1552997209747, 'sent');
 INSERT INTO messages(subject, message, owner_id, date_time, status) VALUES('Hi buddy', 'Just wanna say Hi', 3, 1552997209748, 'sent');

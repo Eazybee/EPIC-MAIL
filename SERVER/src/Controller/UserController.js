@@ -1,27 +1,30 @@
+import bcrypt from 'bcrypt';
 import Utility from '../Utility/Uitility';
 import db from '../Utility/Db';
+
 
 class UserController {
   static signUp(req, res) {
     const {
       firstName, lastName, email, password,
     } = req.body;
-
-    const values = [firstName, lastName, email, password, 'user'];
-
-    db.addUser(values).then((row) => {
-      if (row > 0) {
-        const token = Utility.getToken(values);
-        res.status(201).json({
-          status: 201,
-          data: [{
-            token,
-          }],
-        });
-      }
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 400);
+    const saltRounds = 10;
+    bcrypt.hash(password, saltRounds, (err, hash) => {
+      const values = [firstName, lastName, email, hash, 'user'];
+      db.addUser(values).then((row) => {
+        if (row > 0) {
+          const token = Utility.getToken(values);
+          res.status(201).json({
+            status: 201,
+            data: [{
+              token,
+            }],
+          });
+        }
+      }).catch((error) => {
+        const errorMessage = `SERVER ERROR: ${error.message}`;
+        Utility.handleError(res, errorMessage, 400);
+      });
     });
   }
 
