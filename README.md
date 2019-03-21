@@ -9,8 +9,9 @@ Epic Mail is a mailing web app that enables user to exchange information over th
 ## Prerequisite
 1. Internet connection
 2. Internet browser
-3. git
-4. nodejs
+3. Git
+4. Nodejs
+5. Postgres
 
 ## Template URL
 - https://eazybee.github.io/EPIC-MAIL/UI/index.html
@@ -49,6 +50,14 @@ Admin user
 * GET https://epic-mail-api.herokuapp.com/api/v1/messages/{id} - Get message with the specified id
 * PUT https://epic-mail-api.herokuapp.com/api/v1/messages - Send a draft message
 * DELETE https://epic-mail-api.herokuapp.com/api/v1/messages/{id} - Delete message with specified id
+* POST https://epic-mail-api.herokuapp.com/api/v1/groups - Create new group
+* POST https://epic-mail-api.herokuapp.com/api/v1/groups​/{id}​/users - Add a user to a group
+* POST https://epic-mail-api.herokuapp.com/api/v1/groups/{id}/messages - Send mail to a group
+* GET https://epic-mail-api.herokuapp.com/api/v1/groups - Get user's groups
+* PATCH https://epic-mail-api.herokuapp.com/api/v1/groups/{id}/name - Update a group name
+* DELETE https://epic-mail-api.herokuapp.com/api/v1/groups/{id} - Delete the group with the specified id
+* DELETE https://epic-mail-api.herokuapp.com/api/v1​/groups​/{groupId}​/users​/{userId} -/groups/{groupId}/users/{userId} - Delete a member from a group
+
 
 ## Branches
 * The branches are structured according to git work flow. 
@@ -65,6 +74,7 @@ Unt Test locally by runnung ```npm run test```
 2. Css
 3. JavaScript
 4. nodejs
+5. postgres
 
 # Deployed on
 1. github page
@@ -76,6 +86,7 @@ Unt Test locally by runnung ```npm run test```
 # Credits
   - Onengiye Richard (klevamane) for Readme Template https://github.com/klevamane/Maintenance-tr/blob/develop/README.md
   - Traversy videos on node js https://www.youtube.com/watch?v=k_0ZzvHbNBQ&list=PLillGF-RfqbYRpji8t4SxUkMxfowG4Kqp 
+- Andela 42 cycle bootcampers, VLFs and LFAs for helping to unblock me.
 
 # Author
 * Ilori Ezekiel (Eazybee)
