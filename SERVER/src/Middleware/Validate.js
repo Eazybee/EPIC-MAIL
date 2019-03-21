@@ -67,21 +67,26 @@ class Validate {
 
     db.getUsers().then((users) => {
       let user = users.find(dbuser => dbuser.email === req.body.email);
-      bcrypt.compare(req.body.password, user.password, (err, result) => {
-        if (result) {
-          const {
-            id, email, password,
-          } = user;
-          const firstName = user.first_name;
-          const lastName = user.last_name;
-          user = new User(id, email, firstName, lastName, password);
-          req.user = user;
-          next();
-        } else {
-          const errorMessage = 'Unauthorized';
-          Utility.handleError(res, errorMessage, 401);
-        }
-      });
+      if (user) {
+        bcrypt.compare(req.body.password, user.password, (err, result) => {
+          if (result) {
+            const {
+              id, email, password,
+            } = user;
+            const firstName = user.first_name;
+            const lastName = user.last_name;
+            user = new User(id, email, firstName, lastName, password);
+            req.user = user;
+            next();
+          } else {
+            const errorMessage = 'Unauthorized';
+            Utility.handleError(res, errorMessage, 401);
+          }
+        });
+      } else {
+        const errorMessage = 'Unauthorized';
+        Utility.handleError(res, errorMessage, 401);
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
