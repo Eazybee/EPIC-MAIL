@@ -133,28 +133,32 @@ class GroupController {
         mailId = savedMail.id;
         const receiverId = member.user_id;
         values = [mailId, UserController.user.getId(), 'sent', dateTime];
+        UserController.mailId = mailId;
 
         // insert into sents table
         db.insertSents(values);
         // insert into the inboxes table
         values = [mailId, receiverId, 'unread', dateTime];
         db.insertInboxes(values);
+        try {
+          res.status(201).json({
+            status: 201,
+            data: [{
+              id: UserController.mailId,
+              createdOn: new Date(parseInt(dateTime, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+              subject,
+              message,
+              parentMessageId: null,
+              status: 'sent',
+            }],
+          });
+        } catch (e) {
+          parseInt(e, 10);
+        }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
         Utility.handleError(res, errorMessage, 500);
       });
-    });
-
-    res.status(201).json({
-      status: 201,
-      data: [{
-        id: mailId,
-        createdOn: new Date(parseInt(dateTime, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject,
-        message,
-        parentMessageId: null,
-        status: 'sent',
-      }],
     });
   }
 }
