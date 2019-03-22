@@ -33,6 +33,21 @@
     .loginPage .sign{
         width:28em;
     }
+    .inbox .seek{
+        height: 2em;
+        display: block;
+    }
+    .inbox .bottom .left{
+        width:-0%;
+        border-right:0;
+    }
+    .inbox .bottom .left.show{
+        width: 20%;
+        border-right:lightblue solid .3em;
+    }
+    .inbox .bottom .right,.inbox .bottom .left{
+        background-color: white;
+    }
     .inbox .bottom li.groups  li a{
         padding-left: 1em;
     }

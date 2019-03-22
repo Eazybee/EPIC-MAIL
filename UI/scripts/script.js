@@ -17,7 +17,7 @@ window.onload = function ready() {
       selectGroup.appendChild(option); // add option to Select element
     });
   };
-  if (document.querySelector('.slider')) {
+  if (document.querySelector('.slider')) { // landing Page
     document.querySelector('.log-in').onclick = () => {
       window.location.href = './pages/loginPage.html';
     };
@@ -29,7 +29,7 @@ window.onload = function ready() {
       });
     };
   }
-  if (document.querySelector('.signUpLink')) { // If on home page -> loginPage.html
+  if (document.querySelector('.signUpLink')) { // loginPage.html
     /** Home Page Traverse Code * */
     document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
       const elem = element;
@@ -104,6 +104,21 @@ window.onload = function ready() {
     };
   }
   if (document.querySelector("a[href='#Inbox']")) { // if on dashboard page -> inbox.html
+    //  Menu buttons
+    const inBtn = document.querySelector('.seek button.in');
+    const outBtn = document.querySelector('.seek button.out');
+    const menu = document.querySelector('.inbox .bottom .left');
+
+    inBtn.onclick = () => {
+      menu.classList.remove('show');
+      inBtn.classList.add('hidden');
+      outBtn.classList.remove('hidden');
+    };
+    outBtn.onclick = () => {
+      menu.classList.add('show');
+      inBtn.classList.remove('hidden');
+      outBtn.classList.add('hidden');
+    };
     // delete mail
     const deleteMail = (mailID, respondMessage = '') => {
       document.querySelector(mailID).classList.add('hidden');
