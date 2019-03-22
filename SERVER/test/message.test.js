@@ -36,7 +36,7 @@ describe('Messages', () => {
         obj = {
           subject: 'Holla',
           message: 'you won again',
-          receiverId: 2,
+          receiverEmail: 'johndoe@test.com',
         };
         chai.request(app)
           .post('/api/v1/messages')
@@ -51,7 +51,7 @@ describe('Messages', () => {
         obj = {
           subject: 'Howdy',
           message: 'how have you been',
-          receiverId: 1,
+          receiverEmail: 'ayomipo@test.com',
         };
         chai.request(app)
           .post('/api/v1/messages')
@@ -153,7 +153,7 @@ describe('Messages', () => {
           id: draftId2,
           subject: 'Holla',
           message: 'you won again',
-          receiverId: 1,
+          receiverId: 2,
         };
         chai.request(app)
           .put('/api/v1/messages')

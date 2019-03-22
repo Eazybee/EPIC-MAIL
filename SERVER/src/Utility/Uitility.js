@@ -9,9 +9,10 @@ class Utility {
   }
 
   static handleError(res, errorMessage, status = 400) {
-    res.status(status).send({
+    const error = errorMessage.replace(/"/g, "'");
+    res.status(status).json({
       status,
-      error: errorMessage,
+      error,
     });
   }
 }

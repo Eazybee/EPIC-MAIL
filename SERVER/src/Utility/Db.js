@@ -2,6 +2,15 @@ import client from '../Database/DbConnection';
 import 'babel-polyfill';
 
 class Database {
+  static async getUserId(email) {
+    const query = {
+      text: 'SELECT id FROM users WHERE email = $1',
+      values: [email],
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
+
   static async addUser(values) {
     const query = {
       text: 'INSERT INTO users(first_name, last_name, email, password, status) VALUES($1, $2, $3, $4, $5)',
@@ -162,8 +171,24 @@ class Database {
   }
 
   static async getGroups(userId) {
+    if (userId) {
+      const query = {
+        text: 'select * from groups where owner_id = $1',
+        values: [userId],
+      };
+      const result = await client.query(query);
+      return result.rows;
+    }
     const query = {
-      text: 'select * from groups where owner_id = $1',
+      text: 'select * from groups',
+    };
+    const result = await client.query(query);
+    return result.rows;
+  }
+
+  static async getAllGroups(userId) {
+    const query = {
+      text: 'select * from group_member where user_id = $1',
       values: [userId],
     };
     const result = await client.query(query);
@@ -210,12 +235,13 @@ class Database {
     let result = await client.query(query);
     if (result.rowCount === 0) {
       query = {
-        text: 'INSERT INTO group_member(group_id, user_id) VALUES($1, $2)',
+        text: 'INSERT INTO group_member(group_id, user_id) VALUES($1, $2)RETURNING *',
         values,
       };
       result = await client.query(query);
+      return result.rows;
     }
-    return result.rows;
+    return [];
   }
 
   static async getGroupMember(groupId, userId) {
@@ -240,6 +266,18 @@ class Database {
     };
     const result = await client.query(query);
     return result.rows;
+  }
+
+  static async getGroupOwner(id) {
+    if (id) {
+      const query = {
+        text: 'SELECT * FROM groups WHERE id = $1',
+        values: [id],
+      };
+      const result = await client.query(query);
+      return result.rows;
+    }
+    return [];
   }
 }
 export default Database;

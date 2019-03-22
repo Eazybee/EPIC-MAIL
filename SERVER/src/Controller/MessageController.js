@@ -219,11 +219,11 @@ class MessageController {
   static deleteMail(req, res) {
     const mailId = parseInt(req.params.id, 10);
     db.deleteMessage(mailId, req.deleteType).then(() => {
-      db.getMessages(mailId).then((rows2) => {
+      db.getMessages(mailId).then(() => {
         res.status(200).json({
           status: 200,
           data: [{
-            message: rows2[0].message,
+            message: 'Message deleted successful',
           }],
         });
       });

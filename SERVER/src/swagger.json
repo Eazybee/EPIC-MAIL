@@ -639,8 +639,8 @@
             "schema": {
               "type": "object",
               "properties": {
-                "userId": {
-                  "type": "integer"
+                "userEmail": {
+                  "type": "string"
                 }
               }
             }
@@ -947,8 +947,8 @@
         "message": {
           "type": "string"
         },
-        "receiverId": {
-          "type": "integer"
+        "receiverEmail": {
+          "type": "string"
         }
       }
     },

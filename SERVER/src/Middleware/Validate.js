@@ -8,20 +8,27 @@ import UserController from '../Controller/UserController';
 
 class Validate {
   static isLoggedIn(req, res, next) {
-    const errorMessage = 'Unauthorized';
     const token = req.headers.authorization;
-    if (UserController.user && token) {
-      jwt.verify(token, process.env.JWT_PRIVATE_SECRET, (err) => {
+    if (!UserController.user) {
+      const errorMessage = 'User is not logged in';
+      Utility.handleError(res, errorMessage, 401);
+    } else if (!token) {
+      const errorMessage = 'Authorization token required';
+      Utility.handleError(res, errorMessage, 401);
+    } else {
+      jwt.verify(token, process.env.JWT_PRIVATE_SECRET, (err, payload) => {
         if (err) {
-          Utility.handleError(res, errorMessage, 401);
-        } else if (UserController.token === token) {
-          next();
-        } else {
+          const errorMessage = 'Invalid authorization token';
           Utility.handleError(res, errorMessage, 401);
         }
+        if (payload) {
+          const {
+            id, email, firstName, lastName, password,
+          } = payload.payload;
+          UserController.user = new User(id, email, firstName, lastName, password);
+          next();
+        }
       });
-    } else {
-      Utility.handleError(res, errorMessage, 401);
     }
   }
 
@@ -63,54 +70,55 @@ class Validate {
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getUsers().then((users) => {
+        let user = users.find(dbuser => dbuser.email === req.body.email);
+        if (user) {
+          bcrypt.compare(req.body.password, user.password, (err, result) => {
+            if (result) {
+              const {
+                id, email, password,
+              } = user;
+              const firstName = user.first_name;
+              const lastName = user.last_name;
+              user = new User(id, email, firstName, lastName, password);
+              req.user = user;
+              next();
+            }
+            if (err) {
+              const errorMessage = 'Unauthorized';
+              Utility.handleError(res, errorMessage, 401);
+            }
+          });
+        } else {
+          const errorMessage = 'Unauthorized';
+          Utility.handleError(res, errorMessage, 401);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
     }
-
-    db.getUsers().then((users) => {
-      let user = users.find(dbuser => dbuser.email === req.body.email);
-      if (user) {
-        bcrypt.compare(req.body.password, user.password, (err, result) => {
-          if (result) {
-            const {
-              id, email, password,
-            } = user;
-            const firstName = user.first_name;
-            const lastName = user.last_name;
-            user = new User(id, email, firstName, lastName, password);
-            req.user = user;
-            next();
-          } else {
-            const errorMessage = 'Unauthorized';
-            Utility.handleError(res, errorMessage, 401);
-          }
-        });
-      } else {
-        const errorMessage = 'Unauthorized';
-        Utility.handleError(res, errorMessage, 401);
-      }
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
-    });
   }
 
   static sendMail(req, res, next) {
     const schema = Joi.object().keys({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      parentMessageId: Joi.number(),
-      receiverId: Joi.number().required(),
+      receiverEmail: Joi.string().email({ minDomainAtoms: 2 }).required(),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      const receiverId = parseInt(req.body.receiverId, 10);
-      db.getUsers(receiverId).then((rows) => {
+      const { receiverEmail } = req.body;
+      db.getUserId(receiverEmail).then((rows) => {
         if (rows.length === 1) {
+          req.body.receiverId = rows[0].id;
           next();
         } else {
-          const errorMessage = 'User with this receiver Id does not exist';
+          const errorMessage = `User with email ${receiverEmail} does not exist!`;
           Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
@@ -124,7 +132,7 @@ class Validate {
     const schema = Joi.object().keys({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      receiverId: Joi.number(),
+      receiverEmail: Joi.string().email({ minDomainAtoms: 2 }),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) {
@@ -201,7 +209,7 @@ class Validate {
           if (loggedInUser.getId() === receiverId) {
             next();
           } else {
-            const errorMessage = 'Unauthorized';
+            const errorMessage = 'Message does not exist!';
             Utility.handleError(res, errorMessage, 401);
           }
         } else {
@@ -267,21 +275,6 @@ class Validate {
     }
   }
 
-  static isAdmin(req, res, next) {
-    db.getUsers(UserController.user.getId()).then((users) => {
-      const user = users[0];
-      if (user.status !== 'admin') {
-        const errorMessage = 'Unauthorized';
-        Utility.handleError(res, errorMessage, 401);
-      } else {
-        next();
-      }
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
-    });
-  }
-
   static updateGroupName(req, res, next) {
     const schema = Joi.object().keys({
       id: Joi.number().required(),
@@ -329,10 +322,18 @@ class Validate {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getGroups(UserController.user.getId()).then((groups) => {
-        const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+      db.getGroups().then((allGroups) => {
+        let groupExist = allGroups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
-          next();
+          db.getGroups(UserController.user.getId()).then((groups) => {
+            groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+            if (groupExist) {
+              next();
+            } else {
+              const errorMessage = 'Only group owner can delete a group';
+              Utility.handleError(res, errorMessage, 404);
+            }
+          });
         } else {
           const errorMessage = 'Group with the id does not exist';
           Utility.handleError(res, errorMessage, 404);
@@ -349,7 +350,7 @@ class Validate {
       id: Joi.number().required(),
     });
     const schema2 = Joi.object().keys({
-      userId: Joi.number().required(),
+      userEmail: Joi.string().email({ minDomainAtoms: 2 }).required(),
     });
     const { error } = Joi.validate(req.params, schema);
     const error2 = Joi.validate(req.body, schema2);
@@ -360,15 +361,27 @@ class Validate {
       const errorMessage = error2.error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getGroups(UserController.user.getId()).then((groups) => {
-        const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+      db.getGroups().then((allGroups) => {
+        let groupExist = allGroups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
-          const userId = parseInt(req.body.userId, 10);
-          db.getUsers(userId).then((rows) => {
-            if (rows.length === 1) {
-              next();
+          db.getGroups(UserController.user.getId()).then((groups) => {
+            groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+            if (groupExist) {
+              const { userEmail } = req.body;
+              db.getUserId(userEmail).then((rows) => {
+                if (rows.length === 1) {
+                  req.body.userId = rows[0].id;
+                  next();
+                } else {
+                  const errorMessage = `User with email ${userEmail} does not exist!`;
+                  Utility.handleError(res, errorMessage, 400);
+                }
+              }).catch((err) => {
+                const errorMessage = `SERVER ERROR: ${err.message}`;
+                Utility.handleError(res, errorMessage, 500);
+              });
             } else {
-              const errorMessage = 'User with this id does not exist';
+              const errorMessage = 'Only Group owners are allowed to add members';
               Utility.handleError(res, errorMessage, 400);
             }
           });
@@ -394,15 +407,23 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       const groupId = parseInt(req.params.groupId, 10);
-      db.getGroups(UserController.user.getId()).then((groups) => {
-        const groupExist = groups.find(group => group.id === groupId);
+      db.getGroups().then((allGroups) => {
+        let groupExist = allGroups.find(group => group.id === groupId);
         if (groupExist) {
-          const userId = parseInt(req.params.userId, 10);
-          db.getGroupMember(groupId, userId).then((rows) => {
-            if (rows.length === 1) {
-              next();
+          db.getGroups(UserController.user.getId()).then((groups) => {
+            groupExist = groups.find(group => group.id === groupId);
+            if (groupExist) {
+              const userId = parseInt(req.params.userId, 10);
+              db.getGroupMember(groupId, userId).then((rows) => {
+                if (rows.length === 1) {
+                  next();
+                } else {
+                  const errorMessage = 'User with this id does not exist in this group';
+                  Utility.handleError(res, errorMessage, 400);
+                }
+              });
             } else {
-              const errorMessage = 'User with this id does not exist in this group';
+              const errorMessage = 'Only group owner can delete group member';
               Utility.handleError(res, errorMessage, 400);
             }
           });
@@ -424,7 +445,6 @@ class Validate {
     const schema2 = Joi.object().keys({
       subject: Joi.string().required(),
       message: Joi.string().required(),
-      parentMessageId: Joi.number(),
     });
     const { error } = Joi.validate(req.params, schema);
     const error2 = Joi.validate(req.body, schema2);
@@ -435,9 +455,9 @@ class Validate {
       const errorMessage = error2.error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getGroups(UserController.user.getId()).then((groups) => {
+      db.getAllGroups(UserController.user.getId()).then((groups) => {
         const groupId = parseInt(req.params.id, 10);
-        const groupExist = groups.find(group => group.id === groupId);
+        const groupExist = groups.find(group => group.group_id === groupId);
         if (groupExist) {
           db.getGroupMember(groupId).then((rows) => {
             if (rows.length > 0) {
