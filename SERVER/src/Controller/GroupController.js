@@ -4,7 +4,7 @@ import UserController from './UserController';
 
 class GroupController {
   static createGroup(req, res) {
-    const values = [
+    let values = [
       UserController.user.getId(),
       req.body.name,
     ];
@@ -19,6 +19,9 @@ class GroupController {
             role: 'admin',
           }],
         });
+
+        values = [group.id, UserController.user.getId()];
+        db.addGroupMember(values);
       }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
@@ -27,16 +30,36 @@ class GroupController {
   }
 
   static getGroups(req, res) {
-    db.getGroups(UserController.user.getId()).then((groups) => {
-      const data = groups.map(group => ({
-        id: group.id,
-        name: group.name,
-        role: 'admin',
-      }));
-      res.status(200).json({
-        status: 200,
-        data,
-      });
+    db.getAllGroups(UserController.user.getId()).then((groups) => {
+      let count = 0;
+      const data = [];
+      if (groups.length > 0) {
+        groups.forEach((group) => {
+          db.getGroupOwner(group.group_id).then((rows) => {
+            count += 1;
+            data.push({
+              id: group.group_id,
+              name: rows[0].name,
+              userId: rows[0].owner_id,
+            });
+            if (count === groups.length) {
+              res.status(200).json({
+                status: 200,
+                data,
+              });
+            }
+          });
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'You don\'t belong to any group',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -87,15 +110,21 @@ class GroupController {
       req.body.userId,
     ];
 
-    db.addGroupMember(values).then(() => {
-      res.status(201).json({
-        status: 201,
-        data: [{
-          id: req.params.id,
-          userId: req.body.userId,
-          role: 'member',
-        }],
-      });
+    db.addGroupMember(values).then((rows) => {
+      if (rows[0]) {
+        res.status(201).json({
+          status: 201,
+          data: [{
+            id: req.params.id,
+            userId: req.body.userId,
+            role: 'member',
+          }],
+        });
+      } else {
+        const { userEmail } = req.body;
+        const errorMessage = `User with email ${userEmail}  already exist in this group`;
+        Utility.handleError(res, errorMessage, 400);
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -107,12 +136,16 @@ class GroupController {
       req.params.groupId,
       req.params.userId,
     ];
-    db.deleteGroupMember(values).then(() => {
-      res.status(200).json({
-        status: 200,
-        data: [{
-          message: `Member ${req.params.userId}  deleted`,
-        }],
+    const userId = parseInt(req.params.userId, 10);
+    db.getUsers(userId).then((users) => {
+      const user = users[0];
+      db.deleteGroupMember(values).then(() => {
+        res.status(200).json({
+          status: 200,
+          data: [{
+            message: `Member with email ${user.email}  deleted`,
+          }],
+        });
       });
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
