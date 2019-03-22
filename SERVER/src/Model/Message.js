@@ -1,16 +1,16 @@
-import Joi from 'joi';
-
 class Message {
   constructor(messageObj) {
-    Message.counter += 1;
-    this.id = Message.counter;
-    this.createdOn = new Date().toLocaleString('en-US', { timeZone: 'UTC' });
+    this.createdOn = new Date();
     this.subject = messageObj.subject; // req
     this.message = messageObj.message; // req
     this.senderId = messageObj.senderId; // req   The owner is also the sender
     this.receiverId = messageObj.receiverId || 0;
     this.parentMessageId = messageObj.parentMessageId || 0;
     this.status = 'draft';
+    this.deletedFor = 'non';
+    Message.counter = (Message.counter + 1) || 0;
+    this.id = Message.counter;
+    Message.messages = Message.messages || [];
     Message.messages[Message.counter] = this;
   }
 
@@ -51,11 +51,6 @@ class Message {
   }
 
   setParentMessageId(parentMessageId) {
-    const schema = Joi.number().required();
-    const { error } = Joi.validate(parentMessageId, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     this.parentMessageId = parentMessageId;
   }
 
@@ -75,13 +70,9 @@ class Message {
     this.receiverId = receiverId;
   }
 
-  isRead() {
-    return this.status === 'read';
-  }
-
   static getMails(mailId) {
     if (mailId) {
-      if (mailId === 0 || !Message.messages[mailId]) {
+      if (!Message.messages[mailId]) {
         throw new Error('Mail does not exist');
       }
       return [Message.messages[mailId]];
@@ -89,6 +80,4 @@ class Message {
     return Message.messages.filter(message => message);
   }
 }
-Message.counter = 0;
-Message.messages = [];
 export default Message;

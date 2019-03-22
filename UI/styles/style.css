@@ -37,6 +37,7 @@ input[type^="rad"]{
 .loginPage .sign.hidden, 
 .loginPage .sign .hidden,
 .right-group .groups .hidden,
+.seek button.hidden,
 .inbox .right .inbox-view > div.hidden{
     display: none;
 }
@@ -73,7 +74,7 @@ body{
 .alert .title-bar{
     display: flex;
     justify-content: space-between;
-    background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);;
+    background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
 }
 .alert .title-bar label{
     font-size: 1.5em;
@@ -104,11 +105,18 @@ body{
 }
 .slider{
     height: 100vh;
+    background-image: url('../img/email-background-images-1.v1.jpg');
+    background-position: left;
 }
-.slider img, .slider div{
+.slider div{
     position: absolute;
     width: 100%;
     height: 100%;  
+}
+
+.slider div:first-child{
+    background: #576CA8;
+    opacity: .4;
 }
 
 .slider div{
@@ -150,6 +158,7 @@ body{
     color:white;
     padding: .5em;
     width: 8em;
+    border-width: .15em;
 }
 .slider .btns button:hover, .slider .btns button:active{
     border: .15em solid lightblue;
@@ -254,35 +263,49 @@ body{
     overflow: hidden;
 }
 .inbox >.top{
-    display: flex;
-    justify-content: space-between;
     padding: .8em;
     border-bottom: lightblue solid 5px;
     background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
     
 }
-.inbox .top div:first-child{
+.inbox >.top >div:first-child{
+    display: flex;
+    justify-content: space-between;
+}
+.inbox .top >div:first-child > div:first-child{
     display: flex;
     flex-flow: column;
 }
-.inbox .top h1{
+.inbox .top >div:first-child h1{
     font-size:2em;
     font-family: cursive;
 }
-.inbox .top h1, .inbox .top p{
+.inbox .top >div:first-child h1, .inbox .top p{
     color: white;
 }
-.inbox .top div button{
+.inbox .top >div:first-child div button{
     padding: .6em;
     background: lightblue;
     color: red;
     font-weight: bold;
     border-color: #0099FF;
 }
-.inbox .top div button:hover{
+.inbox .top >div:first-child div
+button:hover{
     transition: 1s;
     background: red;
     color: white;
+}
+.inbox .seek{
+    display: none
+}
+.seek button{
+    width: 2em;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    border: solid .2em lightblue;
+    top: .5em
 }
 .inbox .bottom {
     display: flex;
@@ -292,9 +315,10 @@ body{
 }
 
 .inbox .bottom .left{
+    transition: 1s;
     width:20%;
     border-right:lightblue solid .3em;
-    height: 100vh;
+    height: 110vh;
 }
 .inbox .bottom ul{
     width:100%;
@@ -319,8 +343,10 @@ body{
     transition: .5s;
 }
 .inbox .bottom .right{
+    transition: 1s;
     width: 100%;
     padding: 1em;
+    padding-bottom: 4em;
     overflow: auto;
 }
 .inbox .bottom .toolbar{
@@ -395,14 +421,13 @@ body{
     padding: .8em;
     background: lightblue;
 }
-.inbox .view-message .top >div{
-   /* display: flex;
-    flex-flow: row wrap;*/
-}
 .inbox .view-message .top img{
     width:3em;
     height:3em;
     margin-right: 1em;
+}
+.inbox .view-message .top p:nth-child(2){
+    color: #194759;
 }
 .inbox .view-message h2{
     font-size: 1.5em;

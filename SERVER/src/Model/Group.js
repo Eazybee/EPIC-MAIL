@@ -1,5 +1,3 @@
-import Joi from 'joi';
-
 class Group {
   constructor(groupName, ownerId, groupMembers = []) {
     Group.counter += 1;
@@ -24,11 +22,6 @@ class Group {
   }
 
   addMembers(membersId) {
-    const schema = Joi.array().required();
-    const { error } = Joi.validate(membersId, schema);
-    if (error) {
-      throw new Error(error.details[0].message);
-    }
     membersId.forEach((memberId) => {
       this.groupMembers.push(memberId);
     });
@@ -38,6 +31,4 @@ class Group {
     return this.groupMembers;
   }
 }
-Group.counter = 0;
-Group.groups = [];
 export default Group;
