@@ -47,7 +47,7 @@ describe('user', () => {
           .post('/api/v1/auth/signup')
           .send(obj)
           .end((err, res) => {
-            expect(res).to.have.status(400);
+            expect(res).to.have.status(409);
             done();
           });
       });

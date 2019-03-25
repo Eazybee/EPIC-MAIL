@@ -102,20 +102,31 @@ class MessageController {
   static getInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId());
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your inbox is empty!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -125,20 +136,31 @@ class MessageController {
   static getUnreadInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId() && mail.status === 'unread');
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any unread message!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -148,20 +170,31 @@ class MessageController {
   static getReadInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId() && mail.status === 'read');
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any read message!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -170,21 +203,32 @@ class MessageController {
 
   static getSentMail(req, res) {
     db.getSents(UserController.user.getId()).then((mails) => {
-      const sent = mails.map(mail => ({
-        id: mail.id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: 'sent',
-      }));
+      if (mails.length !== 0) {
+        const sent = mails.map(mail => ({
+          id: mail.id,
+          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: 'sent',
+        }));
 
-      res.status(200).json({
-        status: 200,
-        data: sent,
-      });
+        res.status(200).json({
+          status: 200,
+          data: sent,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any sent message!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -220,8 +264,8 @@ class MessageController {
     const mailId = parseInt(req.params.id, 10);
     db.deleteMessage(mailId, req.deleteType).then(() => {
       db.getMessages(mailId).then(() => {
-        res.status(200).json({
-          status: 200,
+        res.status(204).json({
+          status: 204,
           data: [{
             message: 'Message deleted successful',
           }],

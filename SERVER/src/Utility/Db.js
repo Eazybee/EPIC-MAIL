@@ -13,11 +13,11 @@ class Database {
 
   static async addUser(values) {
     const query = {
-      text: 'INSERT INTO users(first_name, last_name, email, password, status) VALUES($1, $2, $3, $4, $5)',
+      text: 'INSERT INTO users(first_name, last_name, email, password, status) VALUES($1, $2, $3, $4, $5) RETURNING *',
       values,
     };
     const result = await client.query(query);
-    return result.rowCount;
+    return result.rows;
   }
 
   static async getUsers(id) {

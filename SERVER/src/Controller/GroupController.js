@@ -92,8 +92,8 @@ class GroupController {
 
     db.deleteGroup(groudId).then((rows) => {
       const message = `Group ${rows[0].name} deleted `;
-      res.status(200).json({
-        status: 200,
+      res.status(204).json({
+        status: 204,
         data: [{
           message,
         }],
@@ -140,8 +140,8 @@ class GroupController {
     db.getUsers(userId).then((users) => {
       const user = users[0];
       db.deleteGroupMember(values).then(() => {
-        res.status(200).json({
-          status: 200,
+        res.status(204).json({
+          status: 204,
           data: [{
             message: `Member with email ${user.email}  deleted`,
           }],
