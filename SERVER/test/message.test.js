@@ -340,12 +340,12 @@ describe('Messages', () => {
 
   describe('delete', () => {
     describe('/api/v1/messages/1', () => {
-      it('should return status 200', (done) => {
+      it('should return status 204', (done) => {
         chai.request(app)
           .delete('/api/v1/messages/1')
           .set('authorization', authToken)
           .end((err, res) => {
-            expect(res).to.have.status(200);
+            expect(res).to.have.status(204);
             done();
           });
       });

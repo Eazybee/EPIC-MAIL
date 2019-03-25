@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import Utility from '../Utility/Uitility';
 import db from '../Utility/Db';
-
+import User from '../Model/User';
 
 class UserController {
   static signUp(req, res) {
@@ -10,10 +10,12 @@ class UserController {
     } = req.body;
     const saltRounds = 10;
     bcrypt.hash(password, saltRounds, (err, hash) => {
-      const values = [firstName, lastName, email, hash, 'user'];
-      db.addUser(values).then((row) => {
-        if (row > 0) {
-          const token = Utility.getToken(values);
+      const values = [firstName, lastName, email.toLowerCase(), hash, 'user'];
+      db.addUser(values).then((rows) => {
+        if (rows.length > 0) {
+          const { id } = rows[0];
+          const user = new User(id, email.toLowerCase(), firstName, lastName, password);
+          const token = Utility.getToken(user, '1s');
           res.status(201).json({
             status: 201,
             data: [{

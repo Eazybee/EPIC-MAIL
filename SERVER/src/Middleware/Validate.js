@@ -34,7 +34,7 @@ class Validate {
 
   static signup(req, res, next) {
     db.getUsers().then((users) => {
-      const userExist = users.some(user => user.email === req.body.email);
+      const userExist = users.some(user => user.email === req.body.email.toLowerCase());
       const schema = Joi.object().keys({
         email: Joi.string().email({ minDomainAtoms: 2 }).required(),
         firstName: Joi.string().required(),
@@ -51,7 +51,7 @@ class Validate {
         Utility.handleError(res, errorMessage, 400);
       } else if (userExist) {
         const errorMessage = 'User with this email exist';
-        Utility.handleError(res, errorMessage, 400);
+        Utility.handleError(res, errorMessage, 409);
       } else {
         next();
       }
@@ -72,7 +72,7 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       db.getUsers().then((users) => {
-        let user = users.find(dbuser => dbuser.email === req.body.email);
+        let user = users.find(dbuser => dbuser.email === req.body.email.toLowerCase());
         if (user) {
           bcrypt.compare(req.body.password, user.password, (err, result) => {
             if (result) {
@@ -81,12 +81,12 @@ class Validate {
               } = user;
               const firstName = user.first_name;
               const lastName = user.last_name;
-              user = new User(id, email, firstName, lastName, password);
+              user = new User(id, email.toLowerCase(), firstName, lastName, password);
               req.user = user;
               next();
             }
             if (err) {
-              const errorMessage = 'Unauthorized';
+              const errorMessage = 'Unauthorized: Invalid Credentials';
               Utility.handleError(res, errorMessage, 401);
             }
           });
@@ -197,7 +197,7 @@ class Validate {
     const schema = Joi.number().required();
     const { error } = Joi.validate(mailId, schema);
     if (error) {
-      const errorMessage = error.details[0].message;
+      const errorMessage = '\'id\' must be a number';
       Utility.handleError(res, errorMessage, 400);
     } else {
       db.getMessages(mailId, 'inbox').then((rows) => {
@@ -225,8 +225,10 @@ class Validate {
 
   static deleteMailId(req, res, next) {
     const mailId = parseInt(req.params.id, 10);
-    const schema = Joi.number().required();
-    const { error } = Joi.validate(mailId, schema);
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.params, schema);
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
