@@ -91,7 +91,7 @@ class Validate {
             }
           });
         } else {
-          const errorMessage = 'Unauthorized';
+          const errorMessage = 'Unauthorized: Invalid Credentials';
           Utility.handleError(res, errorMessage, 401);
         }
       }).catch((err) => {

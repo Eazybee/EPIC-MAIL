@@ -105,14 +105,25 @@ window.onload = function ready() {
         alertMessage('Enter email address');
       } else if (password.value.trim() === '') {
         password.value = '';
-        alertMessage('Enter Password');
+        alertMessage('Enter password');
       } else {
+        const obj = {
+          email: email.value,
+          password: password.value,
+        };
         email.value = '';
         password.value = '';
-        alertMessage('Login Successful');
-        setTimeout(() => {
-          window.location.href = './inbox.html';
-        }, 1000);
+        postData('POST', '/auth/login', obj)
+          .then((data) => {
+            const res = data;
+            if ('data' in res && 'token' in res.data[0]) {
+              localStorage.setItem('auth', res.data[0].token);
+              alertMessage('Login Succesful');
+              window.location.href = './inbox.html';
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       }
       return false;
     };
@@ -136,7 +147,7 @@ window.onload = function ready() {
             const res = data;
             if ('data' in res && 'token' in res.data[0]) {
               alertMessage('Account created Succesful!');
-              setTimeout(() => { window.location.reload(); }, 200);
+              window.location.reload();
             }
           }).catch((error) => {
             alertMessage(error.message);
@@ -146,6 +157,10 @@ window.onload = function ready() {
     };
   }
   if (document.querySelector("a[href='#Inbox']")) { // if on dashboard page -> inbox.html
+    // Check if user is logged in
+    if (!localStorage.getItem('auth')) {
+      window.location.replace('./loginPage.html');
+    }
     //  Menu buttons
     const inBtn = document.querySelector('.seek button.in');
     const outBtn = document.querySelector('.seek button.out');
@@ -245,10 +260,9 @@ window.onload = function ready() {
 
     /** Log Out * */
     document.querySelector('.inbox .top div button').onclick = () => {
+      localStorage.removeItem('auth');
       alertMessage('See you soon buddy :-)');
-      setTimeout(() => {
-        window.location.assign('./loginPage.html');
-      }, 1500);
+      window.location.replace('./loginPage.html');
     };
 
     /** Send mail * */
