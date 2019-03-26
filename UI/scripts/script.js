@@ -1,4 +1,32 @@
 window.onload = function ready() {
+  // Code template credit to Mozila: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+// Example POST method implementation:
+
+  const postData = async (method = 'GET', path, data = {}, auth) => {
+    if (!path) {
+      throw new Error('Path not defined!');
+    }
+    const url = `http://localhost:3000/api/v1${path}`;
+    const headers = new Headers();
+    headers.append('Content-Type', 'application/json');
+    if (auth) {
+      headers.append('authorization', localStorage.getItem('auth'));
+    }
+    // Default options are marked with *
+    const result = await fetch(url, {
+      method, // *GET, POST, PUT, DELETE, etc.
+      headers,
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    }).then(async (response) => {
+      const res = await response.json(); console.log(response);
+      if (response.ok) {
+        return res; // parses JSON response into native Javascript objects
+      }
+      throw new Error(res.error);
+    });
+
+    return result;
+  };
   const alertMessage = (message) => {
     document.querySelector('.alert p').innerHTML = message;
     document.querySelectorAll('.modal, .alert').forEach((element) => {
@@ -96,9 +124,23 @@ window.onload = function ready() {
       if (password.value !== rePassword.value) {
         alertMessage('Password do no match');
       } else {
-        document.querySelector('#signUpForm');
-        alertMessage('Registration Sucessful!');
-        setTimeout(() => { window.location.reload(); }, 2000);
+        const signUpForm = document.querySelector('#signUpForm');
+        const obj = {
+          firstName: signUpForm.signupFirstName.value,
+          email: signUpForm.signupEmail.value,
+          password: signUpForm.signupPassword.value,
+          rePassword: signUpForm.signupRePassword.value,
+        };
+        postData('POST', '/auth/signup', obj)
+          .then((data) => {
+            const res = data;
+            if ('data' in res && 'token' in res.data[0]) {
+              alertMessage('Account created Succesful!');
+              setTimeout(() => { window.location.reload(); }, 200);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       }
       return false;
     };
