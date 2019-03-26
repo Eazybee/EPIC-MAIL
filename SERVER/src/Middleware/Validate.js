@@ -38,7 +38,7 @@ class Validate {
       const schema = Joi.object().keys({
         email: Joi.string().email({ minDomainAtoms: 2 }).required(),
         firstName: Joi.string().required(),
-        lastName: Joi.string().required(),
+        lastName: Joi.string(),
         password: Joi.string().required(),
         rePassword: Joi.string().required(),
       });
