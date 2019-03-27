@@ -75,7 +75,10 @@ class Validate {
         let user = users.find(dbuser => dbuser.email === req.body.email.toLowerCase());
         if (user) {
           bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if (result) {
+            if (err) {
+              const errorMessage = 'Unauthorized: Invalid Credentials';
+              Utility.handleError(res, errorMessage, 401);
+            } else if (result) {
               const {
                 id, email, password,
               } = user;
@@ -84,8 +87,7 @@ class Validate {
               user = new User(id, email.toLowerCase(), firstName, lastName, password);
               req.user = user;
               next();
-            }
-            if (err) {
+            } else {
               const errorMessage = 'Unauthorized: Invalid Credentials';
               Utility.handleError(res, errorMessage, 401);
             }

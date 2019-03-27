@@ -136,7 +136,7 @@ class Database {
   }
 
   static async getInboxes(id) {
-    const text = 'select a.msg_id, a.receiver_id, a.status, a.date_time, b.subject, b.message, b.owner_id from inboxes a INNER JOIN messages b ON a.msg_id = b.id and a.status !=$1';
+    const text = 'select a.msg_id, a.receiver_id, a.status, a.date_time, b.subject, b.message, b.owner_id, c.email from inboxes a INNER JOIN messages b ON a.msg_id = b.id and a.status !=$1 INNER JOIN users c ON b.owner_id = c.id ORDER BY a.msg_id DESC';
     if (id) {
       const query = {
         text: `${text} and a.msg_id =$2`,
