@@ -214,7 +214,7 @@ window.onload = function ready() {
 
     /** Left-panel-Menus Event * */
     document.querySelector("a[href='#Inbox']").onclick = async () => {
-      postData('GET', '/messages', null, true)
+      await postData('GET', '/messages', null, true)
         .then(async (response) => {
           const res = await response.json();
           if (parseInt(response.status, 10) === 401) {
@@ -266,7 +266,45 @@ window.onload = function ready() {
       showCompose();
       loadGroup();
     };
-    document.querySelector("a[href='#Sent']").onclick = () => {
+    document.querySelector("a[href='#Sent']").onclick = async () => {
+      await postData('GET', '/messages/sent', null, true)
+        .then(async (response) => {
+          const res = await response.json();
+          if (parseInt(response.status, 10) === 401) {
+            logOut();
+          } else if ('error' in res) {
+            throw new Error(res.error);
+          } else if ('data' in res) {
+            if ('id' in res.data[0]) {
+              const divElement = document.createElement('div');
+              const options = {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+              };
+              res.data.forEach((message) => {
+                const tempDiv = document.createElement('div');
+                tempDiv.classList.add(message.status);
+                tempDiv.innerHTML = `
+                <input type="checkbox" value="${message.id}">
+                <p>${message.receiverEmail}</p>
+                <div>
+                  <p class="subject">${message.subject}</p>
+                  <p class="msg">${message.message}</p>
+                </div>
+                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+                divElement.appendChild(tempDiv);
+              });
+              document.querySelector('.right-sent .inbox-view').innerHTML = divElement.innerHTML;
+            } else {
+              //  res.data[0].message;
+            }
+          }
+        }).catch((error) => {
+          alertMessage(error.message);
+        });
+
       document.querySelectorAll('.right  > div:not(.right-sent)').forEach((element) => {
         element.classList.add('hidden');
       });
