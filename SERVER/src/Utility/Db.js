@@ -156,9 +156,9 @@ class Database {
   static async getSents(id) {
     if (id) {
       const query = {
-        text: `select a.id, a.owner_id, a.subject, a.message, b.date_time, c.receiver_id 
+        text: `select a.id, a.owner_id, a.subject, a.message, b.date_time, c.receiver_id, d.email 
         from messages a inner join sents b on a.id = b.msg_id and b.sender_id = $1 and b.status =$2
-        inner join inboxes c on  a.id = c.msg_id`,
+        inner join inboxes c on  a.id = c.msg_id inner join users d on d.id = c.receiver_id ORDER BY b.msg_id DESC`,
         values: [id, 'sent'],
       };
       const result = await client.query(query);

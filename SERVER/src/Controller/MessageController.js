@@ -207,13 +207,14 @@ class MessageController {
       if (mails.length !== 0) {
         const sent = mails.map(mail => ({
           id: mail.id,
-          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          createdOn: mail.date_time,
           subject: mail.subject,
           message: mail.message,
           senderId: mail.owner_id,
           receiverId: mail.receiver_id,
           parentMessageId: null,
           status: 'sent',
+          receiverEmail: mail.email,
         }));
 
         res.status(200).json({
