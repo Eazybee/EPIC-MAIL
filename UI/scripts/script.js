@@ -2,7 +2,7 @@ window.onload = function ready() {
   // Code template credit to Mozila: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
 // Example POST method implementation:
 
-  const postData = async (method = 'GET', path, data = {}, auth) => {
+  const postData = async (method = 'GET', path, data, auth) => {
     if (!path) {
       throw new Error('Path not defined!');
     }
@@ -12,21 +12,24 @@ window.onload = function ready() {
     if (auth) {
       headers.append('authorization', localStorage.getItem('auth'));
     }
-    // Default options are marked with *
-    const result = await fetch(url, {
+    const init = {
       method, // *GET, POST, PUT, DELETE, etc.
       headers,
-      body: JSON.stringify(data), // body data type must match "Content-Type" header
-    }).then(async (response) => {
-      const res = await response.json(); console.log(response);
-      if (response.ok) {
-        return res; // parses JSON response into native Javascript objects
-      }
-      throw new Error(res.error);
-    });
+    };
+
+    if (data) {
+      init.body = JSON.stringify(data);// body data type must match "Content-Type" header
+    }
+
+    const result = await fetch(url, init).then(response => response);
 
     return result;
   };
+  const logOut = () => {
+    localStorage.removeItem('auth');
+    window.location.replace('./loginPage.html');
+  };
+
   const alertMessage = (message) => {
     document.querySelector('.alert p').innerHTML = message;
     document.querySelectorAll('.modal, .alert').forEach((element) => {
@@ -57,6 +60,7 @@ window.onload = function ready() {
       });
     };
   }
+
   if (document.querySelector('.signUpLink')) { // loginPage.html
     /** Home Page Traverse Code * */
     document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
@@ -111,14 +115,17 @@ window.onload = function ready() {
           email: email.value,
           password: password.value,
         };
-        email.value = '';
-        password.value = '';
         postData('POST', '/auth/login', obj)
-          .then((data) => {
-            const res = data;
+          .then(async (response) => {
+            const res = await response.json();
+            email.value = '';
+            password.value = '';
+            if ('error' in res) {
+              throw new Error(res.error);
+            }
             if ('data' in res && 'token' in res.data[0]) {
               localStorage.setItem('auth', res.data[0].token);
-              alertMessage('Login Succesful');
+              alertMessage('Login Successful');
               window.location.href = './inbox.html';
             }
           }).catch((error) => {
@@ -143,8 +150,15 @@ window.onload = function ready() {
           rePassword: signUpForm.signupRePassword.value,
         };
         postData('POST', '/auth/signup', obj)
-          .then((data) => {
-            const res = data;
+          .then(async (response) => {
+            const res = await response.json();
+            signUpForm.signupFirstName.value = '';
+            signUpForm.signupEmail.value = '';
+            signUpForm.signupPassword.value = '';
+            signUpForm.signupRePassword.value = '';
+            if ('error' in res) {
+              throw new Error(res.error);
+            }
             if ('data' in res && 'token' in res.data[0]) {
               alertMessage('Account created Succesful!');
               window.location.reload();
@@ -156,6 +170,7 @@ window.onload = function ready() {
       return false;
     };
   }
+
   if (document.querySelector("a[href='#Inbox']")) { // if on dashboard page -> inbox.html
     // Check if user is logged in
     if (!localStorage.getItem('auth')) {
@@ -176,6 +191,7 @@ window.onload = function ready() {
       inBtn.classList.remove('hidden');
       outBtn.classList.add('hidden');
     };
+
     // delete mail
     const deleteMail = (mailID, respondMessage = '') => {
       document.querySelector(mailID).classList.add('hidden');
@@ -197,7 +213,45 @@ window.onload = function ready() {
     };
 
     /** Left-panel-Menus Event * */
-    document.querySelector("a[href='#Inbox']").onclick = () => {
+    document.querySelector("a[href='#Inbox']").onclick = async () => {
+      postData('GET', '/messages', null, true)
+        .then(async (response) => {
+          const res = await response.json();
+          if (parseInt(response.status, 10) === 401) {
+            logOut();
+          } else if ('error' in res) {
+            throw new Error(res.error);
+          } else if ('data' in res) {
+            if ('id' in res.data[0]) {
+              const divElement = document.createElement('div');
+              const options = {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+              };
+              res.data.forEach((message) => {
+                const tempDiv = document.createElement('div');
+                tempDiv.classList.add(message.status);
+                tempDiv.innerHTML = `
+                <input type="checkbox" value="${message.id}">
+                <p>${message.senderEmail}</p>
+                <div>
+                  <p class="subject">${message.subject}</p>
+                  <p class="msg">${message.message}</p>
+                </div>
+                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+                divElement.appendChild(tempDiv);
+              });
+              document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
+            } else {
+              //  res.data[0].message;
+            }
+          }
+        }).catch((error) => {
+          alertMessage(error.message);
+        });
+
       document.querySelectorAll('.right > div:not(.right-inbox)').forEach((element) => {
         element.classList.add('hidden');
       });
@@ -260,9 +314,8 @@ window.onload = function ready() {
 
     /** Log Out * */
     document.querySelector('.inbox .top div button').onclick = () => {
-      localStorage.removeItem('auth');
       alertMessage('See you soon buddy :-)');
-      window.location.replace('./loginPage.html');
+      logOut();
     };
 
     /** Send mail * */
