@@ -7,7 +7,7 @@ const router = express.Router();
 //  POST
 
 router.post('/', Validate.isLoggedIn, Validate.sendMail, MessageController.sendMail); // send message
-router.post('/save', Validate.isLoggedIn, Validate.saveDraft, MessageController.saveDraft); // save draft
+router.post('/draft', Validate.isLoggedIn, Validate.saveDraft, MessageController.saveDraft); // save draft
 
 //  GET
 router.get('/', Validate.isLoggedIn, MessageController.getInbox); //  get inbox

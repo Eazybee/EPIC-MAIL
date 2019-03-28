@@ -432,7 +432,7 @@ window.onload = function ready() {
       const msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
       let mailTo = '';
       let mailToType = '';
-      let mailID = '';
+      let receiverEmail = null;
       if (topic.trim() === '') {
         alertMessage('Subject cannot be empty');
       } else if (msgBody.trim() === '') {
@@ -441,6 +441,7 @@ window.onload = function ready() {
         document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
           if (radioButton.checked && radioButton.value === 'Individual') {
             mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
+            receiverEmail = mailTo;
             mailToType = 'Individual';
           } else if (radioButton.checked && radioButton.value === 'Group') {
             const selectElement = document.querySelector('.inbox .right-compose .address select');
@@ -450,21 +451,51 @@ window.onload = function ready() {
             mailToType = 'Group';
           }
         });
-        mailID = document.querySelector('.right-draft .inbox-view >div:last-child input') !== null ? parseInt(document.querySelector('.right-draft .inbox-view >div:last-child input').value, 10) + 1 : 0;
 
-        const divElement = document.createElement('div');
-        divElement.innerHTML = `<input type="hidden" value="${mailToType}">`
-                                  + `<input type="checkbox" value="${mailID}">`
+        const obj = {
+          subject: topic,
+          message: msgBody,
+        };
+        if (receiverEmail) {
+          obj.receiverEmail = receiverEmail;
+        }
+        postData('POST', '/messages/draft', obj, true)
+          .then(async (response) => {
+            const res = await response.json();
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if ('error' in res) {
+              throw new Error(res.error);
+            } else if ('data' in res) {
+              if ('id' in res.data[0]) {
+                const draftMsg = res.data[0];
+                const mailId = draftMsg.id;
+                const options = {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric',
+                };
+                const divElement = document.createElement('div');
+                divElement.innerHTML = `<input type="hidden" value="${mailToType}">`
+                                  + `<input type="checkbox" value="${mailId}">`
                                   + `<p>${mailTo}</p>`
                                   + '<div>'
                                       + `<p class="subject">${topic}</p>`
-                                      + `<p class="msg">s${msgBody}</p>`
+                                      + `<p class="msg">${msgBody}</p>`
                                   + '</div>'
-                                  + `<label>${new Date().getDate()}-${new Date().getMonth()}</label>`;
-        divElement.setAttribute('class', `s${mailID}`);
-        document.querySelector('.right-draft .inbox-view').appendChild(divElement);
-        alertMessage('Message saved as draft succesfully');
-        document.querySelector("[name='sendMail']").reset();
+                                  + `<label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(draftMsg.createdOn, 10)))}</label>`;
+                divElement.setAttribute('class', `s${mailId}`);
+                document.querySelector('.right-draft .inbox-view').appendChild(divElement);
+                alertMessage('Message saved as draft succesfully');
+                document.querySelector("[name='sendMail']").reset();
+              } else {
+              //  res.data[0].message;
+              }
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       }
     };
 
