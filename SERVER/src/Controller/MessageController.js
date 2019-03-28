@@ -175,13 +175,14 @@ class MessageController {
       if (inbox.length !== 0) {
         inbox = inbox.map(mail => ({
           id: mail.msg_id,
-          createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+          createdOn: mail.date_time,
           subject: mail.subject,
           message: mail.message,
           senderId: mail.owner_id,
           receiverId: mail.receiver_id,
           parentMessageId: null,
           status: mail.status,
+          senderEmail: mail.email,
         }));
         res.status(200).json({
           status: 200,
