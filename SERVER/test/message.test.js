@@ -64,14 +64,14 @@ describe('Messages', () => {
       });
     });
 
-    describe('/messages/save', () => {
+    describe('/messages/draft', () => {
       it('should return status 201', (done) => { //  testing for saving message as draft
         obj = {
           subject: 'WOW',
           message: 'you won again',
         };
         chai.request(app)
-          .post('/api/v1/messages/save')
+          .post('/api/v1/messages/draft')
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
@@ -85,7 +85,7 @@ describe('Messages', () => {
           message: 'you won again',
         };
         chai.request(app)
-          .post('/api/v1/messages/save')
+          .post('/api/v1/messages/draft')
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
@@ -106,7 +106,7 @@ describe('Messages', () => {
           message: 'you won again',
         };
         chai.request(app)
-          .post('/api/v1/messages/save')
+          .post('/api/v1/messages/draft')
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
@@ -121,7 +121,7 @@ describe('Messages', () => {
           message: 'you won again',
         };
         chai.request(app)
-          .post('/api/v1/messages/save')
+          .post('/api/v1/messages/draft')
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {

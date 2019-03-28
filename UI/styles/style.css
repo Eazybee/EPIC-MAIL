@@ -359,6 +359,14 @@ button:hover{
     border: #194759 solid .2em;
     cursor: pointer;
 }
+.inbox .toolbar span {
+    display: inline-block;
+    text-align: center;
+    width: 5em;
+}
+.inbox .toolbar span input{
+    top: .15em;
+}
 .inbox .toolbar button:hover{
     opacity: .8;
     font-weight: bold;
@@ -371,6 +379,9 @@ button:hover{
     justify-content: space-between;
     padding: .2em;
     margin: .3em 0;
+}
+.inbox .bottom .inbox-view >div.unread *{
+    font-weight: bold;
 }
 .inbox .bottom .inbox-view >div >*:not(input){
     cursor: pointer;
@@ -393,7 +404,6 @@ button:hover{
     width:15%;
 }
 .inbox .inbox-view >div> p,.inbox .inbox-view .subject, .inbox .inbox-view label{
-    font-weight: bold;
     padding-right: .5em;
     overflow: hidden;
 }
