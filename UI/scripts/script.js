@@ -213,44 +213,60 @@ window.onload = function ready() {
     };
 
     /** Left-panel-Menus Event * */
-    document.querySelector("a[href='#Inbox']").onclick = async () => {
-      await postData('GET', '/messages', null, true)
-        .then(async (response) => {
-          const res = await response.json();
-          if (parseInt(response.status, 10) === 401) {
-            logOut();
-          } else if ('error' in res) {
-            throw new Error(res.error);
-          } else if ('data' in res) {
-            if ('id' in res.data[0]) {
-              const divElement = document.createElement('div');
-              const options = {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-              };
-              res.data.forEach((message) => {
-                const tempDiv = document.createElement('div');
-                tempDiv.classList.add(message.status);
-                tempDiv.innerHTML = `
-                <input type="checkbox" value="${message.id}">
-                <p>${message.senderEmail}</p>
-                <div>
-                  <p class="subject">${message.subject}</p>
-                  <p class="msg">${message.message}</p>
-                </div>
-                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
-                divElement.appendChild(tempDiv);
-              });
-              document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
-            } else {
-              //  res.data[0].message;
-            }
-          }
-        }).catch((error) => {
-          alertMessage(error.message);
-        });
+    const populateInbox = async (response) => {
+      const res = await response.json();
+      if (parseInt(response.status, 10) === 401) {
+        logOut();
+      } else if ('error' in res) {
+        throw new Error(res.error);
+      } else if ('data' in res) {
+        if ('id' in res.data[0]) {
+          const divElement = document.createElement('div');
+          const options = {
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+          };
+          res.data.forEach((message) => {
+            const tempDiv = document.createElement('div');
+            tempDiv.classList.add(message.status);
+            tempDiv.innerHTML = `
+            <input type="checkbox" value="${message.id}">
+            <p>${message.senderEmail}</p>
+            <div>
+              <p class="subject">${message.subject}</p>
+              <p class="msg">${message.message}</p>
+            </div>
+            <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+            divElement.appendChild(tempDiv);
+          });
+          document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
+        } else {
+          //  res.data[0].message;
+        }
+      }
+    };
+    document.querySelectorAll(".inbox  .toolbar span input[type='radio']").forEach((radioButton) => {
+      const radioElement = radioButton;
+      radioElement.onchange = () => {
+        const selectedRadioValue = radioButton.value;
+
+        if (selectedRadioValue === 'All') {
+          postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        } else if (selectedRadioValue === 'Unread') {
+          postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        }
+      };
+    });
+    document.querySelector("a[href='#Inbox']").onclick = () => {
+      document.querySelectorAll(".inbox  .toolbar span input[type='radio']").forEach(async (radioButton) => {
+        if (radioButton.checked && radioButton.value === 'All') {
+          await postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        } else if (radioButton.checked && radioButton.value === 'Unread') {
+          await postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        }
+      });
 
       document.querySelectorAll('.right > div:not(.right-inbox)').forEach((element) => {
         element.classList.add('hidden');
