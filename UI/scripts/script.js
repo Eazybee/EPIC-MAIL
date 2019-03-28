@@ -361,19 +361,38 @@ window.onload = function ready() {
       const sendButton = document.querySelector("[name='sendMail'] button");
       sendButton.innerHTML = 'SENDING';
       sendButton.classList.add('sending');
-
-      setTimeout(() => {
-        sendButton.innerHTML = 'SENT';
-        sendButton.classList.add('sent');
-        alertMessage('Message Sent Successffuly');
-      }, 2000);
-      setTimeout(() => {
-        sendButton.innerHTML = 'SEND';
-        sendButton.classList.remove('sending');
-        sendButton.classList.remove('sent');
-        document.querySelector("[name='sendMail']").reset();
-      }, 3000);
-
+      const sendMsg = document.querySelector("[name='sendMail']");
+      const obj = {
+        receiverEmail: sendMsg.email.value,
+        subject: sendMsg.subject.value,
+        message: sendMsg.message.value,
+      };
+      postData('POST', '/messages', obj, true)
+        .then(async (response) => {
+          const res = await response.json();
+          if (parseInt(response.status, 10) === 401) {
+            logOut();
+          } else if ('error' in res) {
+            sendButton.innerHTML = 'SEND';
+            sendButton.classList.remove('sending');
+            sendButton.classList.remove('sent');
+            throw new Error(res.error);
+          } else if ('data' in res && 'id' in res.data[0]) {
+            setTimeout(() => {
+              sendButton.innerHTML = 'SENT';
+              sendButton.classList.add('sent');
+              alertMessage('Message Sent Successffuly');
+            }, 2000);
+            setTimeout(() => {
+              sendButton.innerHTML = 'SEND';
+              sendButton.classList.remove('sending');
+              sendButton.classList.remove('sent');
+              sendMsg.reset();
+            }, 3000);
+          }
+        }).catch((error) => {
+          alertMessage(error.message);
+        });
       return false;
     };
 
