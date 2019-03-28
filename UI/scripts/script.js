@@ -256,6 +256,8 @@ window.onload = function ready() {
           postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         } else if (selectedRadioValue === 'Unread') {
           postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        } else if (selectedRadioValue === 'Read') {
+          postData('GET', '/messages/read', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         }
       };
     });
@@ -265,6 +267,8 @@ window.onload = function ready() {
           await postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         } else if (radioButton.checked && radioButton.value === 'Unread') {
           await postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+        } else if (radioButton.checked && radioButton.value === 'Read') {
+          postData('GET', '/messages/read', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         }
       });
 
