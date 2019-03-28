@@ -38,10 +38,7 @@
                         <li><a href="#Draft">Draft</a></li>
                         <li class="groups"><a href="#Group">Groups</a>
                         </li>
-                            
-                        
                     </ul>
-                    
                 </div>
                 <div class="right">
                     <!-- Create Group -->
@@ -139,6 +136,15 @@
                 <!-- For viewing message in the inbox view -->
                <div class=" right-inbox hidden">
                     <div class="toolbar">
+                            <span>
+                                <input type="radio" value="All" name="to" checked required> All
+                            </span>
+                            <span>
+                                <input type="radio" value="Unread"  name="to"  required> Unread
+                            </span>
+                            <span>
+                                <input type="radio" value="Read"  name="to"  required> Read
+                            </span>
                         <button class="deleteButton">Delete</button>
                     </div>
                     <div class="inbox-view">
