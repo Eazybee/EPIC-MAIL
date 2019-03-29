@@ -65,6 +65,21 @@ class Database {
         const result = await client.query(query);
         return result.rows;
       }
+      if (userAccess === 'sent') {
+        query = {
+          text: `
+          SELECT a.id, a.subject, a.message, b.date_time, c.receiver_id, d.email, d.first_name 
+          FROM messages a  INNER JOIN sents b 
+          ON a.id = b.msg_id and a.id =$1 and a.owner_id = $2 and b.status !=$3
+          INNER JOIN inboxes c 
+          ON a.id = c.msg_id
+          INNER JOIN users d
+          ON d.id = c.receiver_id`,
+          values: [id, userId, 'deleted'],
+        };
+        const result = await client.query(query);
+        return result.rows;
+      }
       if (userAccess === 'delete') {
         query = {
           text: 'SELECT * FROM messages where id =$1 and status !=$2',

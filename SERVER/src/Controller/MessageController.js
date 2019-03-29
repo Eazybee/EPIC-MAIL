@@ -264,6 +264,24 @@ class MessageController {
     });
   }
 
+  static getSentMailId(req, res) {
+    const sent = req.rows.map(mail => ({
+      id: mail.id,
+      createdOn: mail.date_time,
+      subject: mail.subject,
+      message: mail.message,
+      receiverId: mail.receiver_id,
+      parentMessageId: null,
+      status: 'sent',
+      receiverEmail: mail.email,
+      receiverFirstName: mail.first_name,
+    }));
+    res.status(200).json({
+      status: 200,
+      data: sent,
+    });
+  }
+
   static deleteMail(req, res) {
     const mailId = parseInt(req.params.id, 10);
     db.deleteMessage(mailId, req.deleteType).then(() => {
