@@ -104,17 +104,18 @@ window.onload = function ready() {
     document.querySelector('#signInForm').onsubmit = () => {
       const email = document.querySelector("#signInForm input[type='email']");
       const password = document.querySelector("#signInForm input[type='password']");
-
-      if (email.value.trim() === '') {
+      const emailValue = email.value;
+      const passwordValue = password.value;
+      if (emailValue.trim() === '') {
         email.value = '';
         alertMessage('Enter email address');
-      } else if (password.value.trim() === '') {
+      } else if (passwordValue.trim() === '') {
         password.value = '';
         alertMessage('Enter password');
       } else {
         const obj = {
-          email: email.value,
-          password: password.value,
+          email: emailValue,
+          password: passwordValue,
         };
         postData('POST', '/auth/login', obj)
           .then(async (response) => {
@@ -125,14 +126,15 @@ window.onload = function ready() {
             }
             if ('data' in res && 'token' in res.data[0]) {
               localStorage.setItem('auth', res.data[0].token);
-              localStorage.setItem('userEmail', email.value);
+              localStorage.setItem('userEmail', emailValue.trim());
               alertMessage('Login Successful');
               window.location.href = './inbox.html';
             }
-            email.value = '';
-            password.value = '';
           }).catch((error) => {
             alertMessage(error.message);
+          }).finally(() => {
+            email.value = '';
+            password.value = '';
           });
       }
       return false;
@@ -197,7 +199,7 @@ window.onload = function ready() {
     };
 
     // veiw Message
-    const viewMessage = async (maildId) => {
+    const viewInboxMessage = async (maildId) => {
       postData('GET', `/messages/${maildId}`, null, true).then(async (response) => {
         const res = await response.json();
         if (parseInt(response.status, 10) === 401) {
@@ -227,6 +229,62 @@ window.onload = function ready() {
                 <div>
                   <p>${message.senderFirstName}</p>
                   <p>${message.senderEmail}</p>
+                </div>
+              </div>
+              <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
+            `;
+              const tempDiv = document.createElement('div');
+              tempDiv.appendChild(header);
+              tempDiv.innerHTML += `
+                <h2>${message.subject}</h2>
+                <div>
+                  ${message.message}
+                </div>
+              `;
+              divElement.appendChild(tempDiv);
+            });
+            viewMessageDiv.innerHTML = divElement.innerHTML;
+          } else {
+            viewMessageDiv.innerHTML = res.data[0].message;
+          }
+          document.querySelector('.right-inbox ').classList.add('hidden');
+          document.querySelector('.right-compose').classList.add('hidden');
+          document.querySelector('.right-sent').classList.add('hidden');
+          viewMessageDiv.classList.remove('hidden');
+          document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
+        }
+      }).catch((error) => { alertMessage(error.message); });
+    };
+    const viewSentMessage = async (maildId) => {
+      postData('GET', `/messages/sent/${maildId}`, null, true).then(async (response) => {
+        const res = await response.json();
+        if (parseInt(response.status, 10) === 401) {
+          logOut();
+        } else if ('error' in res) {
+          throw new Error(res.error);
+        } else if ('data' in res) {
+          const viewMessageDiv = document.querySelector('.right .view-message');
+          if ('id' in res.data[0]) {
+            const divElement = document.createElement('div');
+            const options = {
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              year: 'numeric',
+            };
+
+            res.data.forEach((message) => {
+              const header = document.createElement('div');
+              header.classList.add('top');
+              if (message.receiverEmail !== localStorage.getItem('userEmail')) {
+                header.classList.add('away');
+              }
+              header.innerHTML = `
+              <div>
+                <div>
+                  <p>${message.receiverFirstName}</p>
+                  <p>${message.receiverEmail}</p>
                 </div>
               </div>
               <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
@@ -602,6 +660,7 @@ window.onload = function ready() {
     };
     // EVENT DELEGATION
     document.addEventListener('click', (e) => {
+      //  Draft
       if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div >*:not(input)')).includes(e.target)) {
         const mailDiv = e.target.parentNode;
         sendDraftMessage(mailDiv);
@@ -610,16 +669,29 @@ window.onload = function ready() {
         const mailDiv = e.target.parentNode.parentNode;
         sendDraftMessage(mailDiv);
       }
+      // Inbox
       if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >*:not(input)')).includes(e.target)) {
         let mailDiv = e.target.previousElementSibling;
         if (!mailDiv.value) {
           mailDiv = mailDiv.previousElementSibling.previousElementSibling;
         }
-        viewMessage(mailDiv.value);
+        viewInboxMessage(mailDiv.value);
       }
       if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >div p')).includes(e.target)) {
         const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
-        viewMessage(mailDiv.value);
+        viewInboxMessage(mailDiv.value);
+      }
+      //  Sent
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >*:not(input)')).includes(e.target)) {
+        let mailDiv = e.target.previousElementSibling;
+        if (!mailDiv.value) {
+          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
+        }
+        viewSentMessage(mailDiv.value);
+      }
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
+        viewSentMessage(mailDiv.value);
       }
     });
 

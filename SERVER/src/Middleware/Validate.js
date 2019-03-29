@@ -225,6 +225,29 @@ class Validate {
     }
   }
 
+  static sentMailId(req, res, next) {
+    const mailId = parseInt(req.params.id, 10);
+    const schema = Joi.number().required();
+    const { error } = Joi.validate(mailId, schema);
+    if (error) {
+      const errorMessage = '\'id\' must be a number';
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getMessages(mailId, 'sent', UserController.user.getId()).then((rows) => {
+        if (rows.length === 1) { //  Checking if mail exist
+          req.rows = rows;
+          next();
+        } else {
+          const errorMessage = 'Message does not exist!';
+          Utility.handleError(res, errorMessage, 404);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
   static deleteMailId(req, res, next) {
     const mailId = parseInt(req.params.id, 10);
     const schema = Joi.object().keys({
