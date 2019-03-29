@@ -294,15 +294,15 @@ describe('Messages', () => {
           });
       });
 
-      it('should return mail of id 6', (done) => {
-        chai.request(app)
-          .get('/api/v1/messages/6')
-          .set('authorization', authToken)
-          .end((err, res) => {
-            expect(res.body.data[0].id).to.equal(6);
-            done();
-          });
-      });
+      // it('should return mail of id 6', (done) => {
+      //   chai.request(app)
+      //     .get('/api/v1/messages/6')
+      //     .set('authorization', authToken)
+      //     .end((err, res) => {
+      //       expect(res.body.data[0].id).to.equal(6);
+      //       done();
+      //     });
+      // });
     });
 
     describe('/api/v1/messages/sent ', () => {

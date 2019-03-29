@@ -240,19 +240,19 @@ class MessageController {
   }
 
   static getMailId(req, res) {
-    db.getInboxes().then((mails) => {
-      const mailId = parseInt(req.params.id, 10);
-      let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId()
-      && mail.msg_id === mailId);
-      inbox = inbox.map(mail => ({
+    const mailId = parseInt(req.params.id, 10);
+    db.getMessageThread(mailId, UserController.user.getId()).then((mails) => {
+      const inbox = mails.map(mail => ({
         id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+        createdOn: mail.date_time,
         subject: mail.subject,
         message: mail.message,
         senderId: mail.owner_id,
         receiverId: mail.receiver_id,
         parentMessageId: null,
         status: mail.status,
+        senderEmail: mail.email,
+        senderFirstName: mail.first_name,
       }));
       res.status(200).json({
         status: 200,
