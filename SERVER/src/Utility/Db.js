@@ -170,6 +170,34 @@ class Database {
     return result.rows;
   }
 
+  static async getMessageThread(id, receiverId) {
+    let query = {
+      text: 'select owner_id from messages where id =$1',
+      values: [id],
+    };
+    let result = await client.query(query);
+    const senderId = result.rows[0].owner_id;
+
+    query = {
+      text: `select a.msg_id, a.date_time, a.receiver_id, a.status, b.subject, b.message, b.owner_id, c.email, c.first_name 
+        from inboxes a inner join messages b on 
+        a.status != 'deleted' and (a.receiver_id =$1 or a.receiver_id =$2) and (b.owner_id =$1 or b.owner_id =$2) and a.msg_id = b.id 
+        inner join users c on c.id = b.owner_id ORDER BY a.id`,
+      values: [senderId, receiverId],
+    };
+    result = await client.query(query);
+    result.rows.forEach((message) => {
+      if (message.status !== 'read') {
+        const updateQuery = {
+          text: 'UPDATE inboxes SET status=$1 WHERE msg_id=$2',
+          values: ['read', message.msg_id],
+        };
+        client.query(updateQuery);
+      }
+    });
+    return result.rows;
+  }
+
   static async getGroups(userId) {
     if (userId) {
       const query = {

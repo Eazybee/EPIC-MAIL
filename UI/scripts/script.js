@@ -27,6 +27,7 @@ window.onload = function ready() {
   };
   const logOut = () => {
     localStorage.removeItem('auth');
+    localStorage.removeItem('userEmail');
     window.location.replace('./loginPage.html');
   };
 
@@ -118,16 +119,18 @@ window.onload = function ready() {
         postData('POST', '/auth/login', obj)
           .then(async (response) => {
             const res = await response.json();
-            email.value = '';
-            password.value = '';
+
             if ('error' in res) {
               throw new Error(res.error);
             }
             if ('data' in res && 'token' in res.data[0]) {
               localStorage.setItem('auth', res.data[0].token);
+              localStorage.setItem('userEmail', email.value);
               alertMessage('Login Successful');
               window.location.href = './inbox.html';
             }
+            email.value = '';
+            password.value = '';
           }).catch((error) => {
             alertMessage(error.message);
           });
@@ -176,6 +179,7 @@ window.onload = function ready() {
     if (!localStorage.getItem('auth')) {
       window.location.replace('./loginPage.html');
     }
+    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail');
     //  Menu buttons
     const inBtn = document.querySelector('.seek button.in');
     const outBtn = document.querySelector('.seek button.out');
@@ -190,6 +194,64 @@ window.onload = function ready() {
       menu.classList.add('show');
       inBtn.classList.remove('hidden');
       outBtn.classList.add('hidden');
+    };
+
+    // veiw Message
+    const viewMessage = async (maildId) => {
+      postData('GET', `/messages/${maildId}`, null, true).then(async (response) => {
+        const res = await response.json();
+        if (parseInt(response.status, 10) === 401) {
+          logOut();
+        } else if ('error' in res) {
+          throw new Error(res.error);
+        } else if ('data' in res) {
+          const viewMessageDiv = document.querySelector('.right .view-message');
+          if ('id' in res.data[0]) {
+            const divElement = document.createElement('div');
+            const options = {
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric',
+              year: 'numeric',
+            };
+
+            res.data.forEach((message) => {
+              const header = document.createElement('div');
+              header.classList.add('top');
+              if (message.senderEmail !== localStorage.getItem('userEmail')) {
+                header.classList.add('away');
+              }
+              header.innerHTML = `
+              <div>
+                <div>
+                  <p>${message.senderFirstName}</p>
+                  <p>${message.senderEmail}</p>
+                </div>
+              </div>
+              <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
+            `;
+              const tempDiv = document.createElement('div');
+              tempDiv.appendChild(header);
+              tempDiv.innerHTML += `
+                <h2>${message.subject}</h2>
+                <div>
+                  ${message.message}
+                </div>
+              `;
+              divElement.appendChild(tempDiv);
+            });
+            viewMessageDiv.innerHTML = divElement.innerHTML;
+          } else {
+            viewMessageDiv.innerHTML = res.data[0].message;
+          }
+          document.querySelector('.right-inbox ').classList.add('hidden');
+          document.querySelector('.right-compose').classList.add('hidden');
+          document.querySelector('.right-sent').classList.add('hidden');
+          viewMessageDiv.classList.remove('hidden');
+          document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
+        }
+      }).catch((error) => { alertMessage(error.message); });
     };
 
     // delete mail
@@ -243,7 +305,7 @@ window.onload = function ready() {
           });
           document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
         } else {
-          //  res.data[0].message;
+          document.querySelector('.right-inbox .inbox-view').innerHTML = res.data[0].message;
         }
       }
     };
@@ -358,17 +420,6 @@ window.onload = function ready() {
         alertMessage('Only an Admin is allowed to create group');
       }
     };
-
-    // veiw Message
-    document.querySelectorAll('.right  > div:not(.right-draft) .inbox-view >div >*:not(input)').forEach((element) => {
-      const elem = element;
-      elem.onclick = () => {
-        document.querySelector('.right-inbox ').classList.add('hidden');
-        document.querySelector('.right-compose').classList.add('hidden');
-        document.querySelector('.right-sent').classList.add('hidden');
-        document.querySelector('.view-message').classList.remove('hidden');
-      };
-    });
 
     /** Log Out * */
     document.querySelector('.inbox .top div button').onclick = () => {
@@ -555,11 +606,20 @@ window.onload = function ready() {
         const mailDiv = e.target.parentNode;
         sendDraftMessage(mailDiv);
       }
-    });
-    document.addEventListener('click', (e) => {
       if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div div p')).includes(e.target)) {
         const mailDiv = e.target.parentNode.parentNode;
         sendDraftMessage(mailDiv);
+      }
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >*:not(input)')).includes(e.target)) {
+        let mailDiv = e.target.previousElementSibling;
+        if (!mailDiv.value) {
+          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
+        }
+        viewMessage(mailDiv.value);
+      }
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
+        viewMessage(mailDiv.value);
       }
     });
 

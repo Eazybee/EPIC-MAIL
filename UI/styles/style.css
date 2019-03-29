@@ -38,6 +38,7 @@ input[type^="rad"]{
 .loginPage .sign .hidden,
 .right-group .groups .hidden,
 .seek button.hidden,
+.inbox .view-message.hidden, .inbox .right-compose.hidden,
 .inbox .right .inbox-view > div.hidden{
     display: none;
 }
@@ -344,7 +345,7 @@ button:hover{
 }
 .inbox .bottom .right{
     transition: 1s;
-    width: 100%;
+    width: calc(100% - 2em);
     padding: 1em;
     padding-bottom: 4em;
     overflow: auto;
@@ -415,14 +416,15 @@ button:hover{
     width:1.2em;
     height: 1.2em
 }
-.inbox .view-message{
+.inbox .view-message, .inbox .right-compose{
     width: 100%;
+    display: block;
 }
 .inbox .view-message >div{
     border: 1px solid lightblue;
     padding: .5em;
     margin-bottom: 1em;
-    width: :100%;
+    width: calc(100% -1em);
 }
 .inbox .view-message .top{
     display: flex;
@@ -440,7 +442,7 @@ button:hover{
     color: #194759;
 }
 .inbox .view-message h2{
-    font-size: 1.5em;
+    font-size: 1.3em;
     padding: .5em 0;
 }
 .inbox .view-message .top.away{
