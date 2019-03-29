@@ -1,54 +1,254 @@
+const postData = async (method = 'GET', path, data, auth) => {
+  if (!path) {
+    throw new Error('Path not defined!');
+  }
+  const url = `http://localhost:3000/api/v1${path}`;
+  const headers = new Headers();
+  headers.append('Content-Type', 'application/json');
+  if (auth) {
+    headers.append('authorization', localStorage.getItem('auth'));
+  }
+  const init = {
+    method, // *GET, POST, PUT, DELETE, etc.
+    headers,
+  };
+
+  if (data) {
+    init.body = JSON.stringify(data);// body data type must match "Content-Type" header
+  }
+
+  const result = await fetch(url, init).then(response => response);
+
+  return result;
+};
+
+const logOut = () => {
+  localStorage.removeItem('auth');
+  localStorage.removeItem('userEmail');
+  window.location.replace('./loginPage.html');
+};
+
+const alertMessage = (message) => {
+  document.querySelector('.alert p').innerHTML = message;
+  document.querySelectorAll('.modal, .alert').forEach((element) => {
+    element.classList.remove('hidden');
+  });
+};
+
+const loadGroup = () => {
+  const selectGroup = document.querySelector('.inbox .right-compose .address select');
+  selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
+  document.querySelectorAll('.right-group .groups div a').forEach((element) => {
+    const name = element.innerHTML;
+    const option = document.createElement('option'); // create an option element(tag)
+    const groupName = document.createTextNode(name); // create a textnode
+    option.appendChild(groupName); // add text to option tag created
+    option.setAttribute('value', name); // set value = name
+    selectGroup.appendChild(option); // add option to Select element
+  });
+};
+
+const populateInbox = async (response) => {
+  const res = await response.json();
+  if (parseInt(response.status, 10) === 401) {
+    logOut();
+  } else if ('error' in res) {
+    throw new Error(res.error);
+  } else if ('data' in res) {
+    if ('id' in res.data[0]) {
+      const divElement = document.createElement('div');
+      const options = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      };
+      res.data.forEach((message) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.classList.add(message.status);
+        tempDiv.innerHTML = `
+        <input type="checkbox" value="${message.id}">
+        <p>${message.senderEmail}</p>
+        <div>
+          <p class="subject">${message.subject}</p>
+          <p class="msg">${message.message}</p>
+        </div>
+        <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+        divElement.appendChild(tempDiv);
+      });
+      document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
+    } else {
+      document.querySelector('.right-inbox .inbox-view').innerHTML = res.data[0].message;
+    }
+  }
+};
+
+// Show Compose Panel
+const showCompose = () => {
+  document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
+    element.classList.add('hidden');
+  });
+  document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Compose'])").forEach((element) => {
+    element.classList.remove('active');
+  });
+  document.querySelector("a[href='#Compose']").classList.add('active');
+  document.querySelector('.right-compose').classList.remove('hidden');
+};
+
+// veiw Message
+const viewInboxMessage = async (maildId) => {
+  postData('GET', `/messages/${maildId}`, null, true).then(async (response) => {
+    const res = await response.json();
+    if (parseInt(response.status, 10) === 401) {
+      logOut();
+    } else if ('error' in res) {
+      throw new Error(res.error);
+    } else if ('data' in res) {
+      const viewMessageDiv = document.querySelector('.right .view-message');
+      if ('id' in res.data[0]) {
+        const divElement = document.createElement('div');
+        const options = {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          year: 'numeric',
+        };
+
+        res.data.forEach((message) => {
+          const header = document.createElement('div');
+          header.classList.add('top');
+          if (message.senderEmail !== localStorage.getItem('userEmail')) {
+            header.classList.add('away');
+          }
+          header.innerHTML = `
+          <div>
+            <div>
+              <p>${message.senderFirstName}</p>
+              <p>${message.senderEmail}</p>
+            </div>
+          </div>
+          <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
+        `;
+          const tempDiv = document.createElement('div');
+          tempDiv.appendChild(header);
+          tempDiv.innerHTML += `
+            <h2>${message.subject}</h2>
+            <div>
+              ${message.message}
+            </div>
+          `;
+          divElement.appendChild(tempDiv);
+        });
+        viewMessageDiv.innerHTML = divElement.innerHTML;
+      } else {
+        viewMessageDiv.innerHTML = res.data[0].message;
+      }
+      document.querySelector('.right-inbox ').classList.add('hidden');
+      document.querySelector('.right-compose').classList.add('hidden');
+      document.querySelector('.right-sent').classList.add('hidden');
+      viewMessageDiv.classList.remove('hidden');
+      document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
+    }
+  }).catch((error) => { alertMessage(error.message); });
+};
+const viewSentMessage = async (maildId) => {
+  postData('GET', `/messages/sent/${maildId}`, null, true).then(async (response) => {
+    const res = await response.json();
+    if (parseInt(response.status, 10) === 401) {
+      logOut();
+    } else if ('error' in res) {
+      throw new Error(res.error);
+    } else if ('data' in res) {
+      const viewMessageDiv = document.querySelector('.right .view-message');
+      if ('id' in res.data[0]) {
+        const divElement = document.createElement('div');
+        const options = {
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          year: 'numeric',
+        };
+
+        res.data.forEach((message) => {
+          const header = document.createElement('div');
+          header.classList.add('top');
+          if (message.receiverEmail !== localStorage.getItem('userEmail')) {
+            header.classList.add('away');
+          }
+          header.innerHTML = `
+          <div>
+            <div>
+              <p>${message.receiverFirstName}</p>
+              <p>${message.receiverEmail}</p>
+            </div>
+          </div>
+          <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
+        `;
+          const tempDiv = document.createElement('div');
+          tempDiv.appendChild(header);
+          tempDiv.innerHTML += `
+            <h2>${message.subject}</h2>
+            <div>
+              ${message.message}
+            </div>
+          `;
+          divElement.appendChild(tempDiv);
+        });
+        viewMessageDiv.innerHTML = divElement.innerHTML;
+      } else {
+        viewMessageDiv.innerHTML = res.data[0].message;
+      }
+      document.querySelector('.right-inbox ').classList.add('hidden');
+      document.querySelector('.right-compose').classList.add('hidden');
+      document.querySelector('.right-sent').classList.add('hidden');
+      viewMessageDiv.classList.remove('hidden');
+      document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
+    }
+  }).catch((error) => { alertMessage(error.message); });
+};
+
+// delete mail
+const deleteMail = (mailID, respondMessage = '') => {
+  document.querySelector(mailID).classList.add('hidden');
+  if (respondMessage !== '') {
+    alertMessage(respondMessage);
+  }
+};
+
+/** Send Draft Message * */
+const sendDraftMessage = (mailDiv) => {
+  const mailID = `.right-draft .inbox-view .s${mailDiv.querySelector("input[type='checkbox']").value}`;
+  const mailToType = mailDiv.querySelector("input[type='hidden']").value;
+  const mailTo = mailDiv.querySelector('p').innerHTML;
+  const mailSubject = mailDiv.querySelector('div .subject').innerHTML;
+  const mailBody = mailDiv.querySelector('div .msg').innerHTML;
+
+  document.querySelector(`.right-compose .address input[type='radio'][value='${mailToType}']`).checked = true;
+  if (mailToType === 'Individual') {
+    document.querySelector(".right-compose .address input[type='email']").value = mailTo;
+    document.querySelector(".right-compose .address input[type='email']").classList.remove('hidden');
+    document.querySelector(".right-compose .address input[type='email']").required = true;
+    document.querySelector('.right-compose .address select').classList.add('hidden');
+  } else if (mailToType === 'Group') {
+    const selectGroup = document.querySelector('.right-compose .address select');
+
+    document.querySelector(".right-compose .address input[type='email']").classList.add('hidden');
+    document.querySelector(".right-compose .address input[type='email']").required = false;
+    selectGroup.classList.remove('hidden');
+
+    loadGroup();
+    selectGroup.value = mailTo;
+  }
+  document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
+  document.querySelector('.right-compose .message textarea').value = mailBody;
+  deleteMail(mailID);
+  showCompose();
+  // alertMessage(mailBody);
+};
+
 window.onload = function ready() {
-  // Code template credit to Mozila: https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
-// Example POST method implementation:
-
-  const postData = async (method = 'GET', path, data, auth) => {
-    if (!path) {
-      throw new Error('Path not defined!');
-    }
-    const url = `http://localhost:3000/api/v1${path}`;
-    const headers = new Headers();
-    headers.append('Content-Type', 'application/json');
-    if (auth) {
-      headers.append('authorization', localStorage.getItem('auth'));
-    }
-    const init = {
-      method, // *GET, POST, PUT, DELETE, etc.
-      headers,
-    };
-
-    if (data) {
-      init.body = JSON.stringify(data);// body data type must match "Content-Type" header
-    }
-
-    const result = await fetch(url, init).then(response => response);
-
-    return result;
-  };
-  const logOut = () => {
-    localStorage.removeItem('auth');
-    localStorage.removeItem('userEmail');
-    window.location.replace('./loginPage.html');
-  };
-
-  const alertMessage = (message) => {
-    document.querySelector('.alert p').innerHTML = message;
-    document.querySelectorAll('.modal, .alert').forEach((element) => {
-      element.classList.remove('hidden');
-    });
-  };
-  const loadGroup = () => {
-    const selectGroup = document.querySelector('.inbox .right-compose .address select');
-    selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
-    document.querySelectorAll('.right-group .groups div a').forEach((element) => {
-      const name = element.innerHTML;
-      const option = document.createElement('option'); // create an option element(tag)
-      const groupName = document.createTextNode(name); // create a textnode
-      option.appendChild(groupName); // add text to option tag created
-      option.setAttribute('value', name); // set value = name
-      selectGroup.appendChild(option); // add option to Select element
-    });
-  };
   if (document.querySelector('.slider')) { // landing Page
     document.querySelector('.log-in').onclick = () => {
       window.location.href = './pages/loginPage.html';
@@ -183,190 +383,61 @@ window.onload = function ready() {
     }
     document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail');
     //  Menu buttons
-    const inBtn = document.querySelector('.seek button.in');
-    const outBtn = document.querySelector('.seek button.out');
-    const menu = document.querySelector('.inbox .bottom .left');
+    (() => {
+      const inBtn = document.querySelector('.seek button.in');
+      const outBtn = document.querySelector('.seek button.out');
+      const menu = document.querySelector('.inbox .bottom .left');
 
-    inBtn.onclick = () => {
-      menu.classList.remove('show');
-      inBtn.classList.add('hidden');
-      outBtn.classList.remove('hidden');
-    };
-    outBtn.onclick = () => {
-      menu.classList.add('show');
-      inBtn.classList.remove('hidden');
-      outBtn.classList.add('hidden');
-    };
+      inBtn.onclick = () => {
+        menu.classList.remove('show');
+        inBtn.classList.add('hidden');
+        outBtn.classList.remove('hidden');
+      };
+      outBtn.onclick = () => {
+        menu.classList.add('show');
+        inBtn.classList.remove('hidden');
+        outBtn.classList.add('hidden');
+      };
+    })();
 
-    // veiw Message
-    const viewInboxMessage = async (maildId) => {
-      postData('GET', `/messages/${maildId}`, null, true).then(async (response) => {
-        const res = await response.json();
-        if (parseInt(response.status, 10) === 401) {
-          logOut();
-        } else if ('error' in res) {
-          throw new Error(res.error);
-        } else if ('data' in res) {
-          const viewMessageDiv = document.querySelector('.right .view-message');
-          if ('id' in res.data[0]) {
-            const divElement = document.createElement('div');
-            const options = {
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              year: 'numeric',
-            };
-
-            res.data.forEach((message) => {
-              const header = document.createElement('div');
-              header.classList.add('top');
-              if (message.senderEmail !== localStorage.getItem('userEmail')) {
-                header.classList.add('away');
-              }
-              header.innerHTML = `
-              <div>
-                <div>
-                  <p>${message.senderFirstName}</p>
-                  <p>${message.senderEmail}</p>
-                </div>
-              </div>
-              <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
-            `;
-              const tempDiv = document.createElement('div');
-              tempDiv.appendChild(header);
-              tempDiv.innerHTML += `
-                <h2>${message.subject}</h2>
-                <div>
-                  ${message.message}
-                </div>
-              `;
-              divElement.appendChild(tempDiv);
-            });
-            viewMessageDiv.innerHTML = divElement.innerHTML;
-          } else {
-            viewMessageDiv.innerHTML = res.data[0].message;
-          }
-          document.querySelector('.right-inbox ').classList.add('hidden');
-          document.querySelector('.right-compose').classList.add('hidden');
-          document.querySelector('.right-sent').classList.add('hidden');
-          viewMessageDiv.classList.remove('hidden');
-          document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
-        }
-      }).catch((error) => { alertMessage(error.message); });
-    };
-    const viewSentMessage = async (maildId) => {
-      postData('GET', `/messages/sent/${maildId}`, null, true).then(async (response) => {
-        const res = await response.json();
-        if (parseInt(response.status, 10) === 401) {
-          logOut();
-        } else if ('error' in res) {
-          throw new Error(res.error);
-        } else if ('data' in res) {
-          const viewMessageDiv = document.querySelector('.right .view-message');
-          if ('id' in res.data[0]) {
-            const divElement = document.createElement('div');
-            const options = {
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric',
-              year: 'numeric',
-            };
-
-            res.data.forEach((message) => {
-              const header = document.createElement('div');
-              header.classList.add('top');
-              if (message.receiverEmail !== localStorage.getItem('userEmail')) {
-                header.classList.add('away');
-              }
-              header.innerHTML = `
-              <div>
-                <div>
-                  <p>${message.receiverFirstName}</p>
-                  <p>${message.receiverEmail}</p>
-                </div>
-              </div>
-              <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>
-            `;
-              const tempDiv = document.createElement('div');
-              tempDiv.appendChild(header);
-              tempDiv.innerHTML += `
-                <h2>${message.subject}</h2>
-                <div>
-                  ${message.message}
-                </div>
-              `;
-              divElement.appendChild(tempDiv);
-            });
-            viewMessageDiv.innerHTML = divElement.innerHTML;
-          } else {
-            viewMessageDiv.innerHTML = res.data[0].message;
-          }
-          document.querySelector('.right-inbox ').classList.add('hidden');
-          document.querySelector('.right-compose').classList.add('hidden');
-          document.querySelector('.right-sent').classList.add('hidden');
-          viewMessageDiv.classList.remove('hidden');
-          document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
-        }
-      }).catch((error) => { alertMessage(error.message); });
-    };
-
-    // delete mail
-    const deleteMail = (mailID, respondMessage = '') => {
-      document.querySelector(mailID).classList.add('hidden');
-      if (respondMessage !== '') {
-        alertMessage(respondMessage);
+    // EVENT DELEGATION
+    document.addEventListener('click', (e) => {
+      //  Draft
+      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div >*:not(input)')).includes(e.target)) {
+        const mailDiv = e.target.parentNode;
+        sendDraftMessage(mailDiv);
       }
-    };
-
-    // Show Compose Panel
-    const showCompose = () => {
-      document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
-        element.classList.add('hidden');
-      });
-      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Compose'])").forEach((element) => {
-        element.classList.remove('active');
-      });
-      document.querySelector("a[href='#Compose']").classList.add('active');
-      document.querySelector('.right-compose').classList.remove('hidden');
-    };
+      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.parentNode;
+        sendDraftMessage(mailDiv);
+      }
+      // Inbox
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >*:not(input)')).includes(e.target)) {
+        let mailDiv = e.target.previousElementSibling;
+        if (!mailDiv.value) {
+          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
+        }
+        viewInboxMessage(mailDiv.value);
+      }
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
+        viewInboxMessage(mailDiv.value);
+      }
+      //  Sent
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >*:not(input)')).includes(e.target)) {
+        let mailDiv = e.target.previousElementSibling;
+        if (!mailDiv.value) {
+          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
+        }
+        viewSentMessage(mailDiv.value);
+      }
+      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >div p')).includes(e.target)) {
+        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
+        viewSentMessage(mailDiv.value);
+      }
+    });
 
     /** Left-panel-Menus Event * */
-    const populateInbox = async (response) => {
-      const res = await response.json();
-      if (parseInt(response.status, 10) === 401) {
-        logOut();
-      } else if ('error' in res) {
-        throw new Error(res.error);
-      } else if ('data' in res) {
-        if ('id' in res.data[0]) {
-          const divElement = document.createElement('div');
-          const options = {
-            month: 'short',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-          };
-          res.data.forEach((message) => {
-            const tempDiv = document.createElement('div');
-            tempDiv.classList.add(message.status);
-            tempDiv.innerHTML = `
-            <input type="checkbox" value="${message.id}">
-            <p>${message.senderEmail}</p>
-            <div>
-              <p class="subject">${message.subject}</p>
-              <p class="msg">${message.message}</p>
-            </div>
-            <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
-            divElement.appendChild(tempDiv);
-          });
-          document.querySelector('.right-inbox .inbox-view').innerHTML = divElement.innerHTML;
-        } else {
-          document.querySelector('.right-inbox .inbox-view').innerHTML = res.data[0].message;
-        }
-      }
-    };
     document.querySelectorAll(".inbox  .toolbar span input[type='radio']").forEach((radioButton) => {
       const radioElement = radioButton;
       radioElement.onchange = () => {
@@ -401,7 +472,6 @@ window.onload = function ready() {
       document.querySelector("a[href='#Inbox']").classList.add('active');
       document.querySelector('.right-inbox').classList.remove('hidden');
     };
-
     document.querySelector("a[href='#Compose']").onclick = () => {
       showCompose();
       loadGroup();
@@ -628,73 +698,6 @@ window.onload = function ready() {
       }
     };
 
-    /** Send Draft Message * */
-    const sendDraftMessage = (mailDiv) => {
-      const mailID = `.right-draft .inbox-view .s${mailDiv.querySelector("input[type='checkbox']").value}`;
-      const mailToType = mailDiv.querySelector("input[type='hidden']").value;
-      const mailTo = mailDiv.querySelector('p').innerHTML;
-      const mailSubject = mailDiv.querySelector('div .subject').innerHTML;
-      const mailBody = mailDiv.querySelector('div .msg').innerHTML;
-
-      document.querySelector(`.right-compose .address input[type='radio'][value='${mailToType}']`).checked = true;
-      if (mailToType === 'Individual') {
-        document.querySelector(".right-compose .address input[type='email']").value = mailTo;
-        document.querySelector(".right-compose .address input[type='email']").classList.remove('hidden');
-        document.querySelector(".right-compose .address input[type='email']").required = true;
-        document.querySelector('.right-compose .address select').classList.add('hidden');
-      } else if (mailToType === 'Group') {
-        const selectGroup = document.querySelector('.right-compose .address select');
-
-        document.querySelector(".right-compose .address input[type='email']").classList.add('hidden');
-        document.querySelector(".right-compose .address input[type='email']").required = false;
-        selectGroup.classList.remove('hidden');
-
-        loadGroup();
-        selectGroup.value = mailTo;
-      }
-      document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
-      document.querySelector('.right-compose .message textarea').value = mailBody;
-      deleteMail(mailID);
-      showCompose();
-      // alertMessage(mailBody);
-    };
-    // EVENT DELEGATION
-    document.addEventListener('click', (e) => {
-      //  Draft
-      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div >*:not(input)')).includes(e.target)) {
-        const mailDiv = e.target.parentNode;
-        sendDraftMessage(mailDiv);
-      }
-      if (e.target && Array.from(document.querySelectorAll('.right-draft .inbox-view >div div p')).includes(e.target)) {
-        const mailDiv = e.target.parentNode.parentNode;
-        sendDraftMessage(mailDiv);
-      }
-      // Inbox
-      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >*:not(input)')).includes(e.target)) {
-        let mailDiv = e.target.previousElementSibling;
-        if (!mailDiv.value) {
-          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
-        }
-        viewInboxMessage(mailDiv.value);
-      }
-      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-inbox .inbox-view >div >div p')).includes(e.target)) {
-        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
-        viewInboxMessage(mailDiv.value);
-      }
-      //  Sent
-      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >*:not(input)')).includes(e.target)) {
-        let mailDiv = e.target.previousElementSibling;
-        if (!mailDiv.value) {
-          mailDiv = mailDiv.previousElementSibling.previousElementSibling;
-        }
-        viewSentMessage(mailDiv.value);
-      }
-      if (e.target && Array.from(document.querySelectorAll('.right  > div.right-sent .inbox-view >div >div p')).includes(e.target)) {
-        const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
-        viewSentMessage(mailDiv.value);
-      }
-    });
-
     /** Delete draft * */
     document.querySelector('.right-draft .toolbar button.deleteButton').onclick = () => {
       document.querySelectorAll('.inbox .bottom .right-draft .inbox-view >div >input').forEach((element) => {
@@ -707,10 +710,25 @@ window.onload = function ready() {
 
     /** Delete inbox * */
     document.querySelector('.right-inbox .toolbar button.deleteButton').onclick = () => {
-      document.querySelectorAll('.inbox .bottom .right-inbox .inbox-view >div >input').forEach((element) => {
+      const checkBoxes = document.querySelectorAll('.right-inbox .inbox-view >div >input');
+      checkBoxes.forEach(async (element) => {
         if (element.checked) {
-          const mailID = `.right-inbox .inbox-view .s${element.value}`;
-          deleteMail(mailID, 'Mail(s) Deleted Successfully');
+          const mailId = element.value;
+
+          await postData('DELETE', `/messages/${mailId}`, null, true)
+            .then(async (response) => {
+              if (parseInt(response.status, 10) === 401) {
+                logOut();
+              } else if (parseInt(response.status, 10) === 204) {
+                document.querySelector('.right-inbox .inbox-view').removeChild((element.parentNode));
+                //  alertMessage('Mail(s) Deleted Successfully');
+              } else if (parseInt(response.status, 10) === 404) {
+                const res = await response.json();
+                throw new Error(res.error);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
+            });
         }
       });
     };
