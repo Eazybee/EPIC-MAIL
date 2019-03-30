@@ -22,6 +22,7 @@ router.put('/', Validate.isLoggedIn, Validate.sendDraft, MessageController.sendD
 
 //  DELETE
 router.delete('/:id', Validate.isLoggedIn, Validate.deleteInboxWithId, MessageController.deleteMail); // delete inbox with id
-router.delete('/sent/:id', Validate.isLoggedIn, Validate.deleteSentWithId, MessageController.deleteMail); // get sent message with id
+router.delete('/sent/:id', Validate.isLoggedIn, Validate.deleteSentWithId, MessageController.deleteMail); // delete sent message with id
+router.delete('/sent/:id/retract', Validate.isLoggedIn, Validate.deleteSentWithId, MessageController.retractMail); // retract sent message with id
 
 export default router;
