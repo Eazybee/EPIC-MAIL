@@ -285,11 +285,27 @@ class MessageController {
   static deleteMail(req, res) {
     const mailId = parseInt(req.params.id, 10);
     db.deleteMessage(mailId, req.deleteType).then(() => {
-      db.getMessages(mailId).then(() => {
+      res.status(204).json({
+        status: 204,
+        data: [{
+          message: 'Message deleted successful',
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
+  static retractMail(req, res) {
+    const mailId = parseInt(req.params.id, 10);
+    db.deleteMessage(mailId, req.deleteType).then(() => {
+      req.deleteType = 'inboxes';
+      db.deleteMessage(mailId, req.deleteType).then(() => {
         res.status(204).json({
           status: 204,
           data: [{
-            message: 'Message deleted successful',
+            message: 'Message retracted successful',
           }],
         });
       });
