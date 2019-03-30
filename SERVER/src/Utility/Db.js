@@ -80,7 +80,16 @@ class Database {
         const result = await client.query(query);
         return result.rows;
       }
-      if (userAccess === 'delete') {
+      if (userAccess === 'deleteInbox') {
+        query = {
+          text: 'SELECT * FROM inboxes where msg_id =$1 and receiver_id=$2 and status !=$3',
+          values: [id, userId, 'deleted'],
+        };
+        const inboxResult = await client.query(query);
+        inboxResult.deleteType = 'inboxes';
+        return inboxResult;
+      }
+      if (userAccess === 'deleteSent') {
         query = {
           text: 'SELECT * FROM messages where id =$1 and status !=$2',
           values: [id, 'deleted'],
@@ -93,21 +102,12 @@ class Database {
             values: [id, userId, 'deleted'],
           };
           const sentResult = await client.query(query);
-
-          if (sentResult.rowCount === 1) {
-            sentResult.deleteType = 'sents';
-            return sentResult;
-          }
-          query = {
-            text: 'SELECT * FROM inboxes where msg_id =$1 and receiver_id=$2 and status !=$3',
-            values: [id, userId, 'deleted'],
-          };
-          const inboxResult = await client.query(query);
-          inboxResult.deleteType = 'inboxes';
-          return inboxResult;
+          sentResult.deleteType = 'sents';
+          return sentResult;
         }
         return result.rows;
       }
+
       query = {
         text: 'SELECT * FROM messages where id =$1 and status !=$2',
         values: [id, 'deleted'],

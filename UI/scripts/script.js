@@ -614,17 +614,6 @@ window.onload = function ready() {
       };
     });
 
-    /** Retract a sent mail * */
-    document.querySelector('#retract').onclick = () => {
-      document.querySelectorAll('.inbox .bottom .right-sent .inbox-view >div >input').forEach((element) => {
-        if (element.checked) {
-          const mailID = `.right-sent .inbox-view  .s${element.value}`;
-          alertMessage('Mail(s) Retracted Successfully');
-          document.querySelector(mailID).classList.add('hidden');
-        }
-      });
-    };
-
     /** Save mail as draft * */
     document.querySelector('#saveMail').onclick = () => {
       const topic = document.querySelector('.inbox .right-compose .message input').value;
@@ -735,10 +724,34 @@ window.onload = function ready() {
 
     /** Delete sent mail * */
     document.querySelector('.right-sent .toolbar button.deleteButton').onclick = () => {
+      const checkBoxes = document.querySelectorAll('.right-sent .inbox-view >div >input');
+      checkBoxes.forEach(async (element) => {
+        if (element.checked) {
+          const mailId = element.value;
+          await postData('DELETE', `/messages/sent/${mailId}`, null, true)
+            .then(async (response) => {
+              if (parseInt(response.status, 10) === 401) {
+                logOut();
+              } else if (parseInt(response.status, 10) === 204) {
+                document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
+                //  alertMessage('Mail(s) Deleted Successfully');
+              } else if (parseInt(response.status, 10) === 404) {
+                const res = await response.json();
+                throw new Error(res.error);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
+            });
+        }
+      });
+    };
+
+    /** Retract a sent mail * */
+    document.querySelector('#retract').onclick = () => {
       document.querySelectorAll('.inbox .bottom .right-sent .inbox-view >div >input').forEach((element) => {
         if (element.checked) {
           const mailID = `.right-sent .inbox-view  .s${element.value}`;
-          alertMessage('Mail(s) Deleted Successfully');
+          alertMessage('Mail(s) Retracted Successfully');
           document.querySelector(mailID).classList.add('hidden');
         }
       });
