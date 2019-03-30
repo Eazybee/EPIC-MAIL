@@ -248,7 +248,7 @@ class Validate {
     }
   }
 
-  static deleteMailId(req, res, next) {
+  static deleteWithId(req, res, next, table) {
     const mailId = parseInt(req.params.id, 10);
     const schema = Joi.object().keys({
       id: Joi.number().required(),
@@ -258,7 +258,7 @@ class Validate {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getMessages(mailId, 'delete', UserController.user.getId()).then((rows) => {
+      db.getMessages(mailId, table, UserController.user.getId()).then((rows) => {
         const mail = rows.rows[0];
         if (mail) { //  Checking if mail exist
           req.deleteType = rows.deleteType;
@@ -272,6 +272,14 @@ class Validate {
         Utility.handleError(res, errorMessage, 500);
       });
     }
+  }
+
+  static deleteInboxWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteInbox');
+  }
+
+  static deleteSentWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteSent');
   }
 
   static createGroup(req, res, next) {
