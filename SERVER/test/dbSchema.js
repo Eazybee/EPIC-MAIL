@@ -47,6 +47,13 @@ CREATE TABLE IF NOT EXISTS sents (
   date_time BIGINT NULL
 );
 
+CREATE TABLE IF NOT EXISTS drafts (
+  msg_id INTEGER NULL,
+  receiver_id INTEGER NULL,
+  status VARCHAR(128) NULL,
+  date_time BIGINT NULL
+);
+
 CREATE TABLE IF NOT EXISTS groups (
   id SERIAL PRIMARY KEY,
   owner_id INTEGER NULL,

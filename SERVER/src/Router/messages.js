@@ -15,7 +15,9 @@ router.get('/unread', Validate.isLoggedIn, MessageController.getUnreadInbox); //
 router.get('/read', Validate.isLoggedIn, MessageController.getReadInbox); // get read inbox
 router.get('/sent', Validate.isLoggedIn, MessageController.getSentMail); // get sent message
 router.get('/sent/:id', Validate.isLoggedIn, Validate.sentMailId, MessageController.getSentMailId); // get sent message with id
+router.get('/draft', Validate.isLoggedIn, MessageController.getDraft); // get draft
 router.get('/:id', Validate.isLoggedIn, Validate.mailId, MessageController.getMailId); // get inbox  with id
+
 
 //  PUT
 router.put('/', Validate.isLoggedIn, Validate.sendDraft, MessageController.sendDraft); // send draft
