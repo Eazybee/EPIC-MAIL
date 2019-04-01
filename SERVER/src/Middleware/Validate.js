@@ -140,6 +140,20 @@ class Validate {
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
+    } else if (req.body.receiverEmail) {
+      const { receiverEmail } = req.body;
+      db.getUserId(receiverEmail).then((rows) => {
+        if (rows.length === 1) {
+          req.body.receiverId = rows[0].id;
+          next();
+        } else {
+          const errorMessage = `User with email ${receiverEmail} does not exist!`;
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
     } else {
       next();
     }

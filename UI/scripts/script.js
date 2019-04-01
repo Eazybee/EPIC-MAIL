@@ -219,31 +219,19 @@ const deleteMail = (mailID, respondMessage = '') => {
 
 /** Send Draft Message * */
 const sendDraftMessage = (mailDiv) => {
-  const mailID = `.right-draft .inbox-view .s${mailDiv.querySelector("input[type='checkbox']").value}`;
-  const mailToType = mailDiv.querySelector("input[type='hidden']").value;
+  // const mailId = mailDiv.querySelector("input[type='checkbox']").value;
   const mailTo = mailDiv.querySelector('p').innerHTML;
   const mailSubject = mailDiv.querySelector('div .subject').innerHTML;
   const mailBody = mailDiv.querySelector('div .msg').innerHTML;
 
-  document.querySelector(`.right-compose .address input[type='radio'][value='${mailToType}']`).checked = true;
-  if (mailToType === 'Individual') {
-    document.querySelector(".right-compose .address input[type='email']").value = mailTo;
-    document.querySelector(".right-compose .address input[type='email']").classList.remove('hidden');
-    document.querySelector(".right-compose .address input[type='email']").required = true;
-    document.querySelector('.right-compose .address select').classList.add('hidden');
-  } else if (mailToType === 'Group') {
-    const selectGroup = document.querySelector('.right-compose .address select');
-
-    document.querySelector(".right-compose .address input[type='email']").classList.add('hidden');
-    document.querySelector(".right-compose .address input[type='email']").required = false;
-    selectGroup.classList.remove('hidden');
-
-    loadGroup();
-    selectGroup.value = mailTo;
-  }
+  document.querySelector(".right-compose .address input[type='email']").value = mailTo;
   document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
   document.querySelector('.right-compose .message textarea').value = mailBody;
-  deleteMail(mailID);
+  document.querySelector('.right-compose .address input[type=\'radio\'][value=\'Individual').checked = true;
+  document.querySelector(".right-compose .address input[type='email']").required = true;
+  document.querySelector(".right-compose .address input[type='email']").classList.remove('hidden');
+  document.querySelector('.right-compose .address select').classList.add('hidden');
+
   showCompose();
   // alertMessage(mailBody);
 };
@@ -524,7 +512,44 @@ window.onload = function ready() {
       document.querySelector("a[href='#Sent']").classList.add('active');
       document.querySelector('.right-sent').classList.remove('hidden');
     };
-    document.querySelector("a[href='#Draft']").onclick = () => {
+    document.querySelector("a[href='#Draft']").onclick = async () => {
+      await postData('GET', '/messages/draft', null, true)
+        .then(async (response) => {
+          const res = await response.json();
+          if (parseInt(response.status, 10) === 401) {
+            logOut();
+          } else if ('error' in res) {
+            throw new Error(res.error);
+          } else if ('data' in res) {
+            if ('id' in res.data[0]) {
+              const divElement = document.createElement('div');
+              const options = {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric',
+              };
+              res.data.forEach((message) => {
+                const tempDiv = document.createElement('div');
+                tempDiv.classList.add(message.status);
+                tempDiv.innerHTML = `
+                <input type="checkbox" value="${message.id}">
+                <p>${message.receiverEmail || ''}</p>
+                <div>
+                  <p class="subject">${message.subject}</p>
+                  <p class="msg">${message.message}</p>
+                </div>
+                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+                divElement.appendChild(tempDiv);
+              });
+              document.querySelector('.right-draft .inbox-view').innerHTML = divElement.innerHTML;
+            } else {
+              //  res.data[0].message;
+            }
+          }
+        }).catch((error) => {
+          alertMessage(error.message);
+        });
       document.querySelectorAll('.right  > div:not(.right-draft)').forEach((element) => {
         element.classList.add('hidden');
       });
@@ -535,18 +560,14 @@ window.onload = function ready() {
       document.querySelector('.right-draft').classList.remove('hidden');
     };
     document.querySelector("a[href='#Group']").onclick = () => {
-      if (document.querySelector(".inbox > input[type='hidden']").value === 'Admin') {
-        document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
-          element.classList.add('hidden');
-        });
-        document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
-          element.classList.remove('active');
-        });
-        document.querySelector("a[href='#Group']").classList.add('active');
-        document.querySelector('.right-group').classList.remove('hidden');
-      } else {
-        alertMessage('Only an Admin is allowed to create group');
-      }
+      document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
+        element.classList.add('hidden');
+      });
+      document.querySelectorAll(".inbox .bottom .left> ul >li a:not([href='#Group'])").forEach((element) => {
+        element.classList.remove('active');
+      });
+      document.querySelector("a[href='#Group']").classList.add('active');
+      document.querySelector('.right-group').classList.remove('hidden');
     };
 
     /** Log Out * */
@@ -605,10 +626,12 @@ window.onload = function ready() {
           inputEmail.classList.remove('hidden');
           inputEmail.required = true;
           selectGroup.classList.add('hidden');
+          document.querySelector('#saveMail').classList.remove('hidden');
         } else if (selectedRadioValue === 'Group') {
           inputEmail.classList.add('hidden');
           inputEmail.required = false;
           selectGroup.classList.remove('hidden');
+          document.querySelector('#saveMail').classList.add('hidden');
           loadGroup();
         }
       };

@@ -46,7 +46,7 @@ class MessageController {
       Date.now(),
       'draft',
     ];
-    db.addMessage(message).then((rows) => {
+    db.addMessage(message, 'draft', req.body.receiverId).then((rows) => {
       const [mail] = rows;
       res.status(201).json({
         status: 201,
@@ -229,6 +229,39 @@ class MessageController {
           data: [
             {
               message: 'Your don\'t have any sent message!',
+            },
+          ],
+        });
+      }
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
+  static getDraft(req, res) {
+    db.getDrafts(UserController.user.getId()).then((mails) => {
+      if (mails.length !== 0) {
+        const drafts = mails.map(mail => ({
+          id: mail.id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: UserController.user.getId(),
+          receiverEmail: mail.receiverEmail,
+          parentMessageId: null,
+          status: 'draft',
+        }));
+        res.status(200).json({
+          status: 200,
+          data: drafts,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your draft is empty!',
             },
           ],
         });

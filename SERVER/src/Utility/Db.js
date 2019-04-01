@@ -36,12 +36,30 @@ class Database {
     return result.rows;
   }
 
-  static async addMessage(values) {
+  static async addMessage(values, type, receiverId) {
     const query = {
       text: 'INSERT INTO messages(subject, message, owner_id, date_time, status) VALUES($1, $2, $3, $4, $5) RETURNING *',
       values,
     };
     const result = await client.query(query);
+    if (type === 'draft') {
+      if (receiverId) {
+        const msgId = result.rows[0].id;
+        const query2 = {
+          text: 'INSERT INTO drafts(msg_id, receiver_id, date_time, status) VALUES($1, $2, $3, $4) RETURNING *',
+          values: [msgId, receiverId, values[3], 'draft'],
+        };
+        await client.query(query2);
+      } else {
+        const msgId = result.rows[0].id;
+        const query2 = {
+          text: 'INSERT INTO drafts(msg_id,  date_time, status) VALUES($1, $2, $3) RETURNING *',
+          values: [msgId, values[3], 'draft'],
+        };
+        await client.query(query2);
+      }
+    }
+
     return result.rows;
   }
 
@@ -183,6 +201,34 @@ class Database {
     const query = { text };
     const result = await client.query(query);
     return result.rows;
+  }
+
+  static async getDrafts(userId) {
+    if (userId) {
+      let query = {
+        text: `select a.receiver_id, a.date_time, b.id, b.subject, b.message, b.id from drafts a
+        inner join messages b on b.owner_id =$1 and a.msg_id  = b.id  and a.status = $2 ORDER BY a.date_time DESC`,
+        values: [userId, 'draft'],
+      };
+      let result = await client.query(query);
+      const { rows } = result;
+
+      const tempRows = await Promise.all(rows.map(async (row) => {
+        const tempRow = row;
+        if (row.receiver_id) {
+          query = {
+            text: 'select email from users where id = $1',
+            values: [tempRow.receiver_id],
+          };
+
+          result = await client.query(query);
+          tempRow.receiverEmail = result.rows[0].email;
+        }
+        return tempRow;
+      }));
+      return tempRows;
+    }
+    return [];
   }
 
   static async getMessageThread(id, receiverId) {
