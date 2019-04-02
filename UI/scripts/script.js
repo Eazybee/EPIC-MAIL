@@ -219,11 +219,12 @@ const deleteMail = (mailID, respondMessage = '') => {
 
 /** Send Draft Message * */
 const sendDraftMessage = (mailDiv) => {
-  // const mailId = mailDiv.querySelector("input[type='checkbox']").value;
+  const mailId = mailDiv.querySelector("input[type='checkbox']").value;
   const mailTo = mailDiv.querySelector('p').innerHTML;
   const mailSubject = mailDiv.querySelector('div .subject').innerHTML;
   const mailBody = mailDiv.querySelector('div .msg').innerHTML;
 
+  document.querySelector(".right-compose input[name='id']").value = mailId;
   document.querySelector(".right-compose .address input[type='email']").value = mailTo;
   document.querySelector(".right-compose .message input[type='text']").value = mailSubject;
   document.querySelector('.right-compose .message textarea').value = mailBody;
@@ -369,7 +370,7 @@ window.onload = function ready() {
     if (!localStorage.getItem('auth')) {
       window.location.replace('./loginPage.html');
     }
-    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail');
+    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toUpperCase();
     //  Menu buttons
     (() => {
       const inBtn = document.querySelector('.seek button.in');
@@ -582,12 +583,19 @@ window.onload = function ready() {
       sendButton.innerHTML = 'SENDING';
       sendButton.classList.add('sending');
       const sendMsg = document.querySelector("[name='sendMail']");
+      const saveMsgId = document.querySelector(".right-compose input[name='id']");
       const obj = {
         receiverEmail: sendMsg.email.value,
         subject: sendMsg.subject.value,
         message: sendMsg.message.value,
       };
-      postData('POST', '/messages', obj, true)
+      let method = 'POST';
+      if (saveMsgId.value) {
+        obj.id = saveMsgId.value;
+        method = 'PUT';
+      }
+
+      postData(method, '/messages', obj, true)
         .then(async (response) => {
           const res = await response.json();
           if (parseInt(response.status, 10) === 401) {
@@ -601,7 +609,7 @@ window.onload = function ready() {
             setTimeout(() => {
               sendButton.innerHTML = 'SENT';
               sendButton.classList.add('sent');
-              alertMessage('Message Sent Successffuly');
+              alertMessage('Message Sent Successfully');
             }, 2000);
             setTimeout(() => {
               sendButton.innerHTML = 'SEND';
@@ -641,34 +649,22 @@ window.onload = function ready() {
     document.querySelector('#saveMail').onclick = () => {
       const topic = document.querySelector('.inbox .right-compose .message input').value;
       const msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
-      let mailTo = '';
-      let mailToType = '';
-      let receiverEmail = null;
+      const receiverEmail = document.querySelector(".inbox .right-compose .address input[type='email']").value;
+      const saveMsgId = document.querySelector(".right-compose input[name='id']");
       if (topic.trim() === '') {
         alertMessage('Subject cannot be empty');
       } else if (msgBody.trim() === '') {
         alertMessage('Message body cannot be empty');
       } else {
-        document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-          if (radioButton.checked && radioButton.value === 'Individual') {
-            mailTo = document.querySelector(".inbox .right-compose .address input[type='email']").value;
-            receiverEmail = mailTo;
-            mailToType = 'Individual';
-          } else if (radioButton.checked && radioButton.value === 'Group') {
-            const selectElement = document.querySelector('.inbox .right-compose .address select');
-            const { selectedIndex } = selectElement; // geting index of selected option
-            const { options } = selectElement; // getting collections of all options as an array
-            mailTo = options[selectedIndex].value; // returning the value of selected option
-            mailToType = 'Group';
-          }
-        });
-
         const obj = {
           subject: topic,
           message: msgBody,
         };
         if (receiverEmail) {
           obj.receiverEmail = receiverEmail;
+        }
+        if (saveMsgId.value) {
+          obj.id = saveMsgId.value;
         }
         postData('POST', '/messages/draft', obj, true)
           .then(async (response) => {
@@ -679,25 +675,6 @@ window.onload = function ready() {
               throw new Error(res.error);
             } else if ('data' in res) {
               if ('id' in res.data[0]) {
-                const draftMsg = res.data[0];
-                const mailId = draftMsg.id;
-                const options = {
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric',
-                };
-                const divElement = document.createElement('div');
-                divElement.innerHTML = `<input type="hidden" value="${mailToType}">`
-                                  + `<input type="checkbox" value="${mailId}">`
-                                  + `<p>${mailTo}</p>`
-                                  + '<div>'
-                                      + `<p class="subject">${topic}</p>`
-                                      + `<p class="msg">${msgBody}</p>`
-                                  + '</div>'
-                                  + `<label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(draftMsg.createdOn, 10)))}</label>`;
-                divElement.setAttribute('class', `s${mailId}`);
-                document.querySelector('.right-draft .inbox-view').appendChild(divElement);
                 alertMessage('Message saved as draft succesfully');
                 document.querySelector("[name='sendMail']").reset();
               } else {

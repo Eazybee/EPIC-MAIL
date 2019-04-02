@@ -39,30 +39,59 @@ class MessageController {
   }
 
   static saveDraft(req, res) {
-    const message = [
-      req.body.subject,
-      req.body.message,
-      UserController.user.getId(),
-      Date.now(),
-      'draft',
-    ];
-    db.addMessage(message, 'draft', req.body.receiverId).then((rows) => {
-      const [mail] = rows;
-      res.status(201).json({
-        status: 201,
-        data: [{
-          id: mail.id,
-          createdOn: mail.date_time,
-          subject: mail.subject,
-          message: mail.message,
-          parentMessageId: null,
-          status: mail.status,
-        }],
+    const msgId = req.body.id;
+    if (msgId) {
+      const message = [
+        req.body.subject,
+        req.body.message,
+        Date.now(),
+        req.body.receiverId,
+        msgId,
+      ];
+
+      db.updateDraft(message).then((rows) => {
+        const [mail] = rows;
+        res.status(200).json({
+          status: 200,
+          data: [{
+            id: msgId,
+            createdOn: mail.date_time,
+            subject: mail.subject,
+            message: mail.message,
+            parentMessageId: null,
+            status: 'draft',
+          }],
+        });
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
       });
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
-    });
+    } else {
+      const message = [
+        req.body.subject,
+        req.body.message,
+        UserController.user.getId(),
+        Date.now(),
+        'draft',
+      ];
+      db.addMessage(message, 'draft', req.body.receiverId).then((rows) => {
+        const [mail] = rows;
+        res.status(201).json({
+          status: 201,
+          data: [{
+            id: mail.id,
+            createdOn: mail.date_time,
+            subject: mail.subject,
+            message: mail.message,
+            parentMessageId: null,
+            status: mail.status,
+          }],
+        });
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
   }
 
   static sendDraft(req, res) {
@@ -71,7 +100,7 @@ class MessageController {
     const dateTime = Date.now();
     let values = [subject, message, 'sent', mailId];
 
-    db.updateMessage(values).then((rowCount) => {
+    db.sendDraft(values, [receiverId, dateTime, 'sent', mailId]).then((rowCount) => {
       if (rowCount === 1) {
         // insert into sents table
         values = [mailId, UserController.user.getId(), 'sent', dateTime];

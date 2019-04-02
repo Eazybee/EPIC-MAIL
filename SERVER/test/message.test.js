@@ -136,7 +136,7 @@ describe('Messages', () => {
           id: draftId1,
           subject: 'Holla',
           message: 'you won again',
-          receiverId: 1,
+          receiverEmail: 'johndoe@test.com',
         };
         chai.request(app)
           .put('/api/v1/messages')
@@ -153,7 +153,7 @@ describe('Messages', () => {
           id: draftId2,
           subject: 'Holla',
           message: 'you won again',
-          receiverId: 2,
+          receiverEmail: 'ayomipo@test.com',
         };
         chai.request(app)
           .put('/api/v1/messages')

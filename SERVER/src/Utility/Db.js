@@ -5,7 +5,7 @@ class Database {
   static async getUserId(email) {
     const query = {
       text: 'SELECT id FROM users WHERE email = $1',
-      values: [email],
+      values: [email.toLowerCase()],
     };
     const result = await client.query(query);
     return result.rows;
@@ -43,32 +43,43 @@ class Database {
     };
     const result = await client.query(query);
     if (type === 'draft') {
-      if (receiverId) {
-        const msgId = result.rows[0].id;
-        const query2 = {
-          text: 'INSERT INTO drafts(msg_id, receiver_id, date_time, status) VALUES($1, $2, $3, $4) RETURNING *',
-          values: [msgId, receiverId, values[3], 'draft'],
-        };
-        await client.query(query2);
-      } else {
-        const msgId = result.rows[0].id;
-        const query2 = {
-          text: 'INSERT INTO drafts(msg_id,  date_time, status) VALUES($1, $2, $3) RETURNING *',
-          values: [msgId, values[3], 'draft'],
-        };
-        await client.query(query2);
-      }
+      const msgId = result.rows[0].id;
+      const query2 = {
+        text: 'INSERT INTO drafts(msg_id, receiver_id, date_time, status) VALUES($1, $2, $3, $4) RETURNING *',
+        values: [msgId, receiverId, values[3], 'draft'],
+      };
+      await client.query(query2);
     }
 
     return result.rows;
   }
 
-  static async updateMessage(values) {
-    const query = {
+  static async updateDraft(values) {
+    let query = {
+      text: 'UPDATE messages set subject=$1, message=$2 where id =$3 RETURNING *',
+      values: [values[0], values[1], values[4]],
+    };
+    const result = await client.query(query);
+
+    query = {
+      text: 'UPDATE drafts set date_time=$1, receiver_id=$2 where msg_id =$3 RETURNING *',
+      values: [values[2], values[3], values[4]],
+    };
+    await client.query(query);
+    return result.rows;
+  }
+
+  static async sendDraft(values, values2) {
+    let query = {
       text: 'UPDATE messages SET subject=$1, message=$2, status=$3 WHERE id=$4',
       values,
     };
     const result = await client.query(query);
+    query = {
+      text: 'UPDATE drafts SET receiver_id=$1, date_time=$2, status=$3 WHERE msg_id=$4',
+      values: values2,
+    };
+    await client.query(query);
     return result.rowCount;
   }
 
@@ -123,6 +134,17 @@ class Database {
           sentResult.deleteType = 'sents';
           return sentResult;
         }
+        return result.rows;
+      }
+      if (userAccess === 'draft') {
+        query = {
+          text: `
+                 SELECT a.owner_id, b.msg_id FROM messages a 
+                 inner join drafts b 
+                 on a.id =$1 and a.owner_id =$2 and b.status =$3 and a.id = b.msg_id`,
+          values: [id, userId, 'draft'],
+        };
+        const result = await client.query(query);
         return result.rows;
       }
 
@@ -227,6 +249,20 @@ class Database {
         return tempRow;
       }));
       return tempRows;
+    }
+    return [];
+  }
+
+  static async getDraftId(id, userId) {
+    if (id) {
+      const query = {
+        text: `
+        SELECT a.*, b.owner_id from drafts a 
+        inner join messages b on a.msg_id = $1 and a.status =$2 and a.msg_id = b.id and b.owner_id = $3 `,
+        values: [id, 'draft', userId],
+      };
+      const result = await client.query(query);
+      return result.rows;
     }
     return [];
   }

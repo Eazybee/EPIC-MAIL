@@ -135,25 +135,54 @@ class Validate {
       subject: Joi.string().required(),
       message: Joi.string().required(),
       receiverEmail: Joi.string().email({ minDomainAtoms: 2 }),
+      id: Joi.number(),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
-    } else if (req.body.receiverEmail) {
+    } else if (req.body.receiverEmail || req.body.id) {
       const { receiverEmail } = req.body;
-      db.getUserId(receiverEmail).then((rows) => {
-        if (rows.length === 1) {
-          req.body.receiverId = rows[0].id;
-          next();
-        } else {
-          const errorMessage = `User with email ${receiverEmail} does not exist!`;
-          Utility.handleError(res, errorMessage, 400);
-        }
-      }).catch((err) => {
-        const errorMessage = `SERVER ERROR: ${err.message}`;
-        Utility.handleError(res, errorMessage, 500);
-      });
+      const msgId = req.body.id;
+
+      if (msgId) {
+        db.getMessages(msgId, 'draft', UserController.user.getId()).then((rows) => {
+          if (rows.length === 1) {
+            if (receiverEmail) {
+              db.getUserId(receiverEmail).then((rows2) => {
+                if (rows2.length === 1) {
+                  req.body.receiverId = rows2[0].id;
+                  next();
+                } else {
+                  const errorMessage = `User with email ${receiverEmail} does not exist!`;
+                  Utility.handleError(res, errorMessage, 400);
+                }
+              });
+            } else {
+              next();
+            }
+          } else {
+            const errorMessage = 'Draft message does not exist!';
+            Utility.handleError(res, errorMessage, 400);
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      } else if (receiverEmail) {
+        db.getUserId(receiverEmail).then((rows) => {
+          if (rows.length === 1) {
+            req.body.receiverId = rows[0].id;
+            next();
+          } else {
+            const errorMessage = `User with email ${receiverEmail} does not exist!`;
+            Utility.handleError(res, errorMessage, 400);
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      }
     } else {
       next();
     }
@@ -165,41 +194,29 @@ class Validate {
       subject: Joi.string().required(),
       message: Joi.string().required(),
       parentMessageId: Joi.number(),
-      receiverId: Joi.number().required(),
+      receiverEmail: Joi.string().email({ minDomainAtoms: 2 }).required(),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) { // if schema exist
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      const mailId = parseInt(req.body.id, 10);
-      db.getMessages(mailId).then((rows) => {
-        const [mail] = rows;
-        if (mail) { // if mail exist
-          if (mail.owner_id !== UserController.user.getId()) {
-            // check if message belongs to the user
-            const errorMessage = 'Unauthorized';
-            Utility.handleError(res, errorMessage, 401);
-          } else if (mail.status !== 'draft') { // check if it is a draft
-            const errorMessage = 'Message must be draft';
-            Utility.handleError(res, errorMessage, 400);
-          } else {
-            const userId = parseInt(req.body.receiverId, 10);
-            db.getUsers(userId).then((rows2) => {
-              if (rows2.length === 1) {
-                next();
-              } else {
-                const errorMessage = 'User with this receiverId does not exist!';
-                Utility.handleError(res, errorMessage, 400);
-              }
-            }).catch((err) => {
-              const errorMessage = `SERVER ERROR: ${err.message}`;
-              Utility.handleError(res, errorMessage, 500);
-            });
-          }
+      const { receiverEmail } = req.body;
+      db.getUserId(receiverEmail).then((rows) => {
+        if (rows.length === 1) {
+          req.body.receiverId = rows[0].id;
+          const draftMsgId = req.body.id;
+          db.getDraftId(draftMsgId, UserController.user.getId()).then((rows2) => {
+            if (rows2.length === 1) {
+              next();
+            } else {
+              const errorMessage = 'Draft message does not exist!';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
         } else {
-          const errorMessage = 'Message does not exist!';
-          Utility.handleError(res, errorMessage, 404);
+          const errorMessage = `User with email ${receiverEmail} does not exist!`;
+          Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
