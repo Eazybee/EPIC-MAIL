@@ -532,7 +532,12 @@ button.sent{
     border: .1em lightblue solid;
     padding: 1em;
 }
-.right-group .groups div {
+.right-group .groups >div:nth-child(2) {
+    display: flex;
+    flex-flow: column nowrap;
+}
+.right-group .groups div >div{
+    display: flex;
     flex-flow: row nowrap;
 }
 .right-group .groups div.btn{
