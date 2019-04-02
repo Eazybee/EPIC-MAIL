@@ -789,13 +789,28 @@ window.onload = function ready() {
 
     /** CREATE GROUP* */
     document.querySelector('.right-group #createGroup').onsubmit = () => {
-      const groupName = document.querySelector(".right-group input[type='text']");
-      if (groupName.value.trim() !== '') {
-        const div = document.createElement('div');
-        div.innerHTML = `<input type="checkbox"><a href="#">${groupName.value.trim()}</a>`;
-        document.querySelector('.right-group .groups').appendChild(div);
-        groupName.value = '';
-        alertMessage('Group Created Successfully!');
+      const groupElement = document.querySelector(".right-group input[type='text']");
+      const groupName = groupElement.value.trim();
+      if (groupName !== '') {
+        const obj = {
+          name: groupName,
+        };
+        postData('POST', '/groups', obj, true)
+          .then(async (response) => {
+            const res = await response.json();
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if ('error' in res) {
+              throw new Error(res.error);
+            } else if ('data' in res && 'id' in res.data[0]) {
+              const div = document.createElement('div');
+              div.innerHTML = `<input type="checkbox" value="${res.data[0].id}"><a href="#">${res.data[0].name}</a>`;
+              document.querySelector('.right-group .groups >div:nth-child(2)').prepend(div);
+              groupElement.value = '';
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       } else {
         alertMessage('Group name cannot be empty');
       }
