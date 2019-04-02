@@ -209,14 +209,6 @@ const viewSentMessage = async (maildId) => {
   }).catch((error) => { alertMessage(error.message); });
 };
 
-// delete mail
-const deleteMail = (mailID, respondMessage = '') => {
-  document.querySelector(mailID).classList.add('hidden');
-  if (respondMessage !== '') {
-    alertMessage(respondMessage);
-  }
-};
-
 /** Send Draft Message * */
 const sendDraftMessage = (mailDiv) => {
   const mailId = mailDiv.querySelector("input[type='checkbox']").value;
@@ -689,10 +681,25 @@ window.onload = function ready() {
 
     /** Delete draft * */
     document.querySelector('.right-draft .toolbar button.deleteButton').onclick = () => {
-      document.querySelectorAll('.inbox .bottom .right-draft .inbox-view >div >input').forEach((element) => {
+      const checkBoxes = document.querySelectorAll('.right-draft .inbox-view >div >input');
+      checkBoxes.forEach(async (element) => {
         if (element.checked) {
-          const mailID = `.right-draft .inbox-view .s${element.value}`;
-          deleteMail(mailID, 'Draft Mail(s) Deleted Successfully');
+          const mailId = element.value;
+
+          await postData('DELETE', `/messages/draft/${mailId}`, null, true)
+            .then(async (response) => {
+              if (parseInt(response.status, 10) === 401) {
+                logOut();
+              } else if (parseInt(response.status, 10) === 204) {
+                document.querySelector('.right-draft .inbox-view').removeChild((element.parentNode));
+                //  alertMessage('Mail(s) Deleted Successfully');
+              } else if (parseInt(response.status, 10) === 404) {
+                const res = await response.json();
+                throw new Error(res.error);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
+            });
         }
       });
     };

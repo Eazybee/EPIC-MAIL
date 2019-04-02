@@ -313,6 +313,10 @@ class Validate {
     Validate.deleteWithId(req, res, next, 'deleteSent');
   }
 
+  static deleteDrafttWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteDraft');
+  }
+
   static createGroup(req, res, next) {
     const schema = Joi.object().keys({
       name: Joi.string().required(),

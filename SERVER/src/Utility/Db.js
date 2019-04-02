@@ -109,33 +109,6 @@ class Database {
         const result = await client.query(query);
         return result.rows;
       }
-      if (userAccess === 'deleteInbox') {
-        query = {
-          text: 'SELECT * FROM inboxes where msg_id =$1 and receiver_id=$2 and status !=$3',
-          values: [id, userId, 'deleted'],
-        };
-        const inboxResult = await client.query(query);
-        inboxResult.deleteType = 'inboxes';
-        return inboxResult;
-      }
-      if (userAccess === 'deleteSent') {
-        query = {
-          text: 'SELECT * FROM messages where id =$1 and status !=$2',
-          values: [id, 'deleted'],
-        };
-        const result = await client.query(query);
-
-        if (result.rowCount === 1) {
-          query = {
-            text: 'SELECT * FROM sents where msg_id =$1 and sender_id=$2 and status !=$3',
-            values: [id, userId, 'deleted'],
-          };
-          const sentResult = await client.query(query);
-          sentResult.deleteType = 'sents';
-          return sentResult;
-        }
-        return result.rows;
-      }
       if (userAccess === 'draft') {
         query = {
           text: `
@@ -147,9 +120,41 @@ class Database {
         const result = await client.query(query);
         return result.rows;
       }
+      if (userAccess === 'deleteInbox') {
+        query = {
+          text: 'SELECT * FROM inboxes where msg_id =$1 and receiver_id=$2 and status !=$3',
+          values: [id, userId, 'deleted'],
+        };
+        const inboxResult = await client.query(query);
+        inboxResult.deleteType = 'inboxes';
+        return inboxResult;
+      }
+      if (userAccess === 'deleteSent') {
+        query = {
+          text: `SELECT a.*, b.owner_id FROM sents a 
+                 inner join messages b 
+                 on a.msg_id =$1 and a.sender_id=$2 and a.status !=$3
+                 and b.id = a.msg_id`,
+          values: [id, userId, 'deleted'],
+        };
+        const sentResult = await client.query(query);
+        sentResult.deleteType = 'sents';
+        return sentResult;
+      }
+      if (userAccess === 'deleteDraft') {
+        query = {
+          text: `SELECT a.*, b.owner_id FROM drafts a 
+                 inner join messages b 
+                 on a.msg_id =$1 and a.status =$2 and a.msg_id = b.id and b.owner_id =$3`,
+          values: [id, 'draft', userId],
+        };
+        const sentResult = await client.query(query);
+        sentResult.deleteType = 'drafts';
+        return sentResult;
+      }
 
       query = {
-        text: 'SELECT * FROM messages where id =$1 and status !=$2',
+        text: 'SELECT * FROM drafts where id =$1 and status !=$2',
         values: [id, 'deleted'],
       };
       const result = await client.query(query);
