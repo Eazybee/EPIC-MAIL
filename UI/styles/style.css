@@ -515,14 +515,16 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-
+.right-group{
+    height: 100%;
+}
 .right-group >div >div {
     padding: 1em;
     display: flex;
     flex-flow: column;
 }
 .right-group .create{
-    margin: 3em 0;
+    margin: 2em 0;
 }
 .right-group .create input, .right-group .create button{
     padding:.7em;
@@ -560,15 +562,7 @@ button.sent{
     width: 90%;
     padding: .5em 0;
     margin-left: 1em;
-    
 }
 .right-group .groups div:not(.btn):hover{
     background-color: lightblue;
-}
-.right-group ul{
-    display: flex;
-    flex-flow: column nowrap;
-}
-.right-group div ul li{
-    padding: .4em 1em
 }

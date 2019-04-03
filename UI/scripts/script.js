@@ -39,12 +39,15 @@ const loadGroup = () => {
   const selectGroup = document.querySelector('.inbox .right-compose .address select');
   selectGroup.innerHTML = "<option disabled selected value=''>Select Group</option>";
   document.querySelectorAll('.right-group .groups div a').forEach((element) => {
-    const name = element.innerHTML;
-    const option = document.createElement('option'); // create an option element(tag)
-    const groupName = document.createTextNode(name); // create a textnode
-    option.appendChild(groupName); // add text to option tag created
-    option.setAttribute('value', name); // set value = name
-    selectGroup.appendChild(option); // add option to Select element
+    if (element) {
+      const name = element.innerHTML;
+      const id = element.previousElementSibling.value;
+      const option = document.createElement('option'); // create an option element(tag)
+      const groupName = document.createTextNode(name); // create a textnode
+      option.appendChild(groupName); // add text to option tag created
+      option.setAttribute('value', id); // set value = name
+      selectGroup.appendChild(option); // add option to Select element
+    }
   });
 };
 
@@ -81,6 +84,29 @@ const populateInbox = async (response) => {
       document.querySelector('.right-inbox .inbox-view').innerHTML = res.data[0].message;
     }
   }
+};
+
+const getGroups = async () => {
+  postData('GET', '/groups', null, true).then(async (response) => {
+    const res = await response.json();
+    if (parseInt(response.status, 10) === 401) {
+      logOut();
+    } else if ('error' in res) {
+      throw new Error(res.error);
+    } else if ('data' in res) {
+      if ('id' in res.data[0]) {
+        const divElement = document.createElement('div');
+        res.data.forEach((group) => {
+          const div = document.createElement('div');
+          div.innerHTML = `<input type="checkbox" value="${group.id}"><a href="#">${group.name}</a>`;
+          divElement.append(div);
+        });
+        document.querySelector('.right-group .groups >div:nth-child(2)').innerHTML = divElement.innerHTML;
+      } else {
+        document.querySelector('.right-group .groups >div:nth-child(2)').innerHTML = res.data[0].message;
+      }
+    }
+  }).catch((error) => { alertMessage(error.message); });
 };
 
 // Show Compose Panel
@@ -363,6 +389,7 @@ window.onload = function ready() {
       window.location.replace('./loginPage.html');
     }
     document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toUpperCase();
+    getGroups();
     //  Menu buttons
     (() => {
       const inBtn = document.querySelector('.seek button.in');
@@ -552,7 +579,8 @@ window.onload = function ready() {
       document.querySelector("a[href='#Draft']").classList.add('active');
       document.querySelector('.right-draft').classList.remove('hidden');
     };
-    document.querySelector("a[href='#Group']").onclick = () => {
+    document.querySelector("a[href='#Group']").onclick = async () => {
+      await getGroups();
       document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
         element.classList.add('hidden');
       });
@@ -803,9 +831,7 @@ window.onload = function ready() {
             } else if ('error' in res) {
               throw new Error(res.error);
             } else if ('data' in res && 'id' in res.data[0]) {
-              const div = document.createElement('div');
-              div.innerHTML = `<input type="checkbox" value="${res.data[0].id}"><a href="#">${res.data[0].name}</a>`;
-              document.querySelector('.right-group .groups >div:nth-child(2)').prepend(div);
+              getGroups();
               groupElement.value = '';
             }
           }).catch((error) => {
