@@ -322,7 +322,7 @@ class Database {
       values: [userId],
     };
     const result = await client.query(query);
-    return result.rows;
+    return result.rows.reverse();
   }
 
   static async createGroup(values) {
