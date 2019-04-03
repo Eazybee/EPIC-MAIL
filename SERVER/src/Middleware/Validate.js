@@ -401,7 +401,7 @@ class Validate {
               next();
             } else {
               const errorMessage = 'Only group owner can delete a group';
-              Utility.handleError(res, errorMessage, 404);
+              Utility.handleError(res, errorMessage, 400);
             }
           });
         } else {

@@ -807,10 +807,25 @@ window.onload = function ready() {
 
     /** Delete Group* */
     document.querySelector('.right-group .groups .btn button').onclick = () => {
-      document.querySelectorAll('.right-group .groups input').forEach((element) => {
+      const checkBoxes = document.querySelectorAll('.right-group .groups input');
+      checkBoxes.forEach(async (element) => {
         if (element.checked) {
-          alertMessage('Group(s) Deleted Successfully');
-          element.parentNode.classList.add('hidden');
+          const mailId = element.value;
+          await postData('DELETE', `/groups/${mailId}`, null, true)
+            .then(async (response) => {
+              const resStatus = parseInt(response.status, 10);
+              if (resStatus === 401) {
+                logOut();
+              } else if (resStatus === 204) {
+                document.querySelector('.right-group .groups >div:nth-child(2)').removeChild((element.parentNode));
+                //  alertMessage('Mail(s) Deleted Successfully');
+              } else if (resStatus === 404 || resStatus === 400) {
+                const res = await response.json();
+                throw new Error(res.error);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
+            });
         }
       });
     };
