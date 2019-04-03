@@ -388,7 +388,7 @@ window.onload = function ready() {
     if (!localStorage.getItem('auth')) {
       window.location.replace('./loginPage.html');
     }
-    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toUpperCase();
+    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toLowerCase();
     getGroups();
     //  Menu buttons
     (() => {
@@ -605,7 +605,6 @@ window.onload = function ready() {
       const sendMsg = document.querySelector("[name='sendMail']");
       const saveMsgId = document.querySelector(".right-compose input[name='id']");
       const obj = {
-        receiverEmail: sendMsg.email.value,
         subject: sendMsg.subject.value,
         message: sendMsg.message.value,
       };
@@ -614,33 +613,54 @@ window.onload = function ready() {
         obj.id = saveMsgId.value;
         method = 'PUT';
       }
-
-      postData(method, '/messages', obj, true)
-        .then(async (response) => {
-          const res = await response.json();
-          if (parseInt(response.status, 10) === 401) {
-            logOut();
-          } else if ('error' in res) {
+      let endpoint;
+      document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
+        if (radioButton.checked && radioButton.value === 'Individual') {
+          obj.receiverEmail = sendMsg.email.value;
+          endpoint = '/messages';
+        } else if (radioButton.checked && radioButton.value === 'Group') {
+          const selectElement = document.querySelector('.inbox .right-compose .address select');
+          const { selectedIndex } = selectElement; // geting index of selected option
+          const { options } = selectElement; // getting collections of all options as an array
+          const groupId = options[selectedIndex].value; // returning the value of selected option
+          if (!groupId || groupId.trim() === '') {
+            alertMessage('Select a group to send message to');
             sendButton.innerHTML = 'SEND';
             sendButton.classList.remove('sending');
             sendButton.classList.remove('sent');
-            throw new Error(res.error);
-          } else if ('data' in res && 'id' in res.data[0]) {
-            setTimeout(() => {
-              sendButton.innerHTML = 'SENT';
-              sendButton.classList.add('sent');
-              alertMessage('Message Sent Successfully');
-            }, 2000);
-            setTimeout(() => {
+          } else {
+            endpoint = `/groups/${groupId}/messages`;
+          }
+        }
+        if (endpoint) {
+          postData(method, endpoint, obj, true)
+            .then(async (response) => {
+              const res = await response.json();
+              if (parseInt(response.status, 10) === 401) {
+                logOut();
+              } else if ('error' in res) {
+                throw new Error(res.error);
+              } else if ('data' in res && 'id' in res.data[0]) {
+                setTimeout(() => {
+                  sendButton.innerHTML = 'SENT';
+                  sendButton.classList.add('sent');
+                  alertMessage('Message Sent Successfully');
+                }, 2000);
+                setTimeout(() => {
+                  sendButton.innerHTML = 'SEND';
+                  sendButton.classList.remove('sending');
+                  sendButton.classList.remove('sent');
+                  sendMsg.reset();
+                }, 3000);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
               sendButton.innerHTML = 'SEND';
               sendButton.classList.remove('sending');
               sendButton.classList.remove('sent');
-              sendMsg.reset();
-            }, 3000);
-          }
-        }).catch((error) => {
-          alertMessage(error.message);
-        });
+            });
+        }
+      });
       return false;
     };
 
