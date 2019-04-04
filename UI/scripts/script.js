@@ -443,6 +443,22 @@ window.onload = function ready() {
         const mailDiv = e.target.parentNode.previousElementSibling.previousElementSibling;
         viewSentMessage(mailDiv.value);
       }
+      //  Group
+      if (e.target && Array.from(document.querySelectorAll('.right-group .groups div a')).includes(e.target)) {
+        const checkBox = e.target.previousElementSibling;
+        const groupName = e.target.innerHTML;
+        document.querySelector('.right-groupMember > input[type = "hidden"]').value = checkBox.value;
+        document.querySelector('.right-groupMember .update div:first-child label').innerHTML = groupName;
+        document.querySelector('.right-groupMember .update div:first-child label').classList.remove('hidden');
+        document.querySelector('.right-groupMember .update div:first-child input').classList.add('hidden');
+        const editBtn = document.querySelector('.right-groupMember .update div:last-child button:nth-child(1)');
+        editBtn.classList.remove('hidden');
+        editBtn.nextElementSibling.classList.add('hidden');
+        editBtn.nextElementSibling.nextElementSibling.classList.add('hidden');
+        document.querySelector('.right-group').classList.add('hidden');
+        document.querySelector('.right-groupMember').classList.remove('hidden');
+        // viewSentMessage(mailDiv.value);
+      }
     });
 
     /** Left-panel-Menus Event * */
@@ -850,7 +866,7 @@ window.onload = function ready() {
       });
     };
 
-    /** CREATE GROUP* */
+    /** Create Group* */
     document.querySelector('.right-group #createGroup').onsubmit = () => {
       const groupElement = document.querySelector(".right-group input[type='text']");
       const groupName = groupElement.value.trim();
@@ -876,6 +892,89 @@ window.onload = function ready() {
         alertMessage('Group name cannot be empty');
       }
       return false;
+    };
+
+    const editBtn = document.querySelector('.right-groupMember .update div:last-child button:nth-child(1)');
+    const updateBtn = editBtn.nextElementSibling;
+    const cancelBtn = editBtn.nextElementSibling.nextElementSibling;
+    const groupLable = document.querySelector('.right-groupMember .update div:first-child label');
+    const groupEditInput = document.querySelector('.right-groupMember .update div:first-child input');
+
+    /** Edit  Group Name* */
+    editBtn.onclick = () => {
+      const groupName = groupLable.innerHTML;
+      groupEditInput.value = groupName;
+      groupLable.classList.add('hidden');
+      editBtn.classList.add('hidden');
+      updateBtn.classList.remove('hidden');
+      cancelBtn.classList.remove('hidden');
+      groupEditInput.classList.remove('hidden');
+    };
+
+    /** Udate Group Name* */
+    document.querySelector('.right-groupMember #editGroupName').onsubmit = () => {
+      groupLable.innerHTML = groupEditInput.value;
+      groupLable.classList.remove('hidden');
+      editBtn.classList.remove('hidden');
+      updateBtn.classList.add('hidden');
+      cancelBtn.classList.add('hidden');
+      groupEditInput.classList.add('hidden');
+      return false;
+    };
+
+    /** Cancel Group Name Update* */
+    cancelBtn.onclick = () => {
+      const groupName = groupLable.innerHTML;
+      groupEditInput.value = groupName;
+      groupLable.classList.remove('hidden');
+      editBtn.classList.remove('hidden');
+      updateBtn.classList.add('hidden');
+      cancelBtn.classList.add('hidden');
+      groupEditInput.classList.add('hidden');
+    };
+
+    /** Add Group Member* */
+    document.querySelector('.right-groupMember .addMember >form').onsubmit = () => {
+      const form = document.querySelector('.right-groupMember .addMember form');
+      const { email } = form;
+      const emailVal = email.value;
+      if (email.value.trim() === '') {
+        alertMessage('Enter group member\'s email');
+      } else {
+        const memberDiv = document.createElement('div');
+        memberDiv.innerHTML = `<input type="checkbox" value="207">
+                               <p>${emailVal}</p>
+                               <label>Member</label>`;
+        document.querySelector('.right-groupMember .member .inbox-view').append(memberDiv);
+        form.reset();
+      }
+      return false;
+    };
+
+    /** Delete Group Member* */
+    document.querySelector('.right-groupMember .toolbar button').onclick = () => {
+      const checkBoxes = document.querySelectorAll('.right-groupMember .member .inbox-view div >input');
+      checkBoxes.forEach(async (element) => {
+        if (element.checked) {
+          // const mailId = element.value;
+          document.querySelector('.right-groupMember .member .inbox-view').removeChild((element.parentNode));
+          // await postData('DELETE', `/groups/${mailId}`, null, true)
+          //   .then(async (response) => {
+          //     const resStatus = parseInt(response.status, 10);
+          //     if (resStatus === 401) {
+          //       logOut();
+          //     } else if (resStatus === 204) {
+          //       document.querySelector('.right-group .groups >div:nth-child(2)').removeChild((element.parentNode));
+          //       //  alertMessage('Mail(s) Deleted Successfully');
+          //     } else if (resStatus === 404 || resStatus === 400) {
+          //       const res = await response.json();
+          //       throw new Error(res.error);
+          //     }
+          //   }).catch((error) => {
+          //     alertMessage(error.message);
+          //   });
+        }
+      });
     };
   }
 };

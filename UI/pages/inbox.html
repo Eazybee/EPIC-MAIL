@@ -60,7 +60,39 @@
                     </div>
                 </div>
                     <!--Viewing group-->
-                <div class="right-group hidden"></div>
+                <div class="right-groupMember hidden">
+                    <form action="#" id="editGroupName"></form>
+                    <input type="hidden">
+                    <div class="update">
+                        <div>
+                            <label>Group Name</label>
+                            <input class="hidden" type="text" form="editGroupName" required>
+                        </div>
+                        <div>
+                            <button>Edit</button>
+                            <button class="hidden" type="submit" form="editGroupName"> Update</button>
+                            <button class="hidden">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="addMember">
+                        <form action="#">
+                            <input type="email" placeholder="Johndoe@epicmailcom" name="email" required>
+                            <button type="submit">Add Member</button>
+                        </form>
+                    </div>
+                    <div class="member">
+                        <div class="toolbar">
+                            <button class="deleteButton">Delete</button>
+                        </div>
+                        <div class="inbox-view">
+                            <div>
+                                <input type="checkbox" value="207">
+                                <p>maryj@test.com</p>
+                                <label>Admin</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- For Draft Mail -->
                 <div class="right-draft hidden">
                     <div class="toolbar">
