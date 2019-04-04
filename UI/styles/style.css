@@ -292,7 +292,8 @@ body{
     border-color: #0099FF;
 }
 .inbox .top >div:first-child div
-button:hover{
+button:hover,
+.right-groupMember .update div:last-child button:nth-child(3):hover{
     transition: 1s;
     background: red;
     color: white;
@@ -515,7 +516,7 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-.right-group{
+.right-group, .right-groupMember{
     height: 100%;
 }
 .right-group >div >div {
@@ -563,6 +564,55 @@ button.sent{
     padding: .5em 0;
     margin-left: 1em;
 }
-.right-group .groups div:not(.btn):hover{
+.right-group .groups div div:not(.btn):hover{
     background-color: lightblue;
+}
+.right-groupMember >div{
+    margin-bottom: 3em;
+}
+.right-groupMember .update > div{
+    margin: .5em;
+    display: flex;
+}
+.right-groupMember .update div:first-child{
+    flex-flow: column nowrap;
+}
+.right-groupMember .update div:first-child *{
+    padding: .5em .4em;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+.right-groupMember .update div:first-child input{
+    padding: .4em .4em;
+    border: 1px solid lightblue;
+}
+.right-groupMember .update div:last-child button{
+    width:100%;
+    justify-content: center;
+    padding: .4em 0;
+}
+.right-groupMember .update div:last-child button:nth-child(2){
+    width:99.5%;
+    margin-right:.5%;
+}
+.right-groupMember .update div:last-child button:nth-child(3){
+    width:99.5%;
+    margin-left:.5%;
+}
+
+.right-groupMember .addMember form{
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 0 .5em;
+}
+.right-groupMember .addMember form *{
+    padding: .5em 0;
+    margin-bottom: .5em;
+}
+.right-groupMember .addMember form input{
+    padding: .5em .5em;
+}
+.right-groupMember .member{
+    padding: .5em;
+    border: .1em lightblue solid;
 }
