@@ -361,16 +361,21 @@ class Validate {
       const errorMessage = error2.error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getGroups(UserController.user.getId()).then((groups) => {
+      db.getGroups().then((groups) => {
         const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
-          const sameName = groups.some(group => group.name === req.body.name
-            && group.id !== groupExist.id);
-          if (sameName) {
-            const errorMessage = 'Another group with same name exist';
-            Utility.handleError(res, errorMessage, 400);
+          if (groupExist.owner_id === UserController.user.getId()) {
+            const sameName = groups.some(group => group.name === req.body.name
+              && group.id !== groupExist.id);
+            if (sameName) {
+              const errorMessage = 'Another group with same name exist';
+              Utility.handleError(res, errorMessage, 400);
+            } else {
+              next();
+            }
           } else {
-            next();
+            const errorMessage = 'Only group owner can update group name';
+            Utility.handleError(res, errorMessage, 404);
           }
         } else {
           const errorMessage = 'Group with the id does not exist';
