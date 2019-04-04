@@ -961,12 +961,33 @@ window.onload = function ready() {
       if (email.value.trim() === '') {
         alertMessage('Enter group member\'s email');
       } else {
-        const memberDiv = document.createElement('div');
-        memberDiv.innerHTML = `<input type="checkbox" value="207">
-                               <p>${emailVal}</p>
-                               <label>Member</label>`;
-        document.querySelector('.right-groupMember .member .inbox-view').append(memberDiv);
-        form.reset();
+        const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
+        const obj = {
+          userEmail: emailVal,
+        };
+        postData('POST', `/groups/${groupId}/users`, obj, true)
+          .then(async (response) => {
+            const res = await response.json();
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if ('error' in res) {
+              throw new Error(res.error);
+            } else if ('data' in res) {
+              if ('id' in res.data[0]) {
+                const memberDiv = document.createElement('div');
+                memberDiv.innerHTML = `<input type="checkbox" value="207">
+                                      <p>${res.data[0].userEmail}</p>
+                                      <label>Member</label>`;
+                document.querySelector('.right-groupMember .member .inbox-view').append(memberDiv);
+              } else {
+                //  res.data[0].message;
+              }
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          }).finally(() => {
+            form.reset();
+          });
       }
       return false;
     };
