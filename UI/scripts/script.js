@@ -913,12 +913,32 @@ window.onload = function ready() {
 
     /** Udate Group Name* */
     document.querySelector('.right-groupMember #editGroupName').onsubmit = () => {
-      groupLable.innerHTML = groupEditInput.value;
-      groupLable.classList.remove('hidden');
-      editBtn.classList.remove('hidden');
-      updateBtn.classList.add('hidden');
-      cancelBtn.classList.add('hidden');
-      groupEditInput.classList.add('hidden');
+      const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
+      const obj = {
+        name: groupEditInput.value,
+      };
+      postData('PATCH', `/groups/${groupId}/name`, obj, true)
+        .then(async (response) => {
+          const res = await response.json();
+          if (parseInt(response.status, 10) === 401) {
+            logOut();
+          } else if ('error' in res) {
+            throw new Error(res.error);
+          } else if ('data' in res) {
+            if ('id' in res.data[0]) {
+              groupLable.innerHTML = res.data[0].name;
+              groupLable.classList.remove('hidden');
+              editBtn.classList.remove('hidden');
+              updateBtn.classList.add('hidden');
+              cancelBtn.classList.add('hidden');
+              groupEditInput.classList.add('hidden');
+            } else {
+            //  res.data[0].message;
+            }
+          }
+        }).catch((error) => {
+          alertMessage(error.message);
+        });
       return false;
     };
 
