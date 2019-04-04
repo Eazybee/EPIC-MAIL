@@ -118,6 +118,7 @@ class GroupController {
             id: req.params.id,
             userId: req.body.userId,
             role: 'member',
+            userEmail: req.body.userEmail.toLowerCase(),
           }],
         });
       } else {
