@@ -66,6 +66,19 @@ class GroupController {
     });
   }
 
+  static getGroupMembers(req, res) {
+    const groupId = parseInt(req.params.id, 10);
+    db.getGroupMembers(groupId).then((groupMembers) => {
+      res.status(200).json({
+        status: 200,
+        data: groupMembers,
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
   static updateGroupName(req, res) {
     const values = [
       req.body.name,

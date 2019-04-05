@@ -420,6 +420,29 @@ class Validate {
     }
   }
 
+  static groupId(req, res, next) {
+    const groupId = parseInt(req.params.id, 10);
+    const schema = Joi.number().required();
+    const { error } = Joi.validate(groupId, schema);
+    if (error) {
+      const errorMessage = '\'id\' must be a number';
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getAllGroups(UserController.user.getId()).then((groups) => {
+        const groupExist = groups.find(group => group.group_id === groupId);
+        if (groupExist) {
+          next();
+        } else {
+          const errorMessage = 'Group does not exist';
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
   static addGroupMember(req, res, next) {
     const schema = Joi.object().keys({
       id: Joi.number().required(),
@@ -461,7 +484,7 @@ class Validate {
             }
           });
         } else {
-          const errorMessage = 'Group with the id does not exist';
+          const errorMessage = 'Group does not exist';
           Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {

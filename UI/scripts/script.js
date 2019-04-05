@@ -109,6 +109,27 @@ const getGroups = async () => {
   }).catch((error) => { alertMessage(error.message); });
 };
 
+const getGroupMembers = async (groupId) => {
+  await postData('GET', `/groups/${groupId}`, null, true).then(async (response) => {
+    const res = await response.json();
+    if (parseInt(response.status, 10) === 401) {
+      logOut();
+    } else if ('error' in res) {
+      throw new Error(res.error);
+    } else if ('data' in res) {
+      if ('userId' in res.data[0]) {
+        res.data.forEach((member) => {
+          const memberDiv = document.createElement('div');
+          memberDiv.innerHTML = `<input type="checkbox" value="${member.userId}">
+                                <p>${member.userEmail}</p>
+                                  <label>${member.userRole}</label>`;
+          document.querySelector('.right-groupMember .member .inbox-view').append(memberDiv);
+        });
+      }
+    }
+  }).catch((error) => { alertMessage(error.message); });
+};
+
 // Show Compose Panel
 const showCompose = () => {
   document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
@@ -446,18 +467,23 @@ window.onload = function ready() {
       //  Group
       if (e.target && Array.from(document.querySelectorAll('.right-group .groups div a')).includes(e.target)) {
         const checkBox = e.target.previousElementSibling;
-        const groupName = e.target.innerHTML;
-        document.querySelector('.right-groupMember > input[type = "hidden"]').value = checkBox.value;
-        document.querySelector('.right-groupMember .update div:first-child label').innerHTML = groupName;
-        document.querySelector('.right-groupMember .update div:first-child label').classList.remove('hidden');
-        document.querySelector('.right-groupMember .update div:first-child input').classList.add('hidden');
-        const editBtn = document.querySelector('.right-groupMember .update div:last-child button:nth-child(1)');
-        editBtn.classList.remove('hidden');
-        editBtn.nextElementSibling.classList.add('hidden');
-        editBtn.nextElementSibling.nextElementSibling.classList.add('hidden');
-        document.querySelector('.right-group').classList.add('hidden');
-        document.querySelector('.right-groupMember').classList.remove('hidden');
-        // viewSentMessage(mailDiv.value);
+        (() => {
+          const groupName = e.target.innerHTML;
+          document.querySelector('.right-groupMember .member .inbox-view').innerHTML = '';
+          document.querySelector('.right-groupMember > input[type = "hidden"]').value = checkBox.value;
+          document.querySelector('.right-groupMember .update div:first-child label').innerHTML = groupName;
+          document.querySelector('.right-groupMember .update div:first-child label').classList.remove('hidden');
+          document.querySelector('.right-groupMember .update div:first-child input').classList.add('hidden');
+          const editBtn = document.querySelector('.right-groupMember .update div:last-child button:nth-child(1)');
+          editBtn.classList.remove('hidden');
+          editBtn.nextElementSibling.classList.add('hidden');
+          editBtn.nextElementSibling.nextElementSibling.classList.add('hidden');
+          document.querySelector('.right-group').classList.add('hidden');
+          document.querySelector('.right-groupMember').classList.remove('hidden');
+        })();
+
+        const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
+        getGroupMembers(groupId);
       }
     });
 
@@ -911,7 +937,7 @@ window.onload = function ready() {
       groupEditInput.classList.remove('hidden');
     };
 
-    /** Udate Group Name* */
+    /** Update Group Name* */
     document.querySelector('.right-groupMember #editGroupName').onsubmit = () => {
       const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
       const obj = {
