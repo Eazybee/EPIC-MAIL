@@ -325,6 +325,39 @@ class Database {
     return result.rows.reverse();
   }
 
+  static async getGroupMembers(groupId) {
+    const temp = [];
+    let query = {
+      text: `select a.*, b.email from groups a 
+             inner join users b
+             on a.id = $1 and a.owner_id = b.id`,
+      values: [groupId],
+    };
+    let result = await client.query(query);
+    const adminId = result.rows[0].owner_id;
+    temp.push({
+      userId: adminId,
+      userEmail: result.rows[0].email,
+      userRole: 'Admin',
+    });
+
+    query = {
+      text: `select a.*, b.email from group_member a
+             inner join users b
+             on a.group_id = $1 and a.user_id != $2 and a.user_id = b.id`,
+      values: [groupId, adminId],
+    };
+    result = await client.query(query);
+    result.rows.forEach((groupMember) => {
+      temp.push({
+        userId: groupMember.user_id,
+        userEmail: groupMember.email,
+        userRole: 'Member',
+      });
+    });
+    return temp;
+  }
+
   static async createGroup(values) {
     const query = {
       text: 'INSERT INTO groups(owner_id, name) VALUES($1, $2) RETURNING *',

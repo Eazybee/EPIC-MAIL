@@ -12,6 +12,7 @@ router.post('/:id/messages', Validate.isLoggedIn, Validate.messageGroup, GroupCo
 
 // GET
 router.get('/', Validate.isLoggedIn, GroupController.getGroups);
+router.get('/:id', Validate.isLoggedIn, Validate.groupId, GroupController.getGroupMembers);
 
 // PATCH
 router.patch('/:id/name', Validate.isLoggedIn, Validate.updateGroupName, GroupController.updateGroupName);
