@@ -706,13 +706,21 @@ window.onload = function ready() {
                 sendButton.innerHTML = 'SENT';
                 sendButton.classList.add('sent');
                 alertMessage('Message Sent Successfully');
-              }, 2000);
+              }, 1000);
               setTimeout(() => {
                 sendButton.innerHTML = 'SEND';
                 sendButton.classList.remove('sending');
                 sendButton.classList.remove('sent');
                 sendMsg.reset();
-              }, 3000);
+                const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+                const selectGroup = document.querySelector('.inbox .right-compose .address select');
+                saveMsgId.value = null;
+                inputEmail.classList.remove('hidden');
+                inputEmail.required = true;
+                selectGroup.classList.add('hidden');
+                selectGroup.required = false;
+                document.querySelector('#saveMail').classList.remove('hidden');
+              }, 2000);
             }
           }).catch((error) => {
             alertMessage(error.message);

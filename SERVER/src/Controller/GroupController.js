@@ -209,5 +209,67 @@ class GroupController {
       });
     });
   }
+
+  static sendDraft(req, res) {
+    const { members } = req;
+    const dateTime = Date.now();
+    const { subject, message, id } = req.body;
+
+    members.forEach((member, index) => {
+      if (index === 0) {
+        const mailId = id;
+        const receiverId = member.user_id;
+        let values = [subject, message, 'sent', mailId];
+        db.sendDraft(values, [receiverId, dateTime, 'sent', mailId]).then((rowCount) => {
+          if (rowCount === 1) {
+          // insert into sents table
+            values = [mailId, UserController.user.getId(), 'sent', dateTime];
+            db.insertSents(values);
+
+            // insert into the inboxes table
+            values = [mailId, receiverId, 'unread', dateTime];
+            db.insertInboxes(values);
+
+            try {
+              res.status(200).json({
+                status: 200,
+                data: [{
+                  id: mailId,
+                  createdOn: dateTime,
+                  subject,
+                  message,
+                  parentMessageId: null,
+                  status: 'sent',
+                }],
+              });
+            } catch (e) {
+              parseInt(e, 10);
+            }
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      } else if (index > 0) {
+        const receiverId = member.user_id;
+        // create mail
+        let values = [subject, message, UserController.user.getId(), dateTime, 'sent'];
+        db.addMessage(values).then((rows) => {
+          const [savedMail] = rows;
+          const mailId = savedMail.id;
+          values = [mailId, UserController.user.getId(), 'sent', dateTime];
+
+          // insert into sents table
+          db.insertSents(values);
+          // insert into the inboxes table
+          values = [mailId, receiverId, 'unread', dateTime];
+          db.insertInboxes(values);
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      }
+    });
+  }
 }
 export default GroupController;
