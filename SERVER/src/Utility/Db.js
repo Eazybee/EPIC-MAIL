@@ -196,7 +196,10 @@ class Database {
   }
 
   static async getInboxes(id) {
-    const text = 'select a.msg_id, a.receiver_id, a.status, a.date_time, b.subject, b.message, b.owner_id, c.email from inboxes a INNER JOIN messages b ON a.msg_id = b.id and a.status !=$1 INNER JOIN users c ON b.owner_id = c.id ORDER BY a.msg_id DESC';
+    const text = `select a.msg_id, a.receiver_id, a.status, a.date_time, b.subject, b.message, b.owner_id, c.email 
+                  from inboxes a 
+                  INNER JOIN messages b ON a.msg_id = b.id and a.status !=$1 
+                  INNER JOIN users c ON b.owner_id = c.id ORDER BY a.date_time DESC`;
     if (id) {
       const query = {
         text: `${text} and a.msg_id =$2`,
@@ -218,7 +221,7 @@ class Database {
       const query = {
         text: `select a.id, a.owner_id, a.subject, a.message, b.date_time, c.receiver_id, d.email 
         from messages a inner join sents b on a.id = b.msg_id and b.sender_id = $1 and b.status =$2
-        inner join inboxes c on  a.id = c.msg_id inner join users d on d.id = c.receiver_id ORDER BY b.msg_id DESC`,
+        inner join inboxes c on  a.id = c.msg_id inner join users d on d.id = c.receiver_id ORDER BY b.date_time DESC`,
         values: [id, 'sent'],
       };
       const result = await client.query(query);
@@ -284,7 +287,7 @@ class Database {
       text: `select a.msg_id, a.date_time, a.receiver_id, a.status, b.subject, b.message, b.owner_id, c.email, c.first_name 
         from inboxes a inner join messages b on 
         a.status != 'deleted' and (a.receiver_id =$1 or a.receiver_id =$2) and (b.owner_id =$1 or b.owner_id =$2) and a.msg_id = b.id 
-        inner join users c on c.id = b.owner_id ORDER BY a.id`,
+        inner join users c on c.id = b.owner_id ORDER BY a.date_time`,
       values: [senderId, receiverId],
     };
     result = await client.query(query);

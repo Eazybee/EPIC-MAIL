@@ -17,6 +17,9 @@ router.get('/:id', Validate.isLoggedIn, Validate.groupId, GroupController.getGro
 // PATCH
 router.patch('/:id/name', Validate.isLoggedIn, Validate.updateGroupName, GroupController.updateGroupName);
 
+// PUT
+router.put('/:id/messages', Validate.isLoggedIn, Validate.sendDraftToGroup, GroupController.sendDraft); // send draft
+
 // DELETE
 router.delete('/:id', Validate.isLoggedIn, Validate.deleteGroup, GroupController.deleteGroup);
 router.delete('/:groupId/users/:userId', Validate.isLoggedIn, Validate.deleteGroupMember, GroupController.deleteGroupMember);
