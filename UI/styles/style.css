@@ -14,6 +14,11 @@
 ::placeholder {
   color: #b2beb5;
 }
+*:disabled{
+  pointer-events: none;
+  display: none !important;
+  margin: 0 !important;
+}
 input,textarea,button,select{
     border: 1px solid cyan;
     border-radius: .2em;

@@ -434,7 +434,9 @@ class Database {
   static async getGroupOwner(id) {
     if (id) {
       const query = {
-        text: 'SELECT * FROM groups WHERE id = $1',
+        text: `SELECT a.*, b.email FROM groups a
+               INNER JOIN users b
+               ON a.id = $1 AND a.owner_id = b.id`,
         values: [id],
       };
       const result = await client.query(query);
