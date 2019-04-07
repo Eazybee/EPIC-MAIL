@@ -41,6 +41,7 @@ class GroupController {
               id: group.group_id,
               name: rows[0].name,
               userId: rows[0].owner_id,
+              userEmail: rows[0].email,
             });
             if (count === groups.length) {
               res.status(200).json({

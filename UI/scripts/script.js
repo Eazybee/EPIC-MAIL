@@ -98,7 +98,11 @@ const getGroups = async () => {
         const divElement = document.createElement('div');
         res.data.forEach((group) => {
           const div = document.createElement('div');
-          div.innerHTML = `<input type="checkbox" value="${group.id}"><a href="#">${group.name}</a>`;
+          if (group.userEmail === localStorage.getItem('userEmail')) {
+            div.innerHTML += `<input type="checkbox" value="${group.id}"><a href="#">${group.name}</a>`;
+          } else {
+            div.innerHTML += `<input type="checkbox" value="${group.id}" disabled><a href="#">${group.name}</a>`;
+          }
           divElement.append(div);
         });
         document.querySelector('.right-group .groups >div:nth-child(2)').innerHTML = divElement.innerHTML;
@@ -109,7 +113,7 @@ const getGroups = async () => {
   }).catch((error) => { alertMessage(error.message); });
 };
 
-const getGroupMembers = async (groupId) => {
+const getGroupMembers = async (groupId, checkbox) => {
   await postData('GET', `/groups/${groupId}`, null, true).then(async (response) => {
     const res = await response.json();
     if (parseInt(response.status, 10) === 401) {
@@ -120,8 +124,12 @@ const getGroupMembers = async (groupId) => {
       if ('userId' in res.data[0]) {
         res.data.forEach((member) => {
           const memberDiv = document.createElement('div');
-          memberDiv.innerHTML = `<input type="checkbox" value="${member.userId}">
-                                <p>${member.userEmail}</p>
+          if (checkbox.disabled) {
+            memberDiv.innerHTML = `<input type="checkbox" value="${member.userId}" disabled>`;
+          } else {
+            memberDiv.innerHTML = `<input type="checkbox" value="${member.userId}">`;
+          }
+          memberDiv.innerHTML += `<p>${member.userEmail}</p>
                                   <label>${member.userRole}</label>`;
           document.querySelector('.right-groupMember .member .inbox-view').append(memberDiv);
         });
@@ -480,10 +488,17 @@ window.onload = function ready() {
           editBtn.nextElementSibling.nextElementSibling.classList.add('hidden');
           document.querySelector('.right-group').classList.add('hidden');
           document.querySelector('.right-groupMember').classList.remove('hidden');
+          const showHide = (bool) => {
+            editBtn.disabled = bool;
+            document.querySelector('.right-groupMember .addMember button').disabled = bool;
+            document.querySelector('.right-groupMember .addMember input').disabled = bool;
+            document.querySelector('.right-groupMember .toolbar button').disabled = bool;
+          };
+          showHide(checkBox.disabled);
         })();
 
         const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
-        getGroupMembers(groupId);
+        getGroupMembers(groupId, checkBox);
       }
     });
 
@@ -558,7 +573,7 @@ window.onload = function ready() {
               });
               document.querySelector('.right-sent .inbox-view').innerHTML = divElement.innerHTML;
             } else {
-              //  res.data[0].message;
+              document.querySelector('.right-sent .inbox-view').innerHTML = res.data[0].message;
             }
           }
         }).catch((error) => {
@@ -606,7 +621,7 @@ window.onload = function ready() {
               });
               document.querySelector('.right-draft .inbox-view').innerHTML = divElement.innerHTML;
             } else {
-              //  res.data[0].message;
+              document.querySelector('.right-draft .inbox-view').innerHTML = res.data[0].message;
             }
           }
         }).catch((error) => {
@@ -656,53 +671,56 @@ window.onload = function ready() {
         method = 'PUT';
       }
       let endpoint;
-      document.querySelectorAll(".inbox .right-compose .address span input[type='radio']").forEach((radioButton) => {
-        if (radioButton.checked && radioButton.value === 'Individual') {
-          obj.receiverEmail = sendMsg.email.value;
-          endpoint = '/messages';
-        } else if (radioButton.checked && radioButton.value === 'Group') {
-          const selectElement = document.querySelector('.inbox .right-compose .address select');
-          const { selectedIndex } = selectElement; // geting index of selected option
-          const { options } = selectElement; // getting collections of all options as an array
-          const groupId = options[selectedIndex].value; // returning the value of selected option
-          if (!groupId || groupId.trim() === '') {
-            alertMessage('Select a group to send message to');
+
+      const radioBtn = Array.from(document.querySelectorAll(".inbox .right-compose .address span input[type='radio']"))
+        .find(radioButton => radioButton.checked);
+
+      if (radioBtn && radioBtn.value === 'Individual') {
+        obj.receiverEmail = sendMsg.email.value;
+        endpoint = '/messages';
+      } else if (radioBtn && radioBtn.value === 'Group') {
+        const selectElement = document.querySelector('.inbox .right-compose .address select');
+        const { selectedIndex } = selectElement; // geting index of selected option
+        const { options } = selectElement; // getting collections of all options as an array
+        const groupId = options[selectedIndex].value; // returning the value of selected option
+        if (!groupId || groupId.trim() === '') {
+          alertMessage('Select a group to send message to');
+          sendButton.innerHTML = 'SEND';
+          sendButton.classList.remove('sending');
+          sendButton.classList.remove('sent');
+        } else {
+          endpoint = `/groups/${groupId}/messages`;
+        }
+      }
+
+      if (endpoint) {
+        postData(method, endpoint, obj, true)
+          .then(async (response) => {
+            const res = await response.json();
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if ('error' in res) {
+              throw new Error(res.error);
+            } else if ('data' in res && 'id' in res.data[0]) {
+              setTimeout(() => {
+                sendButton.innerHTML = 'SENT';
+                sendButton.classList.add('sent');
+                alertMessage('Message Sent Successfully');
+              }, 2000);
+              setTimeout(() => {
+                sendButton.innerHTML = 'SEND';
+                sendButton.classList.remove('sending');
+                sendButton.classList.remove('sent');
+                sendMsg.reset();
+              }, 3000);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
             sendButton.innerHTML = 'SEND';
             sendButton.classList.remove('sending');
             sendButton.classList.remove('sent');
-          } else {
-            endpoint = `/groups/${groupId}/messages`;
-          }
-        }
-        if (endpoint) {
-          postData(method, endpoint, obj, true)
-            .then(async (response) => {
-              const res = await response.json();
-              if (parseInt(response.status, 10) === 401) {
-                logOut();
-              } else if ('error' in res) {
-                throw new Error(res.error);
-              } else if ('data' in res && 'id' in res.data[0]) {
-                setTimeout(() => {
-                  sendButton.innerHTML = 'SENT';
-                  sendButton.classList.add('sent');
-                  alertMessage('Message Sent Successfully');
-                }, 2000);
-                setTimeout(() => {
-                  sendButton.innerHTML = 'SEND';
-                  sendButton.classList.remove('sending');
-                  sendButton.classList.remove('sent');
-                  sendMsg.reset();
-                }, 3000);
-              }
-            }).catch((error) => {
-              alertMessage(error.message);
-              sendButton.innerHTML = 'SEND';
-              sendButton.classList.remove('sending');
-              sendButton.classList.remove('sent');
-            });
-        }
-      });
+          });
+      }
       return false;
     };
 
@@ -1021,25 +1039,24 @@ window.onload = function ready() {
     /** Delete Group Member* */
     document.querySelector('.right-groupMember .toolbar button').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-groupMember .member .inbox-view div >input');
+      const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
       checkBoxes.forEach(async (element) => {
         if (element.checked) {
-          // const mailId = element.value;
-          document.querySelector('.right-groupMember .member .inbox-view').removeChild((element.parentNode));
-          // await postData('DELETE', `/groups/${mailId}`, null, true)
-          //   .then(async (response) => {
-          //     const resStatus = parseInt(response.status, 10);
-          //     if (resStatus === 401) {
-          //       logOut();
-          //     } else if (resStatus === 204) {
-          //       document.querySelector('.right-group .groups >div:nth-child(2)').removeChild((element.parentNode));
-          //       //  alertMessage('Mail(s) Deleted Successfully');
-          //     } else if (resStatus === 404 || resStatus === 400) {
-          //       const res = await response.json();
-          //       throw new Error(res.error);
-          //     }
-          //   }).catch((error) => {
-          //     alertMessage(error.message);
-          //   });
+          const userId = element.value;
+          await postData('DELETE', `/groups/${groupId}/users/${userId}`, null, true)
+            .then(async (response) => {
+              const resStatus = parseInt(response.status, 10);
+              if (resStatus === 401) {
+                logOut();
+              } else if (resStatus === 204) {
+                document.querySelector('.right-groupMember .member .inbox-view').removeChild((element.parentNode));
+              } else if (resStatus === 404 || resStatus === 400) {
+                const res = await response.json();
+                throw new Error(res.error);
+              }
+            }).catch((error) => {
+              alertMessage(error.message);
+            });
         }
       });
     };
