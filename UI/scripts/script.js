@@ -9,7 +9,7 @@ const postData = async (method = 'GET', path, data, auth) => {
     headers.append('authorization', localStorage.getItem('auth'));
   }
   const init = {
-    method, // *GET, POST, PUT, DELETE, etc.
+    method,
     headers,
   };
 
@@ -20,6 +20,13 @@ const postData = async (method = 'GET', path, data, auth) => {
   const result = await fetch(url, init).then(response => response);
 
   return result;
+};
+
+const toggleDisable = (...elements) => {
+  elements.forEach((element) => {
+    const ele = element;
+    ele.disabled = !ele.disabled;
+  });
 };
 
 const logOut = () => {
@@ -86,6 +93,76 @@ const populateInbox = async (response) => {
   }
 };
 
+const populateSent = async (response) => {
+  const res = await response.json();
+  if (parseInt(response.status, 10) === 401) {
+    logOut();
+  } else if ('error' in res) {
+    throw new Error(res.error);
+  } else if ('data' in res) {
+    if ('id' in res.data[0]) {
+      const divElement = document.createElement('div');
+      const options = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      };
+      res.data.forEach((message) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.classList.add(message.status);
+        tempDiv.innerHTML = `
+        <input type="checkbox" value="${message.id}">
+        <p>${message.receiverEmail}</p>
+        <div>
+          <p class="subject">${message.subject}</p>
+          <p class="msg">${message.message}</p>
+        </div>
+        <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+        divElement.appendChild(tempDiv);
+      });
+      document.querySelector('.right-sent .inbox-view').innerHTML = divElement.innerHTML;
+    } else {
+      document.querySelector('.right-sent .inbox-view').innerHTML = res.data[0].message;
+    }
+  }
+};
+
+const populateDraft = async (response) => {
+  const res = await response.json();
+  if (parseInt(response.status, 10) === 401) {
+    logOut();
+  } else if ('error' in res) {
+    throw new Error(res.error);
+  } else if ('data' in res) {
+    if ('id' in res.data[0]) {
+      const divElement = document.createElement('div');
+      const options = {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+      };
+      res.data.forEach((message) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.classList.add(message.status);
+        tempDiv.innerHTML = `
+        <input type="checkbox" value="${message.id}">
+        <p>${message.receiverEmail || ''}</p>
+        <div>
+          <p class="subject">${message.subject}</p>
+          <p class="msg">${message.message}</p>
+        </div>
+        <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
+        divElement.appendChild(tempDiv);
+      });
+      document.querySelector('.right-draft .inbox-view').innerHTML = divElement.innerHTML;
+    } else {
+      document.querySelector('.right-draft .inbox-view').innerHTML = res.data[0].message;
+    }
+  }
+};
+
 const getGroups = async () => {
   postData('GET', '/groups', null, true).then(async (response) => {
     const res = await response.json();
@@ -138,7 +215,6 @@ const getGroupMembers = async (groupId, checkbox) => {
   }).catch((error) => { alertMessage(error.message); });
 };
 
-// Show Compose Panel
 const showCompose = () => {
   document.querySelectorAll('.right  > div:not(.right-compose)').forEach((element) => {
     element.classList.add('hidden');
@@ -150,7 +226,6 @@ const showCompose = () => {
   document.querySelector('.right-compose').classList.remove('hidden');
 };
 
-// veiw Message
 const viewInboxMessage = async (maildId) => {
   postData('GET', `/messages/${maildId}`, null, true).then(async (response) => {
     const res = await response.json();
@@ -264,7 +339,6 @@ const viewSentMessage = async (maildId) => {
   }).catch((error) => { alertMessage(error.message); });
 };
 
-/** Send Draft Message * */
 const sendDraftMessage = (mailDiv) => {
   const mailId = mailDiv.querySelector("input[type='checkbox']").value;
   const mailTo = mailDiv.querySelector('p').innerHTML;
@@ -282,6 +356,20 @@ const sendDraftMessage = (mailDiv) => {
 
   showCompose();
   // alertMessage(mailBody);
+};
+
+const getSelectedCheckBox = (checkBoxes) => {
+  const selected = Array.from(checkBoxes).filter((element) => {
+    let bool = false;
+    if (element.checked) {
+      const ele = element;
+      ele.checked = bool;
+      bool = true;
+      ele.disabled = bool;
+    }
+    return bool;
+  });
+  return selected;
 };
 
 window.onload = function ready() {
@@ -340,12 +428,14 @@ window.onload = function ready() {
     document.querySelector('#signInForm').onsubmit = () => {
       const email = document.querySelector("#signInForm input[type='email']");
       const password = document.querySelector("#signInForm input[type='password']");
-      const emailValue = email.value;
+      const loginBtn = document.querySelector('#signInForm button');
+      const emailValue = email.value.trim();
       const passwordValue = password.value;
-      if (emailValue.trim() === '') {
+      toggleDisable(email, password, loginBtn);
+      if (emailValue === '') {
         email.value = '';
         alertMessage('Enter email address');
-      } else if (passwordValue.trim() === '') {
+      } else if (passwordValue === '') {
         password.value = '';
         alertMessage('Enter password');
       } else {
@@ -362,15 +452,15 @@ window.onload = function ready() {
             }
             if ('data' in res && 'token' in res.data[0]) {
               localStorage.setItem('auth', res.data[0].token);
-              localStorage.setItem('userEmail', emailValue.trim());
+              localStorage.setItem('userEmail', emailValue.toLowerCase());
               alertMessage('Login Successful');
               window.location.href = './inbox.html';
             }
           }).catch((error) => {
             alertMessage(error.message);
           }).finally(() => {
-            email.value = '';
-            password.value = '';
+            toggleDisable(email, password, loginBtn);
+            document.querySelector('#signInForm').reset();
           });
       }
       return false;
@@ -378,25 +468,26 @@ window.onload = function ready() {
 
     // SIGNUP FORM
     document.querySelector('#signUpForm').onsubmit = () => {
-      const password = document.querySelector('#signUpForm #password');
-      const rePassword = document.querySelector('#signUpForm #rePassword');
-      if (password.value !== rePassword.value) {
+      const signUpForm = document.querySelector('#signUpForm');
+      const password = signUpForm.signupPassword;
+      const rePassword = signUpForm.signupRePassword;
+      const firstName = signUpForm.signupFirstName;
+      const email = signUpForm.signupEmail;
+      if (firstName.value.trim() === '') {
+        alertMessage('Enter first name');
+      } else if (password.value !== rePassword.value) {
         alertMessage('Password do no match');
       } else {
-        const signUpForm = document.querySelector('#signUpForm');
+        toggleDisable(email, firstName, password, rePassword);
         const obj = {
-          firstName: signUpForm.signupFirstName.value,
-          email: signUpForm.signupEmail.value,
-          password: signUpForm.signupPassword.value,
-          rePassword: signUpForm.signupRePassword.value,
+          firstName: firstName.value.trim(),
+          email: email.value.trim(),
+          password: password.value,
+          rePassword: rePassword.value,
         };
         postData('POST', '/auth/signup', obj)
           .then(async (response) => {
             const res = await response.json();
-            signUpForm.signupFirstName.value = '';
-            signUpForm.signupEmail.value = '';
-            signUpForm.signupPassword.value = '';
-            signUpForm.signupRePassword.value = '';
             if ('error' in res) {
               throw new Error(res.error);
             }
@@ -406,6 +497,9 @@ window.onload = function ready() {
             }
           }).catch((error) => {
             alertMessage(error.message);
+          }).finally(() => {
+            toggleDisable(email, firstName, password, rePassword);
+            signUpForm.reset();
           });
       }
       return false;
@@ -416,9 +510,14 @@ window.onload = function ready() {
     // Check if user is logged in
     if (!localStorage.getItem('auth')) {
       window.location.replace('./loginPage.html');
+    } else {
+      document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toLowerCase();
+      getGroups();
+      postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+      postData('GET', '/messages/sent', null, true).then(populateSent).catch((error) => { alertMessage(error.message); });
+      postData('GET', '/messages/draft', null, true).then(populateDraft).catch((error) => { alertMessage(error.message); });
     }
-    document.querySelector('.inbox .top p').innerHTML = localStorage.getItem('userEmail').toLowerCase();
-    getGroups();
+
     //  Menu buttons
     (() => {
       const inBtn = document.querySelector('.seek button.in');
@@ -518,11 +617,11 @@ window.onload = function ready() {
       };
     });
     document.querySelector("a[href='#Inbox']").onclick = () => {
-      document.querySelectorAll(".inbox  .toolbar span input[type='radio']").forEach(async (radioButton) => {
+      document.querySelectorAll(".inbox  .toolbar span input[type='radio']").forEach((radioButton) => {
         if (radioButton.checked && radioButton.value === 'All') {
-          await postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+          postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         } else if (radioButton.checked && radioButton.value === 'Unread') {
-          await postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+          postData('GET', '/messages/unread', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         } else if (radioButton.checked && radioButton.value === 'Read') {
           postData('GET', '/messages/read', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
         }
@@ -541,44 +640,8 @@ window.onload = function ready() {
       showCompose();
       loadGroup();
     };
-    document.querySelector("a[href='#Sent']").onclick = async () => {
-      await postData('GET', '/messages/sent', null, true)
-        .then(async (response) => {
-          const res = await response.json();
-          if (parseInt(response.status, 10) === 401) {
-            logOut();
-          } else if ('error' in res) {
-            throw new Error(res.error);
-          } else if ('data' in res) {
-            if ('id' in res.data[0]) {
-              const divElement = document.createElement('div');
-              const options = {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-              };
-              res.data.forEach((message) => {
-                const tempDiv = document.createElement('div');
-                tempDiv.classList.add(message.status);
-                tempDiv.innerHTML = `
-                <input type="checkbox" value="${message.id}">
-                <p>${message.receiverEmail}</p>
-                <div>
-                  <p class="subject">${message.subject}</p>
-                  <p class="msg">${message.message}</p>
-                </div>
-                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
-                divElement.appendChild(tempDiv);
-              });
-              document.querySelector('.right-sent .inbox-view').innerHTML = divElement.innerHTML;
-            } else {
-              document.querySelector('.right-sent .inbox-view').innerHTML = res.data[0].message;
-            }
-          }
-        }).catch((error) => {
-          alertMessage(error.message);
-        });
+    document.querySelector("a[href='#Sent']").onclick = () => {
+      postData('GET', '/messages/sent', null, true).then(populateSent).catch((error) => { alertMessage(error.message); });
 
       document.querySelectorAll('.right  > div:not(.right-sent)').forEach((element) => {
         element.classList.add('hidden');
@@ -589,44 +652,8 @@ window.onload = function ready() {
       document.querySelector("a[href='#Sent']").classList.add('active');
       document.querySelector('.right-sent').classList.remove('hidden');
     };
-    document.querySelector("a[href='#Draft']").onclick = async () => {
-      await postData('GET', '/messages/draft', null, true)
-        .then(async (response) => {
-          const res = await response.json();
-          if (parseInt(response.status, 10) === 401) {
-            logOut();
-          } else if ('error' in res) {
-            throw new Error(res.error);
-          } else if ('data' in res) {
-            if ('id' in res.data[0]) {
-              const divElement = document.createElement('div');
-              const options = {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric',
-              };
-              res.data.forEach((message) => {
-                const tempDiv = document.createElement('div');
-                tempDiv.classList.add(message.status);
-                tempDiv.innerHTML = `
-                <input type="checkbox" value="${message.id}">
-                <p>${message.receiverEmail || ''}</p>
-                <div>
-                  <p class="subject">${message.subject}</p>
-                  <p class="msg">${message.message}</p>
-                </div>
-                <label>${new Intl.DateTimeFormat('en-US', options).format(new Date(parseInt(message.createdOn, 10)))}</label>`;
-                divElement.appendChild(tempDiv);
-              });
-              document.querySelector('.right-draft .inbox-view').innerHTML = divElement.innerHTML;
-            } else {
-              document.querySelector('.right-draft .inbox-view').innerHTML = res.data[0].message;
-            }
-          }
-        }).catch((error) => {
-          alertMessage(error.message);
-        });
+    document.querySelector("a[href='#Draft']").onclick = () => {
+      postData('GET', '/messages/draft', null, true).then(populateDraft).catch((error) => { alertMessage(error.message); });
       document.querySelectorAll('.right  > div:not(.right-draft)').forEach((element) => {
         element.classList.add('hidden');
       });
@@ -636,8 +663,8 @@ window.onload = function ready() {
       document.querySelector("a[href='#Draft']").classList.add('active');
       document.querySelector('.right-draft').classList.remove('hidden');
     };
-    document.querySelector("a[href='#Group']").onclick = async () => {
-      await getGroups();
+    document.querySelector("a[href='#Group']").onclick = () => {
+      getGroups();
       document.querySelectorAll('.right  > div:not(.right-group)').forEach((element) => {
         element.classList.add('hidden');
       });
@@ -656,21 +683,24 @@ window.onload = function ready() {
 
     /** Send mail * */
     document.querySelector("[name='sendMail']").onsubmit = () => {
-      const sendButton = document.querySelector("[name='sendMail'] button");
-      sendButton.innerHTML = 'SENDING';
-      sendButton.classList.add('sending');
       const sendMsg = document.querySelector("[name='sendMail']");
+      const { subject, message } = sendMsg;
+      const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+      const selectGroup = document.querySelector('.inbox .right-compose .address select');
+      const sendButton = document.querySelector("[name='sendMail'] button");
+      const saveButton = document.querySelector('#saveMail');
       const saveMsgId = document.querySelector(".right-compose input[name='id']");
+      let endpoint;
+
       const obj = {
-        subject: sendMsg.subject.value,
-        message: sendMsg.message.value,
+        subject: subject.value.trim(),
+        message: message.value.trim(),
       };
       let method = 'POST';
       if (saveMsgId.value) {
         obj.id = saveMsgId.value;
         method = 'PUT';
       }
-      let endpoint;
 
       const radioBtn = Array.from(document.querySelectorAll(".inbox .right-compose .address span input[type='radio']"))
         .find(radioButton => radioButton.checked);
@@ -680,20 +710,20 @@ window.onload = function ready() {
         endpoint = '/messages';
       } else if (radioBtn && radioBtn.value === 'Group') {
         const selectElement = document.querySelector('.inbox .right-compose .address select');
-        const { selectedIndex } = selectElement; // geting index of selected option
-        const { options } = selectElement; // getting collections of all options as an array
-        const groupId = options[selectedIndex].value; // returning the value of selected option
+        const { selectedIndex } = selectElement;
+        const { options } = selectElement;
+        const groupId = options[selectedIndex].value;
         if (!groupId || groupId.trim() === '') {
           alertMessage('Select a group to send message to');
-          sendButton.innerHTML = 'SEND';
-          sendButton.classList.remove('sending');
-          sendButton.classList.remove('sent');
         } else {
           endpoint = `/groups/${groupId}/messages`;
         }
       }
 
       if (endpoint) {
+        sendButton.innerHTML = 'SENDING';
+        sendButton.classList.add('sending');
+        toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
         postData(method, endpoint, obj, true)
           .then(async (response) => {
             const res = await response.json();
@@ -706,27 +736,24 @@ window.onload = function ready() {
                 sendButton.innerHTML = 'SENT';
                 sendButton.classList.add('sent');
                 alertMessage('Message Sent Successfully');
-              }, 1000);
-              setTimeout(() => {
-                sendButton.innerHTML = 'SEND';
-                sendButton.classList.remove('sending');
-                sendButton.classList.remove('sent');
                 sendMsg.reset();
-                const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
-                const selectGroup = document.querySelector('.inbox .right-compose .address select');
-                saveMsgId.value = null;
-                inputEmail.classList.remove('hidden');
-                inputEmail.required = true;
-                selectGroup.classList.add('hidden');
-                selectGroup.required = false;
-                document.querySelector('#saveMail').classList.remove('hidden');
-              }, 2000);
+              }, 1000);
             }
           }).catch((error) => {
             alertMessage(error.message);
-            sendButton.innerHTML = 'SEND';
-            sendButton.classList.remove('sending');
-            sendButton.classList.remove('sent');
+          }).finally(() => {
+            setTimeout(() => {
+              sendButton.innerHTML = 'SEND';
+              sendButton.classList.remove('sending');
+              sendButton.classList.remove('sent');
+              saveMsgId.value = null;
+              inputEmail.classList.remove('hidden');
+              inputEmail.required = true;
+              selectGroup.classList.add('hidden');
+              selectGroup.required = false;
+              document.querySelector('#saveMail').classList.remove('hidden');
+              toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
+            }, 2000);
           });
       }
       return false;
@@ -755,25 +782,30 @@ window.onload = function ready() {
 
     /** Save mail as draft * */
     document.querySelector('#saveMail').onclick = () => {
-      const topic = document.querySelector('.inbox .right-compose .message input').value;
-      const msgBody = document.querySelector('.inbox .right-compose .message textarea').value;
-      const receiverEmail = document.querySelector(".inbox .right-compose .address input[type='email']").value;
+      const composeForm = document.querySelector("[name='sendMail']");
+      const { subject, message } = composeForm;
+      const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+      const selectGroup = document.querySelector('.inbox .right-compose .address select');
+      const sendButton = document.querySelector("[name='sendMail'] button");
+      const saveButton = document.querySelector('#saveMail');
       const saveMsgId = document.querySelector(".right-compose input[name='id']");
-      if (topic.trim() === '') {
+
+      if (subject.value.trim() === '') {
         alertMessage('Subject cannot be empty');
-      } else if (msgBody.trim() === '') {
+      } else if (message.value.trim() === '') {
         alertMessage('Message body cannot be empty');
       } else {
         const obj = {
-          subject: topic,
-          message: msgBody,
+          subject: subject.value.trim(),
+          message: message.value.trim(),
         };
-        if (receiverEmail) {
-          obj.receiverEmail = receiverEmail;
+        if (inputEmail.value && inputEmail.value.trim() !== '') {
+          obj.receiverEmail = inputEmail.value.trim();
         }
         if (saveMsgId.value) {
           obj.id = saveMsgId.value;
         }
+        toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
         postData('POST', '/messages/draft', obj, true)
           .then(async (response) => {
             const res = await response.json();
@@ -784,13 +816,19 @@ window.onload = function ready() {
             } else if ('data' in res) {
               if ('id' in res.data[0]) {
                 alertMessage('Message saved as draft succesfully');
-                document.querySelector("[name='sendMail']").reset();
-              } else {
-              //  res.data[0].message;
+                saveMsgId.value = null;
+                inputEmail.classList.remove('hidden');
+                inputEmail.required = true;
+                selectGroup.classList.add('hidden');
+                selectGroup.required = false;
+                document.querySelector('#saveMail').classList.remove('hidden');
+                composeForm.reset();
               }
             }
           }).catch((error) => {
             alertMessage(error.message);
+          }).finally(() => {
+            toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
           });
       }
     };
@@ -798,81 +836,80 @@ window.onload = function ready() {
     /** Delete draft * */
     document.querySelector('.right-draft .toolbar button.deleteButton').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-draft .inbox-view >div >input');
-      checkBoxes.forEach(async (element) => {
-        if (element.checked) {
-          const mailId = element.value;
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
+        const mailId = element.value;
 
-          await postData('DELETE', `/messages/draft/${mailId}`, null, true)
-            .then(async (response) => {
-              if (parseInt(response.status, 10) === 401) {
-                logOut();
-              } else if (parseInt(response.status, 10) === 204) {
-                document.querySelector('.right-draft .inbox-view').removeChild((element.parentNode));
-                //  alertMessage('Mail(s) Deleted Successfully');
-              } else if (parseInt(response.status, 10) === 404) {
-                const res = await response.json();
-                throw new Error(res.error);
-              }
-            }).catch((error) => {
-              alertMessage(error.message);
-            });
-        }
+        await postData('DELETE', `/messages/draft/${mailId}`, null, true)
+          .then(async (response) => {
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if (parseInt(response.status, 10) === 204) {
+              document.querySelector('.right-draft .inbox-view').removeChild((element.parentNode));
+              //  alertMessage('Mail(s) Deleted Successfully');
+            } else if (parseInt(response.status, 10) === 404) {
+              const res = await response.json();
+              document.querySelector('.right-draft .inbox-view').removeChild((element.parentNode));
+              throw new Error(res.error);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       });
     };
 
     /** Delete inbox * */
     document.querySelector('.right-inbox .toolbar button.deleteButton').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-inbox .inbox-view >div >input');
-      checkBoxes.forEach(async (element) => {
-        if (element.checked) {
-          const mailId = element.value;
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
+        const mailId = element.value;
 
-          await postData('DELETE', `/messages/${mailId}`, null, true)
-            .then(async (response) => {
-              if (parseInt(response.status, 10) === 401) {
-                logOut();
-              } else if (parseInt(response.status, 10) === 204) {
-                document.querySelector('.right-inbox .inbox-view').removeChild((element.parentNode));
-                //  alertMessage('Mail(s) Deleted Successfully');
-              } else if (parseInt(response.status, 10) === 404) {
-                const res = await response.json();
-                throw new Error(res.error);
-              }
-            }).catch((error) => {
-              alertMessage(error.message);
-            });
-        }
+        await postData('DELETE', `/messages/${mailId}`, null, true)
+          .then(async (response) => {
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if (parseInt(response.status, 10) === 204) {
+              document.querySelector('.right-inbox .inbox-view').removeChild((element.parentNode));
+              //  alertMessage('Mail(s) Deleted Successfully');
+            } else if (parseInt(response.status, 10) === 404) {
+              const res = await response.json();
+              throw new Error(res.error);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       });
     };
 
     /** Delete sent mail * */
     document.querySelector('.right-sent .toolbar button.deleteButton').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-sent .inbox-view >div >input');
-      checkBoxes.forEach(async (element) => {
-        if (element.checked) {
-          const mailId = element.value;
-          await postData('DELETE', `/messages/sent/${mailId}`, null, true)
-            .then(async (response) => {
-              if (parseInt(response.status, 10) === 401) {
-                logOut();
-              } else if (parseInt(response.status, 10) === 204) {
-                document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
-                //  alertMessage('Mail(s) Deleted Successfully');
-              } else if (parseInt(response.status, 10) === 404) {
-                const res = await response.json();
-                throw new Error(res.error);
-              }
-            }).catch((error) => {
-              alertMessage(error.message);
-            });
-        }
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
+        const mailId = element.value;
+        await postData('DELETE', `/messages/sent/${mailId}`, null, true)
+          .then(async (response) => {
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if (parseInt(response.status, 10) === 204) {
+              document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
+              //  alertMessage('Mail(s) Deleted Successfully');
+            } else if (parseInt(response.status, 10) === 404) {
+              const res = await response.json();
+              throw new Error(res.error);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       });
     };
 
     /** Retract a sent mail * */
     document.querySelector('#retract').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-sent .inbox-view >div >input');
-      checkBoxes.forEach(async (element) => {
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
         if (element.checked) {
           const mailId = element.value;
           await postData('DELETE', `/messages/sent/${mailId}/retract`, null, true)
@@ -896,7 +933,8 @@ window.onload = function ready() {
     /** Delete Group* */
     document.querySelector('.right-group .groups .btn button').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-group .groups input');
-      checkBoxes.forEach(async (element) => {
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
         if (element.checked) {
           const mailId = element.value;
           await postData('DELETE', `/groups/${mailId}`, null, true)
@@ -921,11 +959,13 @@ window.onload = function ready() {
     /** Create Group* */
     document.querySelector('.right-group #createGroup').onsubmit = () => {
       const groupElement = document.querySelector(".right-group input[type='text']");
+      const submitBtn = document.querySelector('.right-group .create button');
       const groupName = groupElement.value.trim();
       if (groupName !== '') {
         const obj = {
           name: groupName,
         };
+        toggleDisable(groupElement, submitBtn);
         postData('POST', '/groups', obj, true)
           .then(async (response) => {
             const res = await response.json();
@@ -939,6 +979,8 @@ window.onload = function ready() {
             }
           }).catch((error) => {
             alertMessage(error.message);
+          }).finally(() => {
+            toggleDisable(groupElement, submitBtn);
           });
       } else {
         alertMessage('Group name cannot be empty');
@@ -969,6 +1011,8 @@ window.onload = function ready() {
       const obj = {
         name: groupEditInput.value,
       };
+      const submitBtn = document.querySelector('.right-groupMember #editGroupName');
+      toggleDisable(submitBtn, groupEditInput);
       postData('PATCH', `/groups/${groupId}/name`, obj, true)
         .then(async (response) => {
           const res = await response.json();
@@ -990,6 +1034,8 @@ window.onload = function ready() {
           }
         }).catch((error) => {
           alertMessage(error.message);
+        }).finally(() => {
+          toggleDisable(submitBtn, groupEditInput);
         });
       return false;
     };
@@ -1008,6 +1054,7 @@ window.onload = function ready() {
     /** Add Group Member* */
     document.querySelector('.right-groupMember .addMember >form').onsubmit = () => {
       const form = document.querySelector('.right-groupMember .addMember form');
+      const submitBtn = form.querySelector('button');
       const { email } = form;
       const emailVal = email.value;
       if (email.value.trim() === '') {
@@ -1017,6 +1064,7 @@ window.onload = function ready() {
         const obj = {
           userEmail: emailVal,
         };
+        toggleDisable(email, submitBtn);
         postData('POST', `/groups/${groupId}/users`, obj, true)
           .then(async (response) => {
             const res = await response.json();
@@ -1039,6 +1087,7 @@ window.onload = function ready() {
             alertMessage(error.message);
           }).finally(() => {
             form.reset();
+            toggleDisable(email, submitBtn);
           });
       }
       return false;
@@ -1048,7 +1097,8 @@ window.onload = function ready() {
     document.querySelector('.right-groupMember .toolbar button').onclick = () => {
       const checkBoxes = document.querySelectorAll('.right-groupMember .member .inbox-view div >input');
       const groupId = document.querySelector('.right-groupMember > input[type = "hidden"]').value;
-      checkBoxes.forEach(async (element) => {
+      const selected = getSelectedCheckBox(checkBoxes);
+      selected.forEach(async (element) => {
         if (element.checked) {
           const userId = element.value;
           await postData('DELETE', `/groups/${groupId}/users/${userId}`, null, true)

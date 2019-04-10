@@ -12,17 +12,15 @@ class UserController {
     bcrypt.hash(password, saltRounds, (err, hash) => {
       const values = [firstName, lastName, email.toLowerCase(), hash, 'user'];
       db.addUser(values).then((rows) => {
-        if (rows.length > 0) {
-          const { id } = rows[0];
-          const user = new User(id, email.toLowerCase(), firstName, lastName, password);
-          const token = Utility.getToken(user, '1s');
-          res.status(201).json({
-            status: 201,
-            data: [{
-              token,
-            }],
-          });
-        }
+        const { id } = rows[0];
+        const user = new User(id, email.toLowerCase(), firstName, lastName, password);
+        const token = Utility.getToken(user, '1s');
+        res.status(201).json({
+          status: 201,
+          data: [{
+            token,
+          }],
+        });
       }).catch((error) => {
         const errorMessage = `SERVER ERROR: ${error.message}`;
         Utility.handleError(res, errorMessage, 400);

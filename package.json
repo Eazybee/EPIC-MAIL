@@ -4,10 +4,8 @@
   "description": "Epic Mail API",
   "main": "src/index.js",
   "scripts": {
-    "createdb": "psql -d test -u epic -f SERVER/src/sqls/create.sql",
-    "dropdb": "psql -d test -u epic -f SERVER/src/sqls/drop.sql",
     "migrate": "babel-node  ./SERVER/test/dbSchema.js --exit",
-    "test": "set NODE_ENV=test&& npm run migrate && mocha SERVER/test --require @babel/register --recursive --timeout 10000 --exit",
+    "test": "set NODE_ENV=test&& npm run migrate && nyc mocha SERVER/test --require @babel/register --recursive --timeout 10000 --exit",
     "build": "set NODE_ENV=production&& babel SERVER/src --out-dir SERVER/build/dist --exit",
     "dev-start": "babel-watch SERVER/src/app.js",
     "testCoverall": "nyc npm test && nyc report --reporter=text-lcov | coveralls",

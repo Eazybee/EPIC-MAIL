@@ -33,32 +33,34 @@ class Validate {
   }
 
   static signup(req, res, next) {
-    db.getUsers().then((users) => {
-      const userExist = users.some(user => user.email === req.body.email.toLowerCase());
-      const schema = Joi.object().keys({
-        email: Joi.string().email({ minDomainAtoms: 2 }).required(),
-        firstName: Joi.string().required(),
-        lastName: Joi.string(),
-        password: Joi.string().required(),
-        rePassword: Joi.string().required(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        const errorMessage = error.details[0].message;
-        Utility.handleError(res, errorMessage, 400);
-      } else if (req.body.password !== req.body.rePassword) {
-        const errorMessage = 'Password does not match';
-        Utility.handleError(res, errorMessage, 400);
-      } else if (userExist) {
-        const errorMessage = 'User with this email exist';
-        Utility.handleError(res, errorMessage, 409);
-      } else {
-        next();
-      }
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
+    const schema = Joi.object().keys({
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string(),
+      password: Joi.string().required(),
+      rePassword: Joi.string().required(),
     });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getUsers().then((users) => {
+        const userExist = users.some(user => user.email === req.body.email.toLowerCase());
+        if (req.body.password !== req.body.rePassword) {
+          const errorMessage = 'Password does not match';
+          Utility.handleError(res, errorMessage, 400);
+        } else if (userExist) {
+          const errorMessage = 'User with this email exist';
+          Utility.handleError(res, errorMessage, 409);
+        } else {
+          next();
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
   }
 
   static login(req, res, next) {
@@ -115,7 +117,7 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       const { receiverEmail } = req.body;
-      db.getUserId(receiverEmail).then((rows) => {
+      db.getUserId(receiverEmail.toLowerCase()).then((rows) => {
         if (rows.length === 1) {
           req.body.receiverId = rows[0].id;
           next();
@@ -142,7 +144,10 @@ class Validate {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else if (req.body.receiverEmail || req.body.id) {
-      const { receiverEmail } = req.body;
+      let { receiverEmail } = req.body;
+      if (receiverEmail) {
+        receiverEmail = receiverEmail.toLowerCase();
+      }
       const msgId = req.body.id;
 
       if (msgId) {
@@ -202,7 +207,7 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       const { receiverEmail } = req.body;
-      db.getUserId(receiverEmail).then((rows) => {
+      db.getUserId(receiverEmail.toLowerCase()).then((rows) => {
         if (rows.length === 1) {
           req.body.receiverId = rows[0].id;
           const draftMsgId = req.body.id;
@@ -243,7 +248,7 @@ class Validate {
             next();
           } else {
             const errorMessage = 'Message does not exist!';
-            Utility.handleError(res, errorMessage, 401);
+            Utility.handleError(res, errorMessage, 404);
           }
         } else {
           const errorMessage = 'Message does not exist!';
@@ -280,7 +285,6 @@ class Validate {
   }
 
   static deleteWithId(req, res, next, table) {
-    const mailId = parseInt(req.params.id, 10);
     const schema = Joi.object().keys({
       id: Joi.number().required(),
     });
@@ -289,9 +293,10 @@ class Validate {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
+      const mailId = parseInt(req.params.id, 10);
       db.getMessages(mailId, table, UserController.user.getId()).then((rows) => {
         const mail = rows.rows[0];
-        if (mail) { //  Checking if mail exist
+        if (mail) {
           req.deleteType = rows.deleteType;
           next();
         } else {
@@ -366,10 +371,10 @@ class Validate {
         if (groupExist) {
           if (groupExist.owner_id === UserController.user.getId()) {
             const sameName = groups.some(group => group.name === req.body.name
-              && group.id !== groupExist.id);
+              && group.id !== groupExist.id && group.owner_id === UserController.user.getId());
             if (sameName) {
               const errorMessage = 'Another group with same name exist';
-              Utility.handleError(res, errorMessage, 400);
+              Utility.handleError(res, errorMessage, 409);
             } else {
               next();
             }
@@ -411,7 +416,7 @@ class Validate {
           });
         } else {
           const errorMessage = 'Group with the id does not exist';
-          Utility.handleError(res, errorMessage, 404);
+          Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
@@ -463,10 +468,11 @@ class Validate {
         let groupExist = allGroups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
           db.getGroups(UserController.user.getId()).then((groups) => {
-            groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+            const groupId = parseInt(req.params.id, 10);
+            groupExist = groups.find(group => group.id === groupId);
             if (groupExist) {
               const { userEmail } = req.body;
-              db.getUserId(userEmail).then((rows) => {
+              db.getUserId(userEmail.toLowerCase()).then((rows) => {
                 if (rows.length === 1) {
                   req.body.userId = rows[0].id;
                   next();

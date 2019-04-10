@@ -152,20 +152,8 @@ class Database {
         sentResult.deleteType = 'drafts';
         return sentResult;
       }
-
-      query = {
-        text: 'SELECT * FROM drafts where id =$1 and status !=$2',
-        values: [id, 'deleted'],
-      };
-      const result = await client.query(query);
-      return result.rows;
     }
-    query = {
-      text: 'SELECT * FROM messages where status !=$1',
-      values: ['deleted'],
-    };
-    const result = await client.query(query);
-    return result.rows;
+    return [];
   }
 
   static async deleteMessage(id, table) {
@@ -351,14 +339,13 @@ class Database {
       values: [groupId, adminId],
     };
     result = await client.query(query);
-    result.rows.forEach((groupMember) => {
-      temp.push({
-        userId: groupMember.user_id,
-        userEmail: groupMember.email,
-        userRole: 'Member',
-      });
-    });
-    return temp;
+    result.rows = result.rows.map(groupMember => ({
+      userId: groupMember.user_id,
+      userEmail: groupMember.email,
+      userRole: 'Member',
+    }));
+
+    return temp.concat(result.rows);
   }
 
   static async createGroup(values) {
