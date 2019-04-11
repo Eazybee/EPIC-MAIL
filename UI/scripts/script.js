@@ -17,7 +17,12 @@ const postData = async (method = 'GET', path, data, auth) => {
     init.body = JSON.stringify(data);// body data type must match "Content-Type" header
   }
 
-  const result = await fetch(url, init).then(response => response);
+  const result = await fetch(url, init).then(response => response).catch((err) => {
+    if (err.message === 'Failed to fetch') {
+      throw Error('ERROR: Check your internet connection and try again');
+    }
+    throw err;
+  });
 
   return result;
 };
@@ -338,6 +343,142 @@ const viewSentMessage = async (maildId) => {
       document.querySelector('.right').scrollTop = viewMessageDiv.scrollHeight;
     }
   }).catch((error) => { alertMessage(error.message); });
+};
+
+const sendMail = () => {
+  const sendMsg = document.querySelector("[name='sendMail']");
+  const { subject, message } = sendMsg;
+  const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+  const selectGroup = document.querySelector('.inbox .right-compose .address select');
+  const sendButton = document.querySelector("[name='sendMail'] button");
+  const saveButton = document.querySelector('#saveMail');
+  const saveMsgId = document.querySelector(".right-compose input[name='id']");
+  let endpoint;
+
+  const obj = {
+    subject: subject.value.trim(),
+    message: message.value.trim(),
+  };
+  let method = 'POST';
+  if (saveMsgId.value) {
+    obj.id = saveMsgId.value;
+    method = 'PUT';
+  }
+
+  const radioBtn = Array.from(document.querySelectorAll(".inbox .right-compose .address span input[type='radio']"))
+    .find(radioButton => radioButton.checked);
+
+  if (radioBtn && radioBtn.value === 'Individual') {
+    obj.receiverEmail = sendMsg.email.value;
+    endpoint = '/messages';
+  } else if (radioBtn && radioBtn.value === 'Group') {
+    const selectElement = document.querySelector('.inbox .right-compose .address select');
+    const { selectedIndex } = selectElement;
+    const { options } = selectElement;
+    const groupId = options[selectedIndex].value;
+    if (!groupId || groupId.trim() === '') {
+      alertMessage('Select a group to send message to');
+    } else {
+      endpoint = `/groups/${groupId}/messages`;
+    }
+  }
+
+  if (endpoint) {
+    sendButton.innerHTML = 'SENDING';
+    sendButton.classList.add('sending');
+    toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
+    postData(method, endpoint, obj, true)
+      .then(async (response) => {
+        const res = await response.json();
+        const status = parseInt(response.status, 10);
+        if (status === 401) {
+          logOut();
+        } else if (status === 400) {
+          saveMsgId.value = null;
+          await sendMail();
+        } else if ('error' in res) {
+          throw new Error(res.error);
+        } else if ('data' in res && 'id' in res.data[0]) {
+          setTimeout(() => {
+            sendButton.innerHTML = 'SENT';
+            sendButton.classList.add('sent');
+            alertMessage('Message Sent Successfully');
+            sendMsg.reset();
+            postData('GET', '/messages', null, true).then(populateInbox).catch((error) => { alertMessage(error.message); });
+          }, 1000);
+        }
+      }).catch((error) => {
+        alertMessage(error.message);
+      }).finally(() => {
+        setTimeout(() => {
+          sendButton.innerHTML = 'SEND';
+          sendButton.classList.remove('sending');
+          sendButton.classList.remove('sent');
+          saveMsgId.value = null;
+          inputEmail.classList.remove('hidden');
+          inputEmail.required = true;
+          selectGroup.classList.add('hidden');
+          selectGroup.required = false;
+          document.querySelector('#saveMail').classList.remove('hidden');
+          toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
+        }, 2000);
+      });
+  }
+};
+
+const saveMail = () => {
+  const composeForm = document.querySelector("[name='sendMail']");
+  const { subject, message } = composeForm;
+  const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
+  const selectGroup = document.querySelector('.inbox .right-compose .address select');
+  const sendButton = document.querySelector("[name='sendMail'] button");
+  const saveButton = document.querySelector('#saveMail');
+  const saveMsgId = document.querySelector(".right-compose input[name='id']");
+
+  if (subject.value.trim() === '') {
+    alertMessage('Subject cannot be empty');
+  } else if (message.value.trim() === '') {
+    alertMessage('Message body cannot be empty');
+  } else {
+    const obj = {
+      subject: subject.value.trim(),
+      message: message.value.trim(),
+    };
+    if (inputEmail.value && inputEmail.value.trim() !== '') {
+      obj.receiverEmail = inputEmail.value.trim();
+    }
+    if (saveMsgId.value) {
+      obj.id = saveMsgId.value;
+    }
+    toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
+    postData('POST', '/messages/draft', obj, true)
+      .then(async (response) => {
+        const res = await response.json();
+        const status = parseInt(response.status, 10);
+        if (status === 401) {
+          logOut();
+        } else if (status === 400) {
+          saveMsgId.value = null;
+          await saveMail();
+        } else if ('error' in res) {
+          throw new Error(res.error);
+        } else if ('data' in res && 'id' in res.data[0]) {
+          alertMessage('Message saved as draft succesfully');
+          saveMsgId.value = null;
+          inputEmail.classList.remove('hidden');
+          inputEmail.required = true;
+          selectGroup.classList.add('hidden');
+          selectGroup.required = false;
+          document.querySelector('#saveMail').classList.remove('hidden');
+          composeForm.reset();
+          postData('GET', '/messages/draft', null, true).then(populateDraft).catch((error) => { alertMessage(error.message); });
+        }
+      }).catch((error) => {
+        alertMessage(error.message);
+      }).finally(() => {
+        toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
+      });
+  }
 };
 
 const sendDraftMessage = (mailDiv) => {
@@ -706,79 +847,7 @@ window.onload = function ready() {
 
     /** Send mail * */
     document.querySelector("[name='sendMail']").onsubmit = () => {
-      const sendMsg = document.querySelector("[name='sendMail']");
-      const { subject, message } = sendMsg;
-      const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
-      const selectGroup = document.querySelector('.inbox .right-compose .address select');
-      const sendButton = document.querySelector("[name='sendMail'] button");
-      const saveButton = document.querySelector('#saveMail');
-      const saveMsgId = document.querySelector(".right-compose input[name='id']");
-      let endpoint;
-
-      const obj = {
-        subject: subject.value.trim(),
-        message: message.value.trim(),
-      };
-      let method = 'POST';
-      if (saveMsgId.value) {
-        obj.id = saveMsgId.value;
-        method = 'PUT';
-      }
-
-      const radioBtn = Array.from(document.querySelectorAll(".inbox .right-compose .address span input[type='radio']"))
-        .find(radioButton => radioButton.checked);
-
-      if (radioBtn && radioBtn.value === 'Individual') {
-        obj.receiverEmail = sendMsg.email.value;
-        endpoint = '/messages';
-      } else if (radioBtn && radioBtn.value === 'Group') {
-        const selectElement = document.querySelector('.inbox .right-compose .address select');
-        const { selectedIndex } = selectElement;
-        const { options } = selectElement;
-        const groupId = options[selectedIndex].value;
-        if (!groupId || groupId.trim() === '') {
-          alertMessage('Select a group to send message to');
-        } else {
-          endpoint = `/groups/${groupId}/messages`;
-        }
-      }
-
-      if (endpoint) {
-        sendButton.innerHTML = 'SENDING';
-        sendButton.classList.add('sending');
-        toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
-        postData(method, endpoint, obj, true)
-          .then(async (response) => {
-            const res = await response.json();
-            if (parseInt(response.status, 10) === 401) {
-              logOut();
-            } else if ('error' in res) {
-              throw new Error(res.error);
-            } else if ('data' in res && 'id' in res.data[0]) {
-              setTimeout(() => {
-                sendButton.innerHTML = 'SENT';
-                sendButton.classList.add('sent');
-                alertMessage('Message Sent Successfully');
-                sendMsg.reset();
-              }, 1000);
-            }
-          }).catch((error) => {
-            alertMessage(error.message);
-          }).finally(() => {
-            setTimeout(() => {
-              sendButton.innerHTML = 'SEND';
-              sendButton.classList.remove('sending');
-              sendButton.classList.remove('sent');
-              saveMsgId.value = null;
-              inputEmail.classList.remove('hidden');
-              inputEmail.required = true;
-              selectGroup.classList.add('hidden');
-              selectGroup.required = false;
-              document.querySelector('#saveMail').classList.remove('hidden');
-              toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
-            }, 2000);
-          });
-      }
+      sendMail();
       return false;
     };
 
@@ -805,55 +874,7 @@ window.onload = function ready() {
 
     /** Save mail as draft * */
     document.querySelector('#saveMail').onclick = () => {
-      const composeForm = document.querySelector("[name='sendMail']");
-      const { subject, message } = composeForm;
-      const inputEmail = document.querySelector(".inbox .right-compose .address input[type='email']");
-      const selectGroup = document.querySelector('.inbox .right-compose .address select');
-      const sendButton = document.querySelector("[name='sendMail'] button");
-      const saveButton = document.querySelector('#saveMail');
-      const saveMsgId = document.querySelector(".right-compose input[name='id']");
-
-      if (subject.value.trim() === '') {
-        alertMessage('Subject cannot be empty');
-      } else if (message.value.trim() === '') {
-        alertMessage('Message body cannot be empty');
-      } else {
-        const obj = {
-          subject: subject.value.trim(),
-          message: message.value.trim(),
-        };
-        if (inputEmail.value && inputEmail.value.trim() !== '') {
-          obj.receiverEmail = inputEmail.value.trim();
-        }
-        if (saveMsgId.value) {
-          obj.id = saveMsgId.value;
-        }
-        toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
-        postData('POST', '/messages/draft', obj, true)
-          .then(async (response) => {
-            const res = await response.json();
-            if (parseInt(response.status, 10) === 401) {
-              logOut();
-            } else if ('error' in res) {
-              throw new Error(res.error);
-            } else if ('data' in res) {
-              if ('id' in res.data[0]) {
-                alertMessage('Message saved as draft succesfully');
-                saveMsgId.value = null;
-                inputEmail.classList.remove('hidden');
-                inputEmail.required = true;
-                selectGroup.classList.add('hidden');
-                selectGroup.required = false;
-                document.querySelector('#saveMail').classList.remove('hidden');
-                composeForm.reset();
-              }
-            }
-          }).catch((error) => {
-            alertMessage(error.message);
-          }).finally(() => {
-            toggleDisable(subject, message, sendButton, saveButton, inputEmail, selectGroup);
-          });
-      }
+      saveMail();
     };
 
     /** Delete draft * */
@@ -894,9 +915,9 @@ window.onload = function ready() {
               logOut();
             } else if (parseInt(response.status, 10) === 204) {
               document.querySelector('.right-inbox .inbox-view').removeChild((element.parentNode));
-              //  alertMessage('Mail(s) Deleted Successfully');
             } else if (parseInt(response.status, 10) === 404) {
               const res = await response.json();
+              document.querySelector('.right-inbox .inbox-view').removeChild((element.parentNode));
               throw new Error(res.error);
             }
           }).catch((error) => {
@@ -917,9 +938,9 @@ window.onload = function ready() {
               logOut();
             } else if (parseInt(response.status, 10) === 204) {
               document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
-              //  alertMessage('Mail(s) Deleted Successfully');
             } else if (parseInt(response.status, 10) === 404) {
               const res = await response.json();
+              document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
               throw new Error(res.error);
             }
           }).catch((error) => {
@@ -933,23 +954,22 @@ window.onload = function ready() {
       const checkBoxes = document.querySelectorAll('.right-sent .inbox-view >div >input');
       const selected = getSelectedCheckBox(checkBoxes);
       selected.forEach(async (element) => {
-        if (element.checked) {
-          const mailId = element.value;
-          await postData('DELETE', `/messages/sent/${mailId}/retract`, null, true)
-            .then(async (response) => {
-              if (parseInt(response.status, 10) === 401) {
-                logOut();
-              } else if (parseInt(response.status, 10) === 204) {
-                document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
-                //  alertMessage('Mail(s) Deleted Successfully');
-              } else if (parseInt(response.status, 10) === 404) {
-                const res = await response.json();
-                throw new Error(res.error);
-              }
-            }).catch((error) => {
-              alertMessage(error.message);
-            });
-        }
+        const mailId = element.value;
+        await postData('DELETE', `/messages/sent/${mailId}/retract`, null, true)
+          .then(async (response) => {
+            if (parseInt(response.status, 10) === 401) {
+              logOut();
+            } else if (parseInt(response.status, 10) === 204) {
+              document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
+              //  alertMessage('Mail(s) Deleted Successfully');
+            } else if (parseInt(response.status, 10) === 404) {
+              const res = await response.json();
+              document.querySelector('.right-sent .inbox-view').removeChild((element.parentNode));
+              throw new Error(res.error);
+            }
+          }).catch((error) => {
+            alertMessage(error.message);
+          });
       });
     };
 
@@ -967,9 +987,9 @@ window.onload = function ready() {
                 logOut();
               } else if (resStatus === 204) {
                 document.querySelector('.right-group .groups >div:nth-child(2)').removeChild((element.parentNode));
-                //  alertMessage('Mail(s) Deleted Successfully');
               } else if (resStatus === 404 || resStatus === 400) {
                 const res = await response.json();
+                document.querySelector('.right-group .groups >div:nth-child(2)').removeChild((element.parentNode));
                 throw new Error(res.error);
               }
             }).catch((error) => {

@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
 class Utility {
-  static getToken(payload, expiresIn = '1h') {
+  static getToken(payload, expiresIn = '1d') {
     dotenv.config();
     const token = jwt.sign({ payload }, process.env.JWT_PRIVATE_SECRET, { expiresIn });
     return token;
@@ -20,7 +20,7 @@ class Utility {
     });
     const mailOptions = {
       from: 'no-reply@robot.com',
-      to: 'ilorieazykiel@gmail.com',
+      to,
       subject: 'EPICMAIL: Password Reset Confirmation',
       html: `<p>Confirm password reset on your epicmail account: <a href='${endpoint}?r=${token}'>Confirm Password Reset</a></p>
              <p>Ignore if this password request was not made by you. Stay EPIC!</p>`,
