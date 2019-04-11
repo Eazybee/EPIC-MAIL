@@ -3,21 +3,21 @@ import chaiHttp from 'chai-http';
 import app from '../src/app';
 
 chai.use(chaiHttp);
-
 const { expect } = chai;
 
 describe('user', () => {
   let obj;
+  let authToken;
 
   describe('post', () => {
     describe('/auth/signup', () => {
       beforeEach(() => {
         obj = {
-          email: 'Iloriezekiel@beetechnology.com',
+          email: 'epicmailapi@gmail.com',
           firstName: 'Ezekiel',
           lastName: 'Ilori',
-          password: 'bee',
-          rePassword: 'bee',
+          password: 'epic',
+          rePassword: 'epic',
         };
       });
 
@@ -85,8 +85,8 @@ describe('user', () => {
     describe('/auth/login', () => {
       beforeEach(() => {
         obj = {
-          email: 'maryj@test.com',
-          password: 'spiderman123',
+          email: 'epicmailapi@gmail.com',
+          password: 'epic',
         };
       });
 
@@ -145,6 +145,115 @@ describe('user', () => {
           })
           .end((err, res) => {
             expect(res.body).to.have.status(400);
+            done();
+          });
+      });
+    });
+
+    describe('/auth/reset', () => {
+      it('should return status 200', (done) => {
+        obj = {
+          email: 'epicmailapi@gmail.com',
+          password: 'epicmail',
+        };
+
+        chai.request(app)
+          .post('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            authToken = res.body.data[0].token;
+            done();
+          });
+      });
+
+      it('should return status 400, Wrong Email', (done) => {
+        obj = {
+          email: 'wrongEmail@gmail.com',
+          password: 'epicmail',
+        };
+
+        chai.request(app)
+          .post('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+
+      it('should return status 400, Required Field', (done) => {
+        obj = {
+          email: 'epicmailapi@gmail.com',
+        };
+
+        chai.request(app)
+          .post('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+    });
+  });
+
+  describe('put', () => {
+    describe('/auth/login', () => {
+      beforeEach(() => {
+        obj = {
+          email: 'epicmailapi@gmail.com',
+          password: 'epic',
+        };
+      });
+
+      it('should return status 200', (done) => {
+        chai.request(app)
+          .post('/api/v1/auth/login')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            authToken = res.body.data[0].token;
+            done();
+          });
+      });
+    });
+
+    describe('/auth/reset', () => {
+      it('should return status 200', (done) => {
+        obj = {
+          token: authToken,
+        };
+
+        chai.request(app)
+          .put('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(200);
+            done();
+          });
+      });
+      it('should return status 400, Expired Token', (done) => {
+        obj = {
+          token: authToken,
+        };
+
+        chai.request(app)
+          .put('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
+            done();
+          });
+      });
+      it('should return status 400, Required Field', (done) => {
+        obj = {};
+
+        chai.request(app)
+          .put('/api/v1/auth/reset')
+          .send(obj)
+          .end((err, res) => {
+            expect(res).to.have.status(400);
             done();
           });
       });

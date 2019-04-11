@@ -1,5 +1,4 @@
 import client from '../Database/DbConnection';
-import 'babel-polyfill';
 
 class Database {
   static async getUserId(email) {
@@ -13,7 +12,7 @@ class Database {
 
   static async addUser(values) {
     const query = {
-      text: 'INSERT INTO users(first_name, last_name, email, password, status) VALUES($1, $2, $3, $4, $5) RETURNING *',
+      text: 'INSERT INTO users(first_name, last_name, email, password) VALUES($1, $2, $3, $4) RETURNING *',
       values,
     };
     const result = await client.query(query);
@@ -33,6 +32,38 @@ class Database {
       text: 'SELECT * FROM users',
     };
     const result = await client.query(query);
+    return result.rows;
+  }
+
+  static async reset(values) {
+    let query = {
+      text: 'UPDATE resets set password=$1 WHERE user_id=$2 RETURNING *',
+      values,
+    };
+    let result = await client.query(query);
+    if (result.rowCount === 0) {
+      query = {
+        text: 'INSERT INTO resets(password, user_id) VALUES($1, $2) RETURNING *',
+        values,
+      };
+      result = await client.query(query);
+    }
+
+    return result.rows;
+  }
+
+  static async updatePassword(id) {
+    let query = {
+      text: 'DELETE FROM resets where user_id = $1 RETURNING *',
+      values: [id],
+    };
+    let result = await client.query(query);
+    const { password } = result.rows[0];
+    query = {
+      text: 'UPDATE users set password=$1 WHERE id=$2',
+      values: [password, id],
+    };
+    result = await client.query(query);
     return result.rows;
   }
 

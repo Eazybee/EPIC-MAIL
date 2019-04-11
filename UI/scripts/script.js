@@ -2,7 +2,7 @@ const postData = async (method = 'GET', path, data, auth) => {
   if (!path) {
     throw new Error('Path not defined!');
   }
-  const url = `http://localhost:3000/api/v1${path}`;
+  const url = `https://epic-mail-api.herokuapp.com/api/v1${path}`;
   const headers = new Headers();
   headers.append('Content-Type', 'application/json');
   if (auth) {
@@ -282,6 +282,7 @@ const viewInboxMessage = async (maildId) => {
     }
   }).catch((error) => { alertMessage(error.message); });
 };
+
 const viewSentMessage = async (maildId) => {
   postData('GET', `/messages/sent/${maildId}`, null, true).then(async (response) => {
     const res = await response.json();
@@ -387,6 +388,24 @@ window.onload = function ready() {
   }
 
   if (document.querySelector('.signUpLink')) { // loginPage.html
+    /** Listen to url */
+    if (window.location.search && window.location.search.trim() !== '') {
+      const tokenUrl = window.location.search.trim();
+      const tokenSplit = tokenUrl.split('?r=');
+      const token = tokenSplit[1];
+      if (token) {
+        const obj = { token };
+        postData('PUT', '/auth/reset', obj).then(async (response) => {
+          const status = parseInt(response.status, 10);
+          if (status === 401) {
+            alertMessage('Invalid or Expired Password Rest Link');
+          } else if (status === 200) {
+            alertMessage('Password Reset Successfully');
+          }
+        }).catch((error) => { alertMessage(error.message); });
+      }
+    }
+
     /** Home Page Traverse Code * */
     document.querySelectorAll('.resetLink, .signUpLink, .signInLink').forEach((element) => {
       const elem = element;
@@ -399,32 +418,37 @@ window.onload = function ready() {
       };
     });
 
-    // RESET FORM
     document.querySelector('#resetForm').onsubmit = () => {
       const email = document.querySelector("#resetForm input[type='email']");
-      const answer = document.querySelector("#resetForm input[type='text']");
       const password = document.querySelector("#resetForm input[type='password']");
+      const submitButton = document.querySelector('#resetForm button');
       if (email.value.trim() === '') {
         alertMessage('Please enter your Email address');
+      } else if (password.value.trim() === '') {
+        alertMessage('Please enter new password ');
       } else {
-        document.querySelector('#resetForm .answer').classList.remove('hidden');
-        document.querySelector('#resetForm .question').classList.remove('hidden');
+        const obj = {
+          email: email.value.trim(),
+          password: password.value.trim(),
+        };
 
-        if (answer.value.trim() !== '') {
-          document.querySelector('#resetForm .password').classList.remove('hidden');
-          if (password.value.trim() !== '') {
-            alertMessage('Password Reset Succesfully ');
-            email.value = '';
-            answer.value = '';
-            password.value = '';
-            setTimeout(() => { window.location.reload(); }, 3000);
+        toggleDisable(email, password, submitButton);
+        postData('POST', '/auth/reset', obj).then(async (response) => {
+          const res = await response.json();
+          const status = parseInt(response.status, 10);
+          if (status === 400) {
+            alertMessage(res.error);
+          } else if (status === 200) {
+            alertMessage('Check your mail for Password Reset Confirmation link.');
           }
-        }
+        }).catch((error) => { alertMessage(error.message); }).finally(() => {
+          document.querySelector('#resetForm').reset();
+          toggleDisable(email, password, submitButton);
+        });
       }
       return false;
     };
 
-    // SIGN-IN FORM
     document.querySelector('#signInForm').onsubmit = () => {
       const email = document.querySelector("#signInForm input[type='email']");
       const password = document.querySelector("#signInForm input[type='password']");
@@ -466,7 +490,6 @@ window.onload = function ready() {
       return false;
     };
 
-    // SIGNUP FORM
     document.querySelector('#signUpForm').onsubmit = () => {
       const signUpForm = document.querySelector('#signUpForm');
       const password = signUpForm.signupPassword;

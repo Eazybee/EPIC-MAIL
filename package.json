@@ -5,9 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "migrate": "babel-node  ./SERVER/test/dbSchema.js --exit",
-    "test": "set NODE_ENV=test&& npm run migrate && nyc mocha SERVER/test --require @babel/register --recursive --timeout 10000 --exit",
+    "test": "npm run migrate && nyc mocha SERVER/test --require babel-polyfill --require @babel/register --recursive --timeout 10000 --exit",
     "build": "set NODE_ENV=production&& babel SERVER/src --out-dir SERVER/build/dist --exit",
-    "dev-start": "babel-watch SERVER/src/app.js",
+    "start": "nodemon --exec babel-node SERVER/src/app.js",
     "testCoverall": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
     "deploy-heroku": "npm run build && node SERVER/build/dist/app"
   },
@@ -25,6 +25,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "eslint-plugin-react": "^7.11.0",
     "mocha": "^6.0.2",
+    "nodemon": "^1.18.11",
     "nyc": "^13.3.0"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "express": "^4.16.4",
     "joi": "^14.3.1",
     "jsonwebtoken": "^8.5.0",
+    "nodemailer": "^6.1.0",
     "pg": "^7.9.0",
     "swagger-ui-express": "^4.0.2"
   },
