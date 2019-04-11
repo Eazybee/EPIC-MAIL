@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 
 class Utility {
-  static getToken(payload, expiresIn = '1h') {
+  static getToken(payload, expiresIn = '1d') {
     dotenv.config();
     const token = jwt.sign({ payload }, process.env.JWT_PRIVATE_SECRET, { expiresIn });
     return token;

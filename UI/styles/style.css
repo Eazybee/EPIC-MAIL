@@ -61,17 +61,18 @@ body, body>div{
     position: fixed;
 }
 .alert{
-    width:50%;
+    width:40%;
     height: auto;
     background-color: white;
     border: cyan solid .08em;
     border-radius: 0 0 .5em .5em;
-    margin:15% 25%;
+    margin:15% 30%;
 }
 .alert div{
     padding: 1em
 }
 .alert .title-bar{
+    padding:.5em 1em; 
     display: flex;
     justify-content: space-between;
     background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
@@ -200,6 +201,13 @@ body, body>div{
     color: white;
     background: linear-gradient(-45deg, #194759, #194759, #23A6D5, #194759);
     z-index: 2;
+}
+.loginPage .blind{
+    width: 100%;
+    height: 100vh;
+    background: #576CA8;
+    opacity: .4;
+    position: absolute;
 }
 .loginPage .sign{
     margin-top: 1em;
@@ -440,7 +448,7 @@ button:hover,
     padding: .5em 0;
 }
 .inbox .view-message .top.away{
-    background-color: #3E8C84;
+    background-color: #ACEBF2;
 }
 .inbox .right-compose div{
     width: 100%

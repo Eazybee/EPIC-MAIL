@@ -9,14 +9,18 @@
     *{
        font-size: 14px;
     }
-    
-    
+    .alert{
+        width:40%;
+    }
 }
 @media screen and (min-width:600px) and (max-width:768px){
     
     *{
        font-size: 13px;
-    }  
+    }
+    .alert{
+        width:50%;
+    }
 }
 
 @media screen and (min-width:400px) and (max-width:599px),screen and (max-width:399px){
