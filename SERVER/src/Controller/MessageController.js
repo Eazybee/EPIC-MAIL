@@ -39,30 +39,59 @@ class MessageController {
   }
 
   static saveDraft(req, res) {
-    const message = [
-      req.body.subject,
-      req.body.message,
-      UserController.user.getId(),
-      Date.now(),
-      'draft',
-    ];
-    db.addMessage(message).then((rows) => {
-      const [mail] = rows;
-      res.status(201).json({
-        status: 201,
-        data: [{
-          id: mail.id,
-          createdOn: mail.date_time,
-          subject: mail.subject,
-          message: mail.message,
-          parentMessageId: null,
-          status: mail.status,
-        }],
+    const msgId = req.body.id;
+    if (msgId) {
+      const message = [
+        req.body.subject,
+        req.body.message,
+        Date.now(),
+        req.body.receiverId,
+        msgId,
+      ];
+
+      db.updateDraft(message).then((rows) => {
+        const [mail] = rows;
+        res.status(200).json({
+          status: 200,
+          data: [{
+            id: msgId,
+            createdOn: mail.date_time,
+            subject: mail.subject,
+            message: mail.message,
+            parentMessageId: null,
+            status: 'draft',
+          }],
+        });
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
       });
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
-    });
+    } else {
+      const message = [
+        req.body.subject,
+        req.body.message,
+        UserController.user.getId(),
+        Date.now(),
+        'draft',
+      ];
+      db.addMessage(message, 'draft', req.body.receiverId).then((rows) => {
+        const [mail] = rows;
+        res.status(201).json({
+          status: 201,
+          data: [{
+            id: mail.id,
+            createdOn: mail.date_time,
+            subject: mail.subject,
+            message: mail.message,
+            parentMessageId: null,
+            status: mail.status,
+          }],
+        });
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
   }
 
   static sendDraft(req, res) {
@@ -71,7 +100,7 @@ class MessageController {
     const dateTime = Date.now();
     let values = [subject, message, 'sent', mailId];
 
-    db.updateMessage(values).then((rowCount) => {
+    db.sendDraft(values, [receiverId, dateTime, 'sent', mailId]).then((rowCount) => {
       if (rowCount === 1) {
         // insert into sents table
         values = [mailId, UserController.user.getId(), 'sent', dateTime];
@@ -102,20 +131,32 @@ class MessageController {
   static getInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId());
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+          senderEmail: mail.email,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your inbox is empty!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -125,20 +166,32 @@ class MessageController {
   static getUnreadInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId() && mail.status === 'unread');
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+          senderEmail: mail.email,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any unread message!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -148,20 +201,32 @@ class MessageController {
   static getReadInbox(req, res) {
     db.getInboxes().then((mails) => {
       let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId() && mail.status === 'read');
-      inbox = inbox.map(mail => ({
-        id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: mail.status,
-      }));
-      res.status(200).json({
-        status: 200,
-        data: inbox,
-      });
+      if (inbox.length !== 0) {
+        inbox = inbox.map(mail => ({
+          id: mail.msg_id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: mail.status,
+          senderEmail: mail.email,
+        }));
+        res.status(200).json({
+          status: 200,
+          data: inbox,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any read message!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -170,21 +235,66 @@ class MessageController {
 
   static getSentMail(req, res) {
     db.getSents(UserController.user.getId()).then((mails) => {
-      const sent = mails.map(mail => ({
-        id: mail.id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
-        subject: mail.subject,
-        message: mail.message,
-        senderId: mail.owner_id,
-        receiverId: mail.receiver_id,
-        parentMessageId: null,
-        status: 'sent',
-      }));
+      if (mails.length !== 0) {
+        const sent = mails.map(mail => ({
+          id: mail.id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: mail.owner_id,
+          receiverId: mail.receiver_id,
+          parentMessageId: null,
+          status: 'sent',
+          receiverEmail: mail.email,
+        }));
 
-      res.status(200).json({
-        status: 200,
-        data: sent,
-      });
+        res.status(200).json({
+          status: 200,
+          data: sent,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your don\'t have any sent message!',
+            },
+          ],
+        });
+      }
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
+  static getDraft(req, res) {
+    db.getDrafts(UserController.user.getId()).then((mails) => {
+      if (mails.length !== 0) {
+        const drafts = mails.map(mail => ({
+          id: mail.id,
+          createdOn: mail.date_time,
+          subject: mail.subject,
+          message: mail.message,
+          senderId: UserController.user.getId(),
+          receiverEmail: mail.receiverEmail,
+          parentMessageId: null,
+          status: 'draft',
+        }));
+        res.status(200).json({
+          status: 200,
+          data: drafts,
+        });
+      } else {
+        res.status(200).json({
+          status: 200,
+          data: [
+            {
+              message: 'Your draft is empty!',
+            },
+          ],
+        });
+      }
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -192,19 +302,19 @@ class MessageController {
   }
 
   static getMailId(req, res) {
-    db.getInboxes().then((mails) => {
-      const mailId = parseInt(req.params.id, 10);
-      let inbox = mails.filter(mail => mail.receiver_id === UserController.user.getId()
-      && mail.msg_id === mailId);
-      inbox = inbox.map(mail => ({
+    const mailId = parseInt(req.params.id, 10);
+    db.getMessageThread(mailId, UserController.user.getId()).then((mails) => {
+      const inbox = mails.map(mail => ({
         id: mail.msg_id,
-        createdOn: new Date(parseInt(mail.date_time, 10)).toLocaleString('en-US', { timeZone: 'UTC' }),
+        createdOn: mail.date_time,
         subject: mail.subject,
         message: mail.message,
         senderId: mail.owner_id,
         receiverId: mail.receiver_id,
         parentMessageId: null,
         status: mail.status,
+        senderEmail: mail.email,
+        senderFirstName: mail.first_name,
       }));
       res.status(200).json({
         status: 200,
@@ -216,14 +326,48 @@ class MessageController {
     });
   }
 
+  static getSentMailId(req, res) {
+    const sent = req.rows.map(mail => ({
+      id: mail.id,
+      createdOn: mail.date_time,
+      subject: mail.subject,
+      message: mail.message,
+      receiverId: mail.receiver_id,
+      parentMessageId: null,
+      status: 'sent',
+      receiverEmail: mail.email,
+      receiverFirstName: mail.first_name,
+    }));
+    res.status(200).json({
+      status: 200,
+      data: sent,
+    });
+  }
+
   static deleteMail(req, res) {
     const mailId = parseInt(req.params.id, 10);
     db.deleteMessage(mailId, req.deleteType).then(() => {
-      db.getMessages(mailId).then(() => {
-        res.status(200).json({
-          status: 200,
+      res.status(204).json({
+        status: 204,
+        data: [{
+          message: 'Message deleted successful',
+        }],
+      });
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
+  static retractMail(req, res) {
+    const mailId = parseInt(req.params.id, 10);
+    db.deleteMessage(mailId, req.deleteType).then(() => {
+      req.deleteType = 'inboxes';
+      db.deleteMessage(mailId, req.deleteType).then(() => {
+        res.status(204).json({
+          status: 204,
           data: [{
-            message: 'Message deleted successful',
+            message: 'Message retracted successful',
           }],
         });
       });

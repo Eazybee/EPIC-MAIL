@@ -33,32 +33,34 @@ class Validate {
   }
 
   static signup(req, res, next) {
-    db.getUsers().then((users) => {
-      const userExist = users.some(user => user.email === req.body.email);
-      const schema = Joi.object().keys({
-        email: Joi.string().email({ minDomainAtoms: 2 }).required(),
-        firstName: Joi.string().required(),
-        lastName: Joi.string().required(),
-        password: Joi.string().required(),
-        rePassword: Joi.string().required(),
-      });
-      const { error } = Joi.validate(req.body, schema);
-      if (error) {
-        const errorMessage = error.details[0].message;
-        Utility.handleError(res, errorMessage, 400);
-      } else if (req.body.password !== req.body.rePassword) {
-        const errorMessage = 'Password does not match';
-        Utility.handleError(res, errorMessage, 400);
-      } else if (userExist) {
-        const errorMessage = 'User with this email exist';
-        Utility.handleError(res, errorMessage, 400);
-      } else {
-        next();
-      }
-    }).catch((err) => {
-      const errorMessage = `SERVER ERROR: ${err.message}`;
-      Utility.handleError(res, errorMessage, 500);
+    const schema = Joi.object().keys({
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string(),
+      password: Joi.string().required(),
+      rePassword: Joi.string().required(),
     });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getUsers().then((users) => {
+        const userExist = users.some(user => user.email === req.body.email.toLowerCase());
+        if (req.body.password !== req.body.rePassword) {
+          const errorMessage = 'Password does not match';
+          Utility.handleError(res, errorMessage, 400);
+        } else if (userExist) {
+          const errorMessage = 'User with this email exist';
+          Utility.handleError(res, errorMessage, 409);
+        } else {
+          next();
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
   }
 
   static login(req, res, next) {
@@ -72,31 +74,82 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       db.getUsers().then((users) => {
-        let user = users.find(dbuser => dbuser.email === req.body.email);
+        let user = users.find(dbuser => dbuser.email === req.body.email.toLowerCase());
         if (user) {
           bcrypt.compare(req.body.password, user.password, (err, result) => {
-            if (result) {
+            if (err) {
+              const errorMessage = 'Unauthorized: Invalid Credentials';
+              Utility.handleError(res, errorMessage, 401);
+            } else if (result) {
               const {
-                id, email, password,
+                id, email,
               } = user;
               const firstName = user.first_name;
-              const lastName = user.last_name;
-              user = new User(id, email, firstName, lastName, password);
+              user = new User(id, email.toLowerCase(), firstName);
               req.user = user;
               next();
-            }
-            if (err) {
-              const errorMessage = 'Unauthorized';
+            } else {
+              const errorMessage = 'Unauthorized: Invalid Credentials';
               Utility.handleError(res, errorMessage, 401);
             }
           });
         } else {
-          const errorMessage = 'Unauthorized';
+          const errorMessage = 'Unauthorized: Invalid Credentials';
           Utility.handleError(res, errorMessage, 401);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
         Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static reset(req, res, next) {
+    const schema = Joi.object().keys({
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
+      password: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getUsers().then((users) => {
+        let user = users.find(dbuser => dbuser.email === req.body.email.toLowerCase());
+        if (user) {
+          user = new User(user.id, user.email, user.first_name);
+          req.user = user;
+          next();
+        } else {
+          const errorMessage = `User with email ${req.body.email} does not exist`;
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static resetConfirmation(req, res, next) {
+    const schema = Joi.object().keys({
+      token: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      const { token } = req.body;
+      jwt.verify(token, process.env.JWT_PRIVATE_SECRET, (err, payload) => {
+        if (err) {
+          const errorMessage = 'aInvalid or Expired authorization token';
+          Utility.handleError(res, errorMessage, 401);
+        }
+        if (payload) {
+          req.payload = payload.payload;
+          next();
+        }
       });
     }
   }
@@ -113,7 +166,7 @@ class Validate {
       Utility.handleError(res, errorMessage, 400);
     } else {
       const { receiverEmail } = req.body;
-      db.getUserId(receiverEmail).then((rows) => {
+      db.getUserId(receiverEmail.toLowerCase()).then((rows) => {
         if (rows.length === 1) {
           req.body.receiverId = rows[0].id;
           next();
@@ -133,11 +186,57 @@ class Validate {
       subject: Joi.string().required(),
       message: Joi.string().required(),
       receiverEmail: Joi.string().email({ minDomainAtoms: 2 }),
+      id: Joi.number(),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
+    } else if (req.body.receiverEmail || req.body.id) {
+      let { receiverEmail } = req.body;
+      if (receiverEmail) {
+        receiverEmail = receiverEmail.toLowerCase();
+      }
+      const msgId = req.body.id;
+
+      if (msgId) {
+        db.getMessages(msgId, 'draft', UserController.user.getId()).then((rows) => {
+          if (rows.length === 1) {
+            if (receiverEmail) {
+              db.getUserId(receiverEmail).then((rows2) => {
+                if (rows2.length === 1) {
+                  req.body.receiverId = rows2[0].id;
+                  next();
+                } else {
+                  const errorMessage = `User with email ${receiverEmail} does not exist!`;
+                  Utility.handleError(res, errorMessage, 400);
+                }
+              });
+            } else {
+              next();
+            }
+          } else {
+            const errorMessage = 'Draft message does not exist!';
+            Utility.handleError(res, errorMessage, 400);
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      } else if (receiverEmail) {
+        db.getUserId(receiverEmail).then((rows) => {
+          if (rows.length === 1) {
+            req.body.receiverId = rows[0].id;
+            next();
+          } else {
+            const errorMessage = `User with email ${receiverEmail} does not exist!`;
+            Utility.handleError(res, errorMessage, 400);
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      }
     } else {
       next();
     }
@@ -149,41 +248,29 @@ class Validate {
       subject: Joi.string().required(),
       message: Joi.string().required(),
       parentMessageId: Joi.number(),
-      receiverId: Joi.number().required(),
+      receiverEmail: Joi.string().email({ minDomainAtoms: 2 }).required(),
     });
     const { error } = Joi.validate(req.body, schema);
     if (error) { // if schema exist
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      const mailId = parseInt(req.body.id, 10);
-      db.getMessages(mailId).then((rows) => {
-        const [mail] = rows;
-        if (mail) { // if mail exist
-          if (mail.owner_id !== UserController.user.getId()) {
-            // check if message belongs to the user
-            const errorMessage = 'Unauthorized';
-            Utility.handleError(res, errorMessage, 401);
-          } else if (mail.status !== 'draft') { // check if it is a draft
-            const errorMessage = 'Message must be draft';
-            Utility.handleError(res, errorMessage, 400);
-          } else {
-            const userId = parseInt(req.body.receiverId, 10);
-            db.getUsers(userId).then((rows2) => {
-              if (rows2.length === 1) {
-                next();
-              } else {
-                const errorMessage = 'User with this receiverId does not exist!';
-                Utility.handleError(res, errorMessage, 400);
-              }
-            }).catch((err) => {
-              const errorMessage = `SERVER ERROR: ${err.message}`;
-              Utility.handleError(res, errorMessage, 500);
-            });
-          }
+      const { receiverEmail } = req.body;
+      db.getUserId(receiverEmail.toLowerCase()).then((rows) => {
+        if (rows.length === 1) {
+          req.body.receiverId = rows[0].id;
+          const draftMsgId = req.body.id;
+          db.getDraftId(draftMsgId, UserController.user.getId()).then((rows2) => {
+            if (rows2.length === 1) {
+              next();
+            } else {
+              const errorMessage = 'Draft message does not exist!';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
         } else {
-          const errorMessage = 'Message does not exist!';
-          Utility.handleError(res, errorMessage, 404);
+          const errorMessage = `User with email ${receiverEmail} does not exist!`;
+          Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
@@ -197,7 +284,7 @@ class Validate {
     const schema = Joi.number().required();
     const { error } = Joi.validate(mailId, schema);
     if (error) {
-      const errorMessage = error.details[0].message;
+      const errorMessage = '\'id\' must be a number';
       Utility.handleError(res, errorMessage, 400);
     } else {
       db.getMessages(mailId, 'inbox').then((rows) => {
@@ -210,7 +297,7 @@ class Validate {
             next();
           } else {
             const errorMessage = 'Message does not exist!';
-            Utility.handleError(res, errorMessage, 401);
+            Utility.handleError(res, errorMessage, 404);
           }
         } else {
           const errorMessage = 'Message does not exist!';
@@ -223,17 +310,42 @@ class Validate {
     }
   }
 
-  static deleteMailId(req, res, next) {
+  static sentMailId(req, res, next) {
     const mailId = parseInt(req.params.id, 10);
     const schema = Joi.number().required();
     const { error } = Joi.validate(mailId, schema);
     if (error) {
+      const errorMessage = '\'id\' must be a number';
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getMessages(mailId, 'sent', UserController.user.getId()).then((rows) => {
+        if (rows.length === 1) { //  Checking if mail exist
+          req.rows = rows;
+          next();
+        } else {
+          const errorMessage = 'Message does not exist!';
+          Utility.handleError(res, errorMessage, 404);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static deleteWithId(req, res, next, table) {
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+    const { error } = Joi.validate(req.params, schema);
+    if (error) {
       const errorMessage = error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getMessages(mailId, 'delete', UserController.user.getId()).then((rows) => {
+      const mailId = parseInt(req.params.id, 10);
+      db.getMessages(mailId, table, UserController.user.getId()).then((rows) => {
         const mail = rows.rows[0];
-        if (mail) { //  Checking if mail exist
+        if (mail) {
           req.deleteType = rows.deleteType;
           next();
         } else {
@@ -245,6 +357,18 @@ class Validate {
         Utility.handleError(res, errorMessage, 500);
       });
     }
+  }
+
+  static deleteInboxWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteInbox');
+  }
+
+  static deleteSentWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteSent');
+  }
+
+  static deleteDrafttWithId(req, res, next) {
+    Validate.deleteWithId(req, res, next, 'deleteDraft');
   }
 
   static createGroup(req, res, next) {
@@ -291,16 +415,21 @@ class Validate {
       const errorMessage = error2.error.details[0].message;
       Utility.handleError(res, errorMessage, 400);
     } else {
-      db.getGroups(UserController.user.getId()).then((groups) => {
+      db.getGroups().then((groups) => {
         const groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
-          const sameName = groups.some(group => group.name === req.body.name
-            && group.id !== groupExist.id);
-          if (sameName) {
-            const errorMessage = 'Another group with same name exist';
-            Utility.handleError(res, errorMessage, 400);
+          if (groupExist.owner_id === UserController.user.getId()) {
+            const sameName = groups.some(group => group.name === req.body.name
+              && group.id !== groupExist.id && group.owner_id === UserController.user.getId());
+            if (sameName) {
+              const errorMessage = 'Another group with same name exist';
+              Utility.handleError(res, errorMessage, 409);
+            } else {
+              next();
+            }
           } else {
-            next();
+            const errorMessage = 'Only group owner can update group name';
+            Utility.handleError(res, errorMessage, 404);
           }
         } else {
           const errorMessage = 'Group with the id does not exist';
@@ -331,12 +460,35 @@ class Validate {
               next();
             } else {
               const errorMessage = 'Only group owner can delete a group';
-              Utility.handleError(res, errorMessage, 404);
+              Utility.handleError(res, errorMessage, 400);
             }
           });
         } else {
           const errorMessage = 'Group with the id does not exist';
-          Utility.handleError(res, errorMessage, 404);
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static groupId(req, res, next) {
+    const groupId = parseInt(req.params.id, 10);
+    const schema = Joi.number().required();
+    const { error } = Joi.validate(groupId, schema);
+    if (error) {
+      const errorMessage = '\'id\' must be a number';
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getAllGroups(UserController.user.getId()).then((groups) => {
+        const groupExist = groups.find(group => group.group_id === groupId);
+        if (groupExist) {
+          next();
+        } else {
+          const errorMessage = 'Group does not exist';
+          Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
@@ -365,10 +517,11 @@ class Validate {
         let groupExist = allGroups.find(group => group.id === parseInt(req.params.id, 10));
         if (groupExist) {
           db.getGroups(UserController.user.getId()).then((groups) => {
-            groupExist = groups.find(group => group.id === parseInt(req.params.id, 10));
+            const groupId = parseInt(req.params.id, 10);
+            groupExist = groups.find(group => group.id === groupId);
             if (groupExist) {
               const { userEmail } = req.body;
-              db.getUserId(userEmail).then((rows) => {
+              db.getUserId(userEmail.toLowerCase()).then((rows) => {
                 if (rows.length === 1) {
                   req.body.userId = rows[0].id;
                   next();
@@ -386,7 +539,7 @@ class Validate {
             }
           });
         } else {
-          const errorMessage = 'Group with the id does not exist';
+          const errorMessage = 'Group does not exist';
           Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
@@ -463,6 +616,59 @@ class Validate {
             if (rows.length > 0) {
               req.members = rows;
               next();
+            } else {
+              const errorMessage = 'Sending message to an empty group';
+              Utility.handleError(res, errorMessage, 400);
+            }
+          });
+        } else {
+          const errorMessage = 'Group with the id does not exist';
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static sendDraftToGroup(req, res, next) {
+    const schema = Joi.object().keys({
+      id: Joi.number().required(),
+    });
+
+    const schema2 = Joi.object().keys({
+      id: Joi.number().required(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+    });
+
+    const { error } = Joi.validate(req.params, schema);
+    const error2 = Joi.validate(req.body, schema2);
+
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else if (error2.error) {
+      const errorMessage = error2.error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getAllGroups(UserController.user.getId()).then((groups) => {
+        const groupId = parseInt(req.params.id, 10);
+        const groupExist = groups.find(group => group.group_id === groupId);
+        if (groupExist) {
+          db.getGroupMember(groupId).then((rows) => {
+            if (rows.length > 0) {
+              const draftMsgId = req.body.id;
+              db.getDraftId(draftMsgId, UserController.user.getId()).then((rows2) => {
+                if (rows2.length === 1) {
+                  req.members = rows;
+                  next();
+                } else {
+                  const errorMessage = 'Draft message does not exist!';
+                  Utility.handleError(res, errorMessage, 400);
+                }
+              });
             } else {
               const errorMessage = 'Sending message to an empty group';
               Utility.handleError(res, errorMessage, 400);

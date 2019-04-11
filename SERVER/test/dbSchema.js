@@ -5,9 +5,11 @@ dotenv.config();
 
 const sql = `
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS resets CASCADE;
 DROP TABLE IF EXISTS messages CASCADE;
 DROP TABLE IF EXISTS sents CASCADE;
 DROP TABLE IF EXISTS inboxes CASCADE;
+DROP TABLE IF EXISTS drafts CASCADE;
 DROP TABLE IF EXISTS groups CASCADE;
 DROP TABLE IF EXISTS group_member CASCADE;
 
@@ -16,10 +18,14 @@ CREATE TABLE IF NOT EXISTS users (
   first_name VARCHAR(128) NULL,
   last_name VARCHAR(128) NULL,
   email VARCHAR(128) NULL,
-  password VARCHAR(128) NULL,
-  question VARCHAR(128) NULL,
-  answer VARCHAR(128) NULL,
+  password VARCHAR(256) NULL,
   status VARCHAR(128) NULL
+);
+
+CREATE TABLE IF NOT EXISTS resets (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NULL,
+  password VARCHAR(256) NULL
 );
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -43,6 +49,13 @@ CREATE TABLE IF NOT EXISTS sents (
   id SERIAL PRIMARY KEY,
   msg_id INTEGER NULL,
   sender_id INTEGER NULL,
+  status VARCHAR(128) NULL,
+  date_time BIGINT NULL
+);
+
+CREATE TABLE IF NOT EXISTS drafts (
+  msg_id INTEGER NULL,
+  receiver_id INTEGER NULL,
   status VARCHAR(128) NULL,
   date_time BIGINT NULL
 );
@@ -85,12 +98,16 @@ INSERT INTO sents(msg_id, sender_id, status, date_time) VALUES(6, 2, 'sent', 155
 
 `;
 
-const createTable = () => {
-  const connectionString = process.env.DB_TEST;
+const createTable = async () => {
+  let connectionString;
+  if (process.env.NODE_ENV === 'test') {
+    connectionString = process.env.DB_TEST;
+  } else if (process.env.NODE_ENV === 'localTest') {
+    connectionString = process.env.DB_LOCAL_TEST;
+  }
   const client = new Client({ connectionString });
   client.connect();
-  return client.query(sql).then(() => {
-    client.end();
-  });
+  await client.query(sql);
+  client.end();
 };
 createTable();

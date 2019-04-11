@@ -18,7 +18,7 @@
                 <div>
                     <div>
                         <h1> EPIC MAIL</h1>
-                        <p>Johndoe@epicmail.com</p>
+                        <p></p>
                     </div>
                     <div>
                         <button>Log Out</button>
@@ -38,17 +38,14 @@
                         <li><a href="#Draft">Draft</a></li>
                         <li class="groups"><a href="#Group">Groups</a>
                         </li>
-                            
-                        
                     </ul>
-                    
                 </div>
                 <div class="right">
                     <!-- Create Group -->
                 <div class="right-group hidden">
                     <div class = "create">
                         <form action="#" id="createGroup"></form>
-                            <div>
+                        <div>
                                 <input type="text" placeholder="Group Name" form="createGroup" required>
                                 <button form="createGroup" type="submit">Create Group</button>
                         </div>
@@ -58,44 +55,50 @@
                         <div class="btn">
                             <button>Delete</button>
                         </div>
-                        <div>
-                            <input type="checkbox">
-                            <a href="#">Family</a>
-                        </div>
-                        <div>
-                            <input type="checkbox">
-                            <a href="#">Andela</a>
-                        </div>
+                        <div></div>
+                        
                     </div>
                 </div>
                     <!--Viewing group-->
-                <div class="right-group hidden"></div>
+                <div class="right-groupMember hidden">
+                    <form action="#" id="editGroupName"></form>
+                    <input type="hidden">
+                    <div class="update">
+                        <div>
+                            <label>Group Name</label>
+                            <input class="hidden" type="text" form="editGroupName" required>
+                        </div>
+                        <div>
+                            <button>Edit</button>
+                            <button class="hidden" type="submit" form="editGroupName"> Update</button>
+                            <button class="hidden">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="addMember">
+                        <form action="#">
+                            <input type="email" placeholder="Johndoe@epicmailcom" name="email" required>
+                            <button type="submit">Add Member</button>
+                        </form>
+                    </div>
+                    <div class="member">
+                        <div class="toolbar">
+                            <button class="deleteButton">Delete</button>
+                        </div>
+                        <div class="inbox-view">
+                            <div>
+                                <input type="checkbox" value="207">
+                                <p>maryj@test.com</p>
+                                <label>Admin</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <!-- For Draft Mail -->
                 <div class="right-draft hidden">
                     <div class="toolbar">
                         <button class="deleteButton">Delete</button>
                     </div>
                     <div class="inbox-view">
-                        <div class="s1">
-                            <input type="hidden" value="Individual">
-                            <input type="checkbox" value="1">
-                            <p>Nknkfon@eijpo.uihoi</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. message to be seen or not seen</p>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <div class="s2">
-                            <input type="hidden" value="Group">
-                            <input type="checkbox" value="2">
-                            <p>Family</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. </p>
-                            </div>
-                            <label>5:21 am</label>
-                        </div>
                     </div>
                 </div>
                 <!-- For Sent Mail -->
@@ -105,29 +108,12 @@
                         <button id="retract">Retract</button>
                     </div>
                     <div class="inbox-view">
-                        <div class="s1">
-                            <input type="checkbox" value="1">
-                            <p>Nknkfonhihifjje</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. message to be seen or not seen</p>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <div class="s2">
-                            <input type="checkbox" value="2">
-                            <p>Mr Maher-shalal-hash-baz</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. </p>
-                            </div>
-                            <label>5:21 am</label>
-                        </div>
                     </div>
                 </div>
                 <!-- For Composing and send mail -->
                 <div class="right-compose">
                     <form name="sendMail" action="#">
+                        <input type="hidden" value="" name="id">
                         <div class="address">
                             <div>
                                 <label>To :</label>
@@ -140,15 +126,15 @@
                             </div>
                             <div>
                                 <label>Address :</label>
-                                <input type="email" placeholder="Johndoe@epicmail.com" required >
+                                <input type="email" name="email" placeholder="Johndoe@epicmail.com" required >
                                 <select class="hidden">
                                     
                                 </select>
                             </div>
                         </div>
                         <div class="message">
-                            <input type="text" placeholder="Enter Subject / Topic" required>
-                            <textarea placeholder="Enter message body" required></textarea>
+                            <input type="text" name="subject" placeholder="Enter Subject / Topic" required>
+                            <textarea name="message" placeholder="Enter message body" required></textarea>
                         </div>
                         <button type="submit" >SEND</button>
                         <button id="saveMail"  form="">SAVE</button>
@@ -157,98 +143,22 @@
                 <!-- For viewing message in the inbox view -->
                <div class=" right-inbox hidden">
                     <div class="toolbar">
+                            <span>
+                                <input type="radio" value="All" name="to" checked required> All
+                            </span>
+                            <span>
+                                <input type="radio" value="Unread"  name="to"  required> Unread
+                            </span>
+                            <span>
+                                <input type="radio" value="Read"  name="to"  required> Read
+                            </span>
                         <button class="deleteButton">Delete</button>
                     </div>
                     <div class="inbox-view">
-                        <div class="s1">
-                            <input type="hidden" value="Individual">
-                            <input type="checkbox" value="1">
-                            <p>Nknkfon@eijpo.uihoi</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. message to be seen or not seen</p>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <div class="s2">
-                            <input type="hidden" value="Group">
-                            <input type="checkbox" value="2">
-                            <p>Family</p>
-                            <div>
-                                <p class="subject">SUBJECT</p>
-                                <p class="msg">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. </p>
-                            </div>
-                            <label>5:21 am</label>
-                        </div>
                     </div>
                 </div>
                 <!-- For reading messages -->
-                <div class="view-message hidden">
-                    <div>
-                        <div class="top away">
-                            <div>
-                                <img src="../img/user.png">
-                                <div>
-                                    <p>Mr Maher-shalal-hash-baz</p>
-                                    <p>Johndoe@epicmail.com</p>
-                                </div>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <h2>Email Subject or Topic</h2>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. body or message will be dispalyed
-                        </div>
-                    </div>
-                    <div>
-                        <div class="top">
-                            <div>
-                                <img src="../img/user.png">
-                                <div>
-                                    <p>Mr Maher-shalal-hash-baz</p>
-                                    <p>Johndoe@epicmail.com</p>
-                                </div>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <h2>Email Subject or Topic</h2>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. body or message will be dispalyed
-                        </div>
-                    </div>
-                    <div>
-                        <div class="top">
-                            <div>
-                                <img src="../img/user.png">
-                                <div>
-                                    <p>Mr Maher-shalal-hash-baz</p>
-                                    <p>Johndoe@epicmail.com</p>
-                                </div>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <h2>Email Subject or Topic</h2>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. body or message will be dispalyed
-                        </div>
-                    </div>
-                    <div>
-                        <div class="top away">
-                            <div>
-                                <img src="../img/user.png">
-                                <div>
-                                    <p>Mr Maher-shalal-hash-baz</p>
-                                    <p>Johndoe@epicmail.com</p>
-                                </div>
-                            </div>
-                            <label>20/03/2019</label>
-                        </div>
-                        <h2>Email Subject or Topic</h2>
-                        <div>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel fringilla odio. Nulla turpis tortor, auctor id dignissim vitae, eleifend sed augue. Maecenas placerat, lacus eget facilisis aliquam, massa turpis vulputate nibh, laoreet sagittis diam tellus ut turpis. Suspendisse bibendum ullamcorper ante, eu viverra mi vestibulum quis. Integer fringilla congue blandit. Morbi tincidunt urna a mi egestas mattis. Suspendisse a lectus fermentum, tempus orci at, sodales nulla. body or message will be dispalyed
-                        </div>
-                    </div>
-                </div>
+                <div class="view-message hidden"></div>
                 </div>
             </div>
         </div>

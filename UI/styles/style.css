@@ -14,6 +14,9 @@
 ::placeholder {
   color: #b2beb5;
 }
+*:disabled{
+  pointer-events: none;
+}
 input,textarea,button,select{
     border: 1px solid cyan;
     border-radius: .2em;
@@ -38,16 +41,13 @@ input[type^="rad"]{
 .loginPage .sign .hidden,
 .right-group .groups .hidden,
 .seek button.hidden,
+.inbox .view-message.hidden, .inbox .right-compose.hidden,
 .inbox .right .inbox-view > div.hidden{
     display: none;
 }
-
 body, body>div{
     width:100%;
     height: 100%;
-}
-body{
-    
 }
 .modal, .alert{
     position: absolute;
@@ -99,7 +99,6 @@ body{
 .alert p{
     font-size: 1.2em
 }
-
 .body{
     overflow: hidden;
 }
@@ -118,7 +117,6 @@ body{
     background: #576CA8;
     opacity: .4;
 }
-
 .slider div{
     background-color: transparent;
     display: flex;
@@ -138,7 +136,6 @@ body{
     text-align: center;
     text-shadow: .7px .7px .5px #194759;
 }
-
 .slider span{
     font-family: cursive;
     color: white;
@@ -150,8 +147,7 @@ body{
     font-size:3em;
 }
 .slider .btns{
-    top:2em;
-    
+    top:2em; 
 }
 .slider .btns button{
     background-color: #194759;
@@ -183,14 +179,13 @@ body{
         top: 2em;
         opacity: 1
     }
-    
 }
-
 .loginPage{
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
     height: 100vh;
+    min-height: 30em;
     background-image: url("../img/email-background-images-1.v1.jpg");
     background-size: cover;
 }
@@ -291,7 +286,8 @@ body{
     border-color: #0099FF;
 }
 .inbox .top >div:first-child div
-button:hover{
+button:hover,
+.right-groupMember .update div:last-child button:nth-child(3):hover{
     transition: 1s;
     background: red;
     color: white;
@@ -313,7 +309,6 @@ button:hover{
     overflow: hidden;
     width: 100%;
 }
-
 .inbox .bottom .left{
     transition: 1s;
     width:20%;
@@ -344,7 +339,7 @@ button:hover{
 }
 .inbox .bottom .right{
     transition: 1s;
-    width: 100%;
+    width: calc(100% - 2em);
     padding: 1em;
     padding-bottom: 4em;
     overflow: auto;
@@ -359,6 +354,14 @@ button:hover{
     border: #194759 solid .2em;
     cursor: pointer;
 }
+.inbox .toolbar span {
+    display: inline-block;
+    text-align: center;
+    width: 5em;
+}
+.inbox .toolbar span input{
+    top: .15em;
+}
 .inbox .toolbar button:hover{
     opacity: .8;
     font-weight: bold;
@@ -371,6 +374,9 @@ button:hover{
     justify-content: space-between;
     padding: .2em;
     margin: .3em 0;
+}
+.inbox .bottom .inbox-view >div.unread *{
+    font-weight: bold;
 }
 .inbox .bottom .inbox-view >div >*:not(input){
     cursor: pointer;
@@ -393,7 +399,6 @@ button:hover{
     width:15%;
 }
 .inbox .inbox-view >div> p,.inbox .inbox-view .subject, .inbox .inbox-view label{
-    font-weight: bold;
     padding-right: .5em;
     overflow: hidden;
 }
@@ -405,14 +410,15 @@ button:hover{
     width:1.2em;
     height: 1.2em
 }
-.inbox .view-message{
+.inbox .view-message, .inbox .right-compose{
     width: 100%;
+    display: block;
 }
 .inbox .view-message >div{
     border: 1px solid lightblue;
     padding: .5em;
     margin-bottom: 1em;
-    width: :100%;
+    width: calc(100% -1em);
 }
 .inbox .view-message .top{
     display: flex;
@@ -430,7 +436,7 @@ button:hover{
     color: #194759;
 }
 .inbox .view-message h2{
-    font-size: 1.5em;
+    font-size: 1.3em;
     padding: .5em 0;
 }
 .inbox .view-message .top.away{
@@ -461,7 +467,6 @@ button:hover{
 .inbox .right-compose .address input[type="email"],.inbox .right-compose .address select{
     padding: .5em;
     width:50%;
-    
 }
 .inbox .right-compose .message{
     width: 100%;
@@ -503,14 +508,16 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-
+.right-group, .right-groupMember{
+    height: 100%;
+}
 .right-group >div >div {
     padding: 1em;
     display: flex;
     flex-flow: column;
 }
 .right-group .create{
-    margin: 3em 0;
+    margin: 2em 0;
 }
 .right-group .create input, .right-group .create button{
     padding:.7em;
@@ -520,7 +527,12 @@ button.sent{
     border: .1em lightblue solid;
     padding: 1em;
 }
-.right-group .groups div {
+.right-group .groups >div:nth-child(2) {
+    display: flex;
+    flex-flow: column nowrap;
+}
+.right-group .groups div >div{
+    display: flex;
     flex-flow: row nowrap;
 }
 .right-group .groups div.btn{
@@ -543,15 +555,55 @@ button.sent{
     width: 90%;
     padding: .5em 0;
     margin-left: 1em;
-    
 }
-.right-group .groups div:not(.btn):hover{
+.right-group .groups div div:not(.btn):hover{
     background-color: lightblue;
 }
-.right-group ul{
+.right-groupMember >div{
+    margin-bottom: 3em;
+}
+.right-groupMember .update > div{
+    margin: .5em;
     display: flex;
+}
+.right-groupMember .update div:first-child{
     flex-flow: column nowrap;
 }
-.right-group div ul li{
-    padding: .4em 1em
+.right-groupMember .update div:first-child *{
+    padding: .5em .4em;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+.right-groupMember .update div:first-child input{
+    padding: .4em .4em;
+    border: 1px solid lightblue;
+}
+.right-groupMember .update div:last-child button{
+    width:100%;
+    justify-content: center;
+    padding: .4em 0;
+}
+.right-groupMember .update div:last-child button:nth-child(2){
+    width:99.5%;
+    margin-right:.5%;
+}
+.right-groupMember .update div:last-child button:nth-child(3){
+    width:99.5%;
+    margin-left:.5%;
+}
+.right-groupMember .addMember form{
+    display: flex;
+    flex-flow: column nowrap;
+    padding: 0 .5em;
+}
+.right-groupMember .addMember form *{
+    padding: .5em 0;
+    margin-bottom: .5em;
+}
+.right-groupMember .addMember form input{
+    padding: .5em .5em;
+}
+.right-groupMember .member{
+    padding: .5em;
+    border: .1em lightblue solid;
 }

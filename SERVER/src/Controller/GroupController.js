@@ -41,6 +41,7 @@ class GroupController {
               id: group.group_id,
               name: rows[0].name,
               userId: rows[0].owner_id,
+              userEmail: rows[0].email,
             });
             if (count === groups.length) {
               res.status(200).json({
@@ -60,6 +61,19 @@ class GroupController {
           ],
         });
       }
+    }).catch((err) => {
+      const errorMessage = `SERVER ERROR: ${err.message}`;
+      Utility.handleError(res, errorMessage, 500);
+    });
+  }
+
+  static getGroupMembers(req, res) {
+    const groupId = parseInt(req.params.id, 10);
+    db.getGroupMembers(groupId).then((groupMembers) => {
+      res.status(200).json({
+        status: 200,
+        data: groupMembers,
+      });
     }).catch((err) => {
       const errorMessage = `SERVER ERROR: ${err.message}`;
       Utility.handleError(res, errorMessage, 500);
@@ -92,8 +106,8 @@ class GroupController {
 
     db.deleteGroup(groudId).then((rows) => {
       const message = `Group ${rows[0].name} deleted `;
-      res.status(200).json({
-        status: 200,
+      res.status(204).json({
+        status: 204,
         data: [{
           message,
         }],
@@ -118,6 +132,7 @@ class GroupController {
             id: req.params.id,
             userId: req.body.userId,
             role: 'member',
+            userEmail: req.body.userEmail.toLowerCase(),
           }],
         });
       } else {
@@ -140,8 +155,8 @@ class GroupController {
     db.getUsers(userId).then((users) => {
       const user = users[0];
       db.deleteGroupMember(values).then(() => {
-        res.status(200).json({
-          status: 200,
+        res.status(204).json({
+          status: 204,
           data: [{
             message: `Member with email ${user.email}  deleted`,
           }],
@@ -192,6 +207,68 @@ class GroupController {
         const errorMessage = `SERVER ERROR: ${err.message}`;
         Utility.handleError(res, errorMessage, 500);
       });
+    });
+  }
+
+  static sendDraft(req, res) {
+    const { members } = req;
+    const dateTime = Date.now();
+    const { subject, message, id } = req.body;
+
+    members.forEach((member, index) => {
+      if (index === 0) {
+        const mailId = id;
+        const receiverId = member.user_id;
+        let values = [subject, message, 'sent', mailId];
+        db.sendDraft(values, [receiverId, dateTime, 'sent', mailId]).then((rowCount) => {
+          if (rowCount === 1) {
+          // insert into sents table
+            values = [mailId, UserController.user.getId(), 'sent', dateTime];
+            db.insertSents(values);
+
+            // insert into the inboxes table
+            values = [mailId, receiverId, 'unread', dateTime];
+            db.insertInboxes(values);
+
+            try {
+              res.status(200).json({
+                status: 200,
+                data: [{
+                  id: mailId,
+                  createdOn: dateTime,
+                  subject,
+                  message,
+                  parentMessageId: null,
+                  status: 'sent',
+                }],
+              });
+            } catch (e) {
+              parseInt(e, 10);
+            }
+          }
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      } else if (index > 0) {
+        const receiverId = member.user_id;
+        // create mail
+        let values = [subject, message, UserController.user.getId(), dateTime, 'sent'];
+        db.addMessage(values).then((rows) => {
+          const [savedMail] = rows;
+          const mailId = savedMail.id;
+          values = [mailId, UserController.user.getId(), 'sent', dateTime];
+
+          // insert into sents table
+          db.insertSents(values);
+          // insert into the inboxes table
+          values = [mailId, receiverId, 'unread', dateTime];
+          db.insertInboxes(values);
+        }).catch((err) => {
+          const errorMessage = `SERVER ERROR: ${err.message}`;
+          Utility.handleError(res, errorMessage, 500);
+        });
+      }
     });
   }
 }
