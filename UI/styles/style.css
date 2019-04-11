@@ -516,16 +516,13 @@ button.sent{
 .inbox .bottom .right-draft .inbox-view >div:hover{
     background-color: #49738C;
 }
-.right-group, .right-groupMember{
-    height: 100%;
-}
 .right-group >div >div {
     padding: 1em;
     display: flex;
     flex-flow: column;
 }
 .right-group .create{
-    margin: 2em 0;
+    margin: 1em 0 3em 0;
 }
 .right-group .create input, .right-group .create button{
     padding:.7em;
@@ -534,6 +531,7 @@ button.sent{
 .right-group .groups{
     border: .1em lightblue solid;
     padding: 1em;
+    margin-bottom: 1em;
 }
 .right-group .groups >div:nth-child(2) {
     display: flex;
