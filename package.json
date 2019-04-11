@@ -9,7 +9,7 @@
     "build": "set NODE_ENV=production&& babel SERVER/src --out-dir SERVER/build/dist --exit",
     "start": "nodemon --exec babel-node SERVER/src/app.js",
     "testCoverall": "nyc npm test && nyc report --reporter=text-lcov | coveralls",
-    "deploy-heroku": "npm run build && node SERVER/build/dist/app"
+    "deploy-heroku": "npm run build && babel-node SERVER/build/dist/app"
   },
   "author": "Ilori Ezekiel",
   "license": "ISC",

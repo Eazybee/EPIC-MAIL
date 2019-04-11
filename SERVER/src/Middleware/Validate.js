@@ -143,7 +143,7 @@ class Validate {
       const { token } = req.body;
       jwt.verify(token, process.env.JWT_PRIVATE_SECRET, (err, payload) => {
         if (err) {
-          const errorMessage = 'aInvalid or Expired authorization token';
+          const errorMessage = 'Invalid or Expired authorization token';
           Utility.handleError(res, errorMessage, 401);
         }
         if (payload) {
