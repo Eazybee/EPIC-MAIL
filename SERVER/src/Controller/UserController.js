@@ -59,7 +59,7 @@ class UserController {
       } else if (hash) {
         const values = [hash, user.getId()];
         db.reset(values).then(() => {
-          const token = Utility.getToken(user);
+          const token = Utility.getToken(user, '1h');
           Utility.mail(user.getEmail(), token).then(() => {
             res.status(200).json({
               status: 200,
