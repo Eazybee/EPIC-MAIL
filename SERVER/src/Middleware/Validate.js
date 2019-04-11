@@ -82,11 +82,10 @@ class Validate {
               Utility.handleError(res, errorMessage, 401);
             } else if (result) {
               const {
-                id, email, password,
+                id, email,
               } = user;
               const firstName = user.first_name;
-              const lastName = user.last_name;
-              user = new User(id, email.toLowerCase(), firstName, lastName, password);
+              user = new User(id, email.toLowerCase(), firstName);
               req.user = user;
               next();
             } else {
@@ -101,6 +100,56 @@ class Validate {
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;
         Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static reset(req, res, next) {
+    const schema = Joi.object().keys({
+      email: Joi.string().email({ minDomainAtoms: 2 }).required(),
+      password: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      db.getUsers().then((users) => {
+        let user = users.find(dbuser => dbuser.email === req.body.email.toLowerCase());
+        if (user) {
+          user = new User(user.id, user.email, user.first_name);
+          req.user = user;
+          next();
+        } else {
+          const errorMessage = `User with email ${req.body.email} does not exist`;
+          Utility.handleError(res, errorMessage, 400);
+        }
+      }).catch((err) => {
+        const errorMessage = `SERVER ERROR: ${err.message}`;
+        Utility.handleError(res, errorMessage, 500);
+      });
+    }
+  }
+
+  static resetConfirmation(req, res, next) {
+    const schema = Joi.object().keys({
+      token: Joi.string().required(),
+    });
+    const { error } = Joi.validate(req.body, schema);
+    if (error) {
+      const errorMessage = error.details[0].message;
+      Utility.handleError(res, errorMessage, 400);
+    } else {
+      const { token } = req.body;
+      jwt.verify(token, process.env.JWT_PRIVATE_SECRET, (err, payload) => {
+        if (err) {
+          const errorMessage = 'aInvalid or Expired authorization token';
+          Utility.handleError(res, errorMessage, 401);
+        }
+        if (payload) {
+          req.payload = payload.payload;
+          next();
+        }
       });
     }
   }
