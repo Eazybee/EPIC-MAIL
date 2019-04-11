@@ -20,7 +20,7 @@ class Utility {
     });
     const mailOptions = {
       from: 'no-reply@robot.com',
-      to: 'ilorieazykiel@gmail.com',
+      to,
       subject: 'EPICMAIL: Password Reset Confirmation',
       html: `<p>Confirm password reset on your epicmail account: <a href='${endpoint}?r=${token}'>Confirm Password Reset</a></p>
              <p>Ignore if this password request was not made by you. Stay EPIC!</p>`,
