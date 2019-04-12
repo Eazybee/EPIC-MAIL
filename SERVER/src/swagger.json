@@ -4,7 +4,6 @@
     "description": "This is a documentation for restful api endpoints designed as server for EPiC Mail",
     "version": "v1",
     "title": "EPIC MAIL",
-    "termsOfService": "http://swagger.io/terms/",
     "contact": {
       "email": "ilorieazykiel@ymail.com"
     },
@@ -42,8 +41,7 @@
     }
   ],
   "schemes": [
-    "https",
-    "http"
+    "https"
   ],
   "paths": {
     "/auth/signup": {
@@ -51,7 +49,7 @@
         "tags": [
           "user"
         ],
-        "summary": "Creates a new user account",
+        "summary": "creates a new user account",
         "description": "",
         "consumes": [
           "application/json"
@@ -82,6 +80,12 @@
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
+          },
+          "409": {
+            "description": "User Exist",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
           }
         }
       }
@@ -91,7 +95,7 @@
         "tags": [
           "user"
         ],
-        "summary": "Log in into user's account",
+        "summary": "log in into user's account",
         "description": "",
         "consumes": [
           "application/json"
@@ -124,7 +128,96 @@
             }
           },
           "401": {
-            "description": "unauthorized access",
+            "description": "Unauthorized: invalid credentials",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "request password reset",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "User's account that is requesting password requesting",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/login"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful: check your mail",
+            "schema": {
+              "$ref": "#/definitions/authResponse"
+            }
+          },
+          "400": {
+            "description": "Invalid input / Email does not exist",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "password request confirmation",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Token",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "Invalid or Expired token",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -137,7 +230,7 @@
         "tags": [
           "message"
         ],
-        "summary": "Create a new mail and send it to an individual",
+        "summary": "create a new mail and send it to an individual",
         "description": "",
         "consumes": [
           "application/json"
@@ -187,7 +280,7 @@
         "tags": [
           "message"
         ],
-        "summary": "get inbox messages of a user",
+        "summary": "get inbox mails of a user",
         "description": "",
         "produces": [
           "application/json"
@@ -237,7 +330,7 @@
           {
             "in": "body",
             "name": "body",
-            "description": "User's account that needs to be logged into",
+            "description": "Draft mail that needs to be sent",
             "required": true,
             "schema": {
               "$ref": "#/definitions/senddraft"
@@ -259,64 +352,6 @@
           },
           "401": {
             "description": "unauthorized access",
-            "schema": {
-              "$ref": "#/definitions/errorResponse"
-            }
-          },
-          "404": {
-            "description": "not found",
-            "schema": {
-              "$ref": "#/definitions/errorResponse"
-            }
-          }
-        }
-      }
-    },
-    "/messages/save": {
-      "post": {
-        "tags": [
-          "message"
-        ],
-        "summary": "Create a new mail and save it as draft",
-        "description": "",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "header",
-            "name": "authorization",
-            "type": "string",
-            "required": true
-          },
-          {
-            "in": "body",
-            "name": "body",
-            "description": "Mail that needs to be saved as draft",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/savemessage"
-            }
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Successful",
-            "schema": {
-              "$ref": "#/definitions/postMessageResponse"
-            }
-          },
-          "400": {
-            "description": "Invalid input",
-            "schema": {
-              "$ref": "#/definitions/errorResponse"
-            }
-          },
-          "401": {
-            "description": "Unauthorized",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -414,7 +449,7 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/getMessageResponse"
+              "$ref": "#/definitions/getSentMessageResponse"
             }
           },
           "401": {
@@ -426,12 +461,96 @@
         }
       }
     },
-    "/messages/{id}": {
+    "/messages/draft": {
+      "post": {
+        "tags": [
+          "message"
+        ],
+        "summary": "save a mail as draft",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Mail that needs to be saved as draft",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/savemessage"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successful",
+            "schema": {
+              "$ref": "#/definitions/postMessageResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
       "get": {
         "tags": [
           "message"
         ],
-        "summary": "get a specific mail with the specified id",
+        "summary": "get drafted mails of a user",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/getDraftMessageResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/messages/sent/{id}": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "get sent mail with the specified id",
         "description": "",
         "produces": [
           "application/json"
@@ -455,7 +574,13 @@
           "200": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/getMessageResponse"
+              "$ref": "#/definitions/getSentIdMessageResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
             }
           },
           "401": {
@@ -476,7 +601,158 @@
         "tags": [
           "message"
         ],
-        "summary": "delete a specific mail with the specified id",
+        "summary": "delete sent mail with the specified id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the sent mail to deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "404": {
+            "description": "not found",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/messages/sent/{id}/retract": {
+      "delete": {
+        "tags": [
+          "message"
+        ],
+        "summary": "retract sent mail with the specified id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the sent mail to retracted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "404": {
+            "description": "not found",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/messages/{id}": {
+      "get": {
+        "tags": [
+          "message"
+        ],
+        "summary": "get inbox mail with the specified id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the mail to get",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/getMessageIdResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "404": {
+            "description": "not found",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "message"
+        ],
+        "summary": "delete inbox mail with the specified id",
         "description": "",
         "produces": [
           "application/json"
@@ -497,10 +773,63 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/deleteResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "404": {
+            "description": "not found",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/messages/draft/{id}": {
+      "delete": {
+        "tags": [
+          "message"
+        ],
+        "summary": "delete draft mail with the specified id",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the draft mail to deleted",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/deleteResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
             }
           },
           "401": {
@@ -523,7 +852,7 @@
         "tags": [
           "group"
         ],
-        "summary": "Creates a new group",
+        "summary": "create a new group",
         "description": "",
         "consumes": [
           "application/json"
@@ -555,7 +884,7 @@
         ],
         "responses": {
           "201": {
-            "description": "Group created successfully",
+            "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/groupResponse"
             }
@@ -568,6 +897,12 @@
           },
           "401": {
             "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "409": {
+            "description": "confllict: you own another group with same name",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -612,7 +947,7 @@
         "tags": [
           "group"
         ],
-        "summary": "add a user to a group",
+        "summary": "add a user to a specified group",
         "description": "",
         "produces": [
           "application/json"
@@ -647,10 +982,35 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "successful operation",
             "schema": {
-              "$ref": "#/definitions/groupResponse"
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "userId": {
+                        "type": "integer"
+                      },
+                      "role": {
+                        "type": "string"
+                      },
+                      "userEmail": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "400": {
@@ -711,7 +1071,7 @@
           }
         ],
         "responses": {
-          "200": {
+          "201": {
             "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/postMessageResponse"
@@ -719,6 +1079,74 @@
           },
           "400": {
             "description": "Invalid input",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "group"
+        ],
+        "summary": "sending a draft mail to a group",
+        "description": "",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the group",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Draft mail that needs to be sent",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "subject": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/postMessageResponse"
+            }
+          },
+          "400": {
+            "description": "invalid input",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -789,11 +1217,84 @@
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
+          },
+          "409": {
+            "description": "confllict: you own another group with same name",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
           }
         }
       }
     },
     "/groups/{id}": {
+      "get": {
+        "tags": [
+          "group"
+        ],
+        "summary": "get members of a specified group",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Id of the group",
+            "required": true,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "integer"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "userId": {
+                        "type": "integer"
+                      },
+                      "userEmail": {
+                        "type": "string"
+                      },
+                      "userRole": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          },
+          "401": {
+            "description": "unauthorized access",
+            "schema": {
+              "$ref": "#/definitions/errorResponse"
+            }
+          }
+        }
+      },
       "delete": {
         "tags": [
           "group"
@@ -819,20 +1320,20 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/deleteResponse"
             }
           },
-          "401": {
-            "description": "unauthorized access",
+          "400": {
+            "description": "invalid input",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
           },
-          "404": {
-            "description": "not found",
+          "401": {
+            "description": "unauthorized access",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -873,20 +1374,20 @@
           }
         ],
         "responses": {
-          "200": {
+          "204": {
             "description": "successful operation",
             "schema": {
               "$ref": "#/definitions/deleteResponse"
             }
           },
-          "401": {
-            "description": "unauthorized access",
+          "400": {
+            "description": "invalid input",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
           },
-          "404": {
-            "description": "not found",
+          "401": {
+            "description": "unauthorized access",
             "schema": {
               "$ref": "#/definitions/errorResponse"
             }
@@ -914,9 +1415,6 @@
           "type": "string"
         },
         "firstName": {
-          "type": "string"
-        },
-        "lastName": {
           "type": "string"
         },
         "password": {
@@ -964,8 +1462,8 @@
         "message": {
           "type": "string"
         },
-        "receiverId": {
-          "type": "integer"
+        "receiverEmail": {
+          "type": "string"
         }
       }
     },
@@ -1002,6 +1500,184 @@
                 "type": "integer"
               },
               "status": {
+                "type": "string"
+              },
+              "senderEmail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "getMessageIdResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "createdOn": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "integer"
+              },
+              "receiverId": {
+                "type": "integer"
+              },
+              "parentMessageId": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              },
+              "senderEmail": {
+                "type": "string"
+              },
+              "senderFirstName": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "getSentMessageResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "createdOn": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "integer"
+              },
+              "receiverId": {
+                "type": "integer"
+              },
+              "parentMessageId": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              },
+              "receiverEmail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "getSentIdMessageResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "createdOn": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "integer"
+              },
+              "receiverId": {
+                "type": "integer"
+              },
+              "parentMessageId": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              },
+              "receiverEmail": {
+                "type": "string"
+              },
+              "receiverFirstName": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "getDraftMessageResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "createdOn": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              },
+              "senderId": {
+                "type": "integer"
+              },
+              "parentMessageId": {
+                "type": "integer"
+              },
+              "status": {
+                "type": "string"
+              },
+              "receiverEmail": {
                 "type": "string"
               }
             }
@@ -1098,7 +1774,10 @@
               "name": {
                 "type": "string"
               },
-              "role": {
+              "userId": {
+                "type": "integer"
+              },
+              "userEmail": {
                 "type": "string"
               }
             }

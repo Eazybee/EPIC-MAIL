@@ -5,11 +5,11 @@ dotenv.config();
 const connectDb = () => {
   let connectionString;
   let client;
-  if (process.env.NODE_ENV === 'test') {
-    connectionString = process.env.DB_TEST;
-    client = new Client({ connectionString });
-  } else if (process.env.NODE_ENV === 'localTest') {
+  if (!process.env.NODE_ENV) {
     connectionString = process.env.DB_LOCAL_TEST;
+    client = new Client({ connectionString });
+  } else if (process.env.NODE_ENV === 'test') {
+    connectionString = process.env.DB_TEST;
     client = new Client({ connectionString });
   } else if (process.env.NODE_ENV === 'production') {
     const {

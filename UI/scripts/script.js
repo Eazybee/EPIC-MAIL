@@ -393,7 +393,7 @@ const sendMail = () => {
         const status = parseInt(response.status, 10);
         if (status === 401) {
           logOut();
-        } else if (status === 400) {
+        } else if (status === 400 && res.error === 'Draft message does not exist!') {
           saveMsgId.value = null;
           await sendMail();
         } else if ('error' in res) {
@@ -457,7 +457,7 @@ const saveMail = () => {
         const status = parseInt(response.status, 10);
         if (status === 401) {
           logOut();
-        } else if (status === 400) {
+        } else if (status === 400 && res.error === 'Draft message does not exist!') {
           saveMsgId.value = null;
           await saveMail();
         } else if ('error' in res) {
