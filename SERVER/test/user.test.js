@@ -15,7 +15,6 @@ describe('user', () => {
         obj = {
           email: 'epicmailapi@gmail.com',
           firstName: 'Ezekiel',
-          lastName: 'Ilori',
           password: 'epic',
           rePassword: 'epic',
         };

@@ -100,10 +100,10 @@ INSERT INTO sents(msg_id, sender_id, status, date_time) VALUES(6, 2, 'sent', 155
 
 const createTable = async () => {
   let connectionString;
-  if (process.env.NODE_ENV === 'test') {
-    connectionString = process.env.DB_TEST;
-  } else if (process.env.NODE_ENV === 'localTest') {
+  if (!process.env.NODE_ENV) {
     connectionString = process.env.DB_LOCAL_TEST;
+  } else if (process.env.NODE_ENV === 'test') {
+    connectionString = process.env.DB_TEST;
   }
   const client = new Client({ connectionString });
   client.connect();

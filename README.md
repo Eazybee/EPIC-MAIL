@@ -21,9 +21,8 @@ Epic Mail is a mailing web app that enables user to exchange information over th
 - https://epic-mail-api.herokuapp.com/api-docs
 
 ## User Access
-Admin user
-- email: admin@epicmail.com
-- password: Password123 
+- email: admin@andela.com
+- password: andela 
 
 ## How to get a local copy
 #### Clone repository
@@ -33,31 +32,155 @@ Admin user
 * git clone repositorylink.git
 * cd EPIC-MAIL
 * run ```npm install```
-* run ```npm run dev-start```
+* run ```npm run start```
 * open index.html file
-* Sign-in with any dummy email and passowrd
+* Sign up and Log in
 
 ## Routes
+#####Host: https://epic-mail-api.herokuapp.com/api/v1
 
-* POST https://epic-mail-api.herokuapp.com/api/v1/auth/signup - Create new user
-* POST https://epic-mail-api.herokuapp.com/api/v1/auth/login - Log in a user
-* POST https://epic-mail-api.herokuapp.com/api/v1/messages - Send message
-* POST https://epic-mail-api.herokuapp.com/api/v1/messages/save - Save message as draft
-* GET https://epic-mail-api.herokuapp.com/api/v1/messages - Get user's inbox
-* GET https://epic-mail-api.herokuapp.com/api/v1/messages/read - Get user's read inbox
-* GET https://epic-mail-api.herokuapp.com/api/v1/messages/unread -  Get user's unread inbox
-* GET https://epic-mail-api.herokuapp.com/api/v1/messages/sent - Get user's sent messages
-* GET https://epic-mail-api.herokuapp.com/api/v1/messages/{id} - Get message with the specified id
-* PUT https://epic-mail-api.herokuapp.com/api/v1/messages - Send a draft message
-* DELETE https://epic-mail-api.herokuapp.com/api/v1/messages/{id} - Delete message with specified id
-* POST https://epic-mail-api.herokuapp.com/api/v1/groups - Create new group
-* POST https://epic-mail-api.herokuapp.com/api/v1/groups​/{id}​/users - Add a user to a group
-* POST https://epic-mail-api.herokuapp.com/api/v1/groups/{id}/messages - Send mail to a group
-* GET https://epic-mail-api.herokuapp.com/api/v1/groups - Get user's groups
-* PATCH https://epic-mail-api.herokuapp.com/api/v1/groups/{id}/name - Update a group name
-* DELETE https://epic-mail-api.herokuapp.com/api/v1/groups/{id} - Delete the group with the specified id
-* DELETE https://epic-mail-api.herokuapp.com/api/v1​/groups​/{groupId}​/users​/{userId} -/groups/{groupId}/users/{userId} - Delete a member from a group
-
+<table>
+  <tr>
+    <th>VERB</th>
+    <th>ENDPOINTS</th>
+    <th>DESCRIPTION</th>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/auth/signup</td>
+    <td>Create new user</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/auth/login</td>
+    <td>Log in a user</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>​/auth​/reset</td>
+    <td>Request password reset</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>​/auth​/reset</td>
+    <td>Password request confirmation</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/messages</td>
+    <td>Send message</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/messages/draft</td>
+    <td>Save message as draft</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/draft</td>
+    <td>Get user's draft messages</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>/messages</td>
+    <td>Send a draft message</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/messages/draft/:id</td>
+    <td>Delete draft message with specified id</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages</td>
+    <td>Get user's inbox</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/read</td>
+    <td>Get user's read inbox</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/unread</td>
+    <td>Get user's unread inbox</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/sent</td>
+    <td>Get user's sent messages</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/sent/:id</td>
+    <td>Get user's sent message with the specified id</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/messages/sent/:id</td>
+    <td>Delete user's sent message with the specified id</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/messages/sent/:id/retract</td>
+    <td>Retract user's sent message with the specified id</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/messages/:id</td>
+    <td>Get user's inbox message with the specified id</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/messages/:id</td>
+    <td>Delete inbox message with specified id</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/groups</td>
+    <td>Create new group</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/groups​/:id/users</td>
+    <td>Add a user to a group</td>
+  </tr>
+  <tr>
+    <td>POST</td>
+    <td>/groups​/:id/messages</td>
+    <td>Send mail to a group</td>
+  </tr>
+  <tr>
+    <td>PUT</td>
+    <td>​/groups​/:id​/messages</td>
+    <td>Send draft mail to a group</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/groups​</td>
+    <td>Get user's groups</td>
+  </tr>
+  <tr>
+    <td>GET</td>
+    <td>/groups​/:id</td>
+    <td>Get members of a specified group</td>
+  </tr>
+  <tr>
+    <td>PATCH</td>
+    <td>/groups/:id/name​</td>
+    <td>Update a group name</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/groups/:id</td>
+    <td>Delete the group with the specified id</td>
+  </tr>
+  <tr>
+    <td>DELETE</td>
+    <td>/groups/:groupId/users/:userId</td>
+    <td>Delete a member from a group</td>
+  </tr>
+</table>
 
 ## Branches
 * The branches are structured according to git work flow. 
