@@ -36,7 +36,6 @@ class Validate {
     const schema = Joi.object().keys({
       email: Joi.string().email({ minDomainAtoms: 2 }).required(),
       firstName: Joi.string().required(),
-      lastName: Joi.string(),
       password: Joi.string().required(),
       rePassword: Joi.string().required(),
     });
@@ -385,7 +384,7 @@ class Validate {
           const groupExist = groups.some(group => group.name === req.body.name);
           if (groupExist) {
             const errorMessage = 'Group with the same name exist';
-            Utility.handleError(res, errorMessage, 400);
+            Utility.handleError(res, errorMessage, 409);
           } else {
             next();
           }
@@ -429,11 +428,11 @@ class Validate {
             }
           } else {
             const errorMessage = 'Only group owner can update group name';
-            Utility.handleError(res, errorMessage, 404);
+            Utility.handleError(res, errorMessage, 400);
           }
         } else {
           const errorMessage = 'Group with the id does not exist';
-          Utility.handleError(res, errorMessage, 404);
+          Utility.handleError(res, errorMessage, 400);
         }
       }).catch((err) => {
         const errorMessage = `SERVER ERROR: ${err.message}`;

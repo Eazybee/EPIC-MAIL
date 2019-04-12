@@ -54,7 +54,7 @@ describe('groups', () => {
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
-            expect(res).to.have.status(400);
+            expect(res).to.have.status(409);
             done();
           });
       });
@@ -377,7 +377,7 @@ describe('groups', () => {
           .set('authorization', authToken)
           .send(obj)
           .end((err, res) => {
-            expect(res.body).to.have.status(404);
+            expect(res.body).to.have.status(400);
             done();
           });
       });

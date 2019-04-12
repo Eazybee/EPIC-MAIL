@@ -277,9 +277,9 @@ class MessageController {
           subject: mail.subject,
           message: mail.message,
           senderId: UserController.user.getId(),
-          receiverEmail: mail.receiverEmail,
           parentMessageId: null,
           status: 'draft',
+          receiverEmail: mail.receiverEmail,
         }));
         res.status(200).json({
           status: 200,
