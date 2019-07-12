@@ -1,5 +1,5 @@
 [![Build Status](https://travis-ci.org/Eazybee/EPIC-MAIL.svg?branch=develop)](https://travis-ci.org/Eazybee/EPIC-MAIL)
-[![Coverage Status](https://coveralls.io/repos/github/Eazybee/EPIC-MAIL/badge.svg)](https://coveralls.io/github/Eazybee/EPIC-MAIL)
+[![Coverage Status](https://coveralls.io/repos/github/Eazybee/EPIC-MAIL/badge.svg)](https://coveralls.io/github/Eazybee/EPIC-MAIL) [![Greenkeeper badge](https://badges.greenkeeper.io/Eazybee/EPIC-MAIL.svg)](https://greenkeeper.io/)
 
 # EPIC MAIL
 Epic Mail is a mailing web app that enables user to exchange information over the internet.
